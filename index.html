@@ -7,6 +7,26 @@
   <title>Alakuzular Gıda | Süt Toplama, Süzme Yoğurt & Maliyet Sistemi</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
+    @media print {
+      @page { size: A4 portrait; margin: 10mm; }
+      body * { visibility: hidden; }
+      #qrPrintArea, #qrPrintArea * { visibility: visible; }
+      #qrPrintArea {
+        position: fixed;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        border: 4px solid #0f4c81 !important;
+        border-radius: 16px !important;
+        padding: 24px !important;
+        display: flex !important;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        background: #fff !important;
+      }
+    }
     :root {
       --bg: #f1f5f9;
       --card: #ffffff;
@@ -790,6 +810,29 @@
     </div>
     <div class="modal-footer">
       <button type="button" class="btn btn-outline" onclick="closeQrScanner()">Kapat</button>
+    </div>
+  </div>
+</div>
+  <!-- MÜSTAHSİL KAPI QR AFİŞİ PENCERESİ -->
+<div id="qrPrintModal" class="modal-backdrop hidden" onclick="if(event.target===this) closeQrPrintModal()">
+  <div class="modal-dialog" style="max-width:560px;">
+    <div class="modal-header">
+      <h3>🚪 Müstahsil Kapı QR Afişi</h3>
+      <button type="button" class="modal-close" onclick="closeQrPrintModal()" title="Kapat">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div id="qrPrintArea" style="border:3px solid #0f4c81;border-radius:14px;padding:22px;text-align:center;background:#fff;">
+        <div style="font-size:0.9rem;font-weight:800;color:#0f4c81;letter-spacing:0.6px;">ALAKUZULAR GIDA | SÜT TOPLAMA NOKTASI</div>
+        <div id="printQrAd" style="font-size:1.85rem;font-weight:900;color:#0f172a;margin:8px 0 4px;"></div>
+        <div id="printQrMeta" style="font-size:1rem;font-weight:600;color:#334155;margin-bottom:16px;"></div>
+        <div id="qrCodeCanvasBox" style="display:flex;justify-content:center;align-items:center;min-height:290px;"></div>
+        <div id="printQrCodeText" style="margin-top:14px;font-family:monospace;font-size:1.35rem;font-weight:900;color:#0f172a;letter-spacing:1px;"></div>
+        <div style="margin-top:8px;font-size:0.82rem;color:#64748b;">Süt teslimi sırasında telefon kamerası ile QR kodu okutunuz.</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-outline" onclick="closeQrPrintModal()">Kapat</button>
+      <button type="button" class="btn btn-primary" onclick="window.print()">🖨️ Büyük Afiş Yazdır</button>
     </div>
   </div>
 </div>
@@ -1622,6 +1665,25 @@
     closeQrScanner();
     showToast(`✅ ${found.cari_kodu} - ${found.ad_soyad} seçildi.`);
     document.getElementById('sutMiktar').focus();
+  }
+  function openQrPrintModal(mustahsilId) {
+    const m = allMustahsiller.find(x => x.id === mustahsilId);
+    if (!m) return showToast('Müstahsil bulunamadı.', true);
+
+    const qrVal = (m.qr_kod || ('ALK-' + m.cari_kodu)).trim();
+    document.getElementById('printQrAd').textContent = m.ad_soyad;
+    document.getElementById('printQrMeta').textContent = `Cari: ${m.cari_kodu} • Araç: ${m.plaka || '-'}`;
+    document.getElementById('printQrCodeText').textContent = qrVal;
+
+    const qrImgUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=10&data=${encodeURIComponent(qrVal)}`;
+    document.getElementById('qrCodeCanvasBox').innerHTML =
+      `<img src="${qrImgUrl}" alt="QR ${qrVal}" style="width:280px;height:280px;max-width:100%;display:block;border-radius:8px;" />`;
+
+    document.getElementById('qrPrintModal').classList.remove('hidden');
+  }
+
+  function closeQrPrintModal() {
+    document.getElementById('qrPrintModal').classList.add('hidden');
   }
 </script>
 </body>
