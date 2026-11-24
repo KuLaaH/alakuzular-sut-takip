@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Alakuzular Gıda | Süt Toplama, Süzme Yoğurt & Maliyet Sistemi</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
       --bg: #f1f5f9;
@@ -21,7 +22,6 @@
     body { background: var(--bg); color: var(--text); min-height: 100vh; }
     .hidden { display: none !important; }
 
-    /* Üst Bar */
     header {
       background: var(--primary);
       color: #fff;
@@ -46,7 +46,6 @@
     }
     .dot-live { width: 9px; height: 9px; border-radius: 50%; background: #22c55e; display: inline-block; }
 
-    /* Giriş Ekranı */
     .login-wrap {
       max-width: 420px;
       margin: 60px auto;
@@ -59,7 +58,6 @@
     .login-wrap h2 { color: var(--primary); margin-bottom: 6px; font-size: 1.35rem; }
     .login-wrap p { color: var(--muted); font-size: 0.88rem; margin-bottom: 20px; }
 
-    /* Sekmeler & Düzen */
     .container { max-width: 1280px; margin: 18px auto; padding: 0 14px 40px; }
     .tabs {
       display: flex;
@@ -127,7 +125,6 @@
     .btn-primary:hover { background: var(--primary-dark); }
     .btn-success { background: var(--accent); color: #fff; }
     .btn-danger { background: var(--danger); color: #fff; }
-    .btn-outline { background: #fff; border: 1.5px solid var(--border); color: var(--text); }
     .btn-lg { width: 100%; padding: 14px; font-size: 1.05rem; }
 
     .kpi-box {
@@ -216,6 +213,7 @@
     <input type="password" id="loginPass" placeholder="••••" onkeydown="if(event.key==='Enter') login()" />
   </div>
   <button class="btn btn-primary btn-lg" onclick="login()">Giriş Yap</button>
+  <div id="loginErrorBox" class="alert-danger hidden" style="font-size:0.84rem;font-weight:600;"></div>
   <div style="margin-top:14px;font-size:0.78rem;color:var(--muted);line-height:1.5;">
     <strong>Varsayılan Test Hesapları:</strong><br/>
     Yönetici: <code>admin / 1234</code> | Depocu: <code>depocu / 1234</code><br/>
@@ -227,7 +225,7 @@
 <div id="appView" class="container hidden">
   <div class="tabs" id="navTabs"></div>
 
-  <!-- 1. SAHA SÜT TOPLAMA (TOPLAYICI & ADMIN) -->
+  <!-- 1. SAHA SÜT TOPLAMA -->
   <div id="tab-toplama" class="tab-panel hidden">
     <div class="card">
       <h3>Saha Günlük Süt Girişi</h3>
@@ -255,7 +253,7 @@
 
       <div class="grid-3" style="align-items:end;">
         <div>
-          <label>Müstahsil Seçimi (Plakaya Tanımlı)</label>
+          <label>Müstahsil Seçimi</label>
           <select id="sutMustahsil"></select>
         </div>
         <div>
@@ -295,7 +293,7 @@
     </div>
   </div>
 
-  <!-- 2. MERKEZ KANTAR & SÜZME YOĞURT ÜRETİM (DEPOCU & ADMIN) -->
+  <!-- 2. MERKEZ KANTAR & SÜZME YOĞURT ÜRETİM -->
   <div id="tab-depo" class="tab-panel hidden">
     <div class="card">
       <h3>Merkez Kantar Tartımı & Plaka Fark Kontrolü</h3>
@@ -397,7 +395,7 @@
     </div>
   </div>
 
-  <!-- 3. YÖNETİCİ MALİYET TARİFESİ & KÂR ANALİZİ (SADECE ADMIN) -->
+  <!-- 3. YÖNETİCİ MALİYET TARİFESİ & KÂR ANALİZİ -->
   <div id="tab-maliyet" class="tab-panel hidden">
     <div class="card">
       <h3>Tarihten İtibaren Geçerli Maliyet Tarifesi Tanımlama</h3>
@@ -493,7 +491,7 @@
     </div>
 
     <div class="card">
-      <h3>Günlük Maliyet & Toptan / Perakende Kâr Oranı Analizi (Geriye Dönük Açık)</h3>
+      <h3>Günlük Maliyet & Toptan / Perakende Kâr Oranı Analizi</h3>
       <div class="grid-3" style="margin-bottom:12px;align-items:end;">
         <div>
           <label>Analiz Edilecek Tarih</label>
@@ -521,10 +519,10 @@
     </div>
   </div>
 
-  <!-- 4. MÜSTAHSİL, FİYAT & YÖNETİM (SADECE ADMIN) -->
+  <!-- 4. MÜSTAHSİL, FİYAT & YÖNETİM -->
   <div id="tab-yonetim" class="tab-panel hidden">
     <div class="card">
-      <h3>Yeni Müstahsil Kartı Ekle (TC / İşletme No / Cari Kod Mükerrer Engelli)</h3>
+      <h3>Yeni Müstahsil Kartı Ekle</h3>
       <div class="grid-4" style="margin-bottom:10px;">
         <div><label>Cari Kodu *</label><input type="text" id="mCari" placeholder="Örn: MST-001" /></div>
         <div><label>Adı Soyadı *</label><input type="text" id="mAd" placeholder="Ad Soyad" /></div>
@@ -595,9 +593,9 @@
 <div id="toast"></div>
 
 <script>
-  // CANLI SUPABASE BAĞLANTI BİLGİLERİ
-  const SUPABASE_URL = "https://snlvqfcbgovpykmmspph.supabase.co/rest/v1";
-  const SUPABASE_KEY = "sb_publishable_BQ_BNqstu9zltJq8qMYMXw_8rIVJggf";
+  const SUPABASE_PROJECT_URL = "https://snlvqfcbgovpykmmspph.supabase.co";
+  const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_BQ_BNqstu9zltJq8qMYMXw_8rIVJggf";
+  const sbClient = window.supabase.createClient(SUPABASE_PROJECT_URL, SUPABASE_PUBLISHABLE_KEY);
 
   let currentUser = null;
   let allMustahsiller = [];
@@ -613,34 +611,35 @@
     setTimeout(() => { t.style.display = 'none'; }, 3500);
   }
 
-  async function sbFetch(path, options = {}) {
-    const headers = {
-      'apikey': SUPABASE_KEY,
-      'Authorization': 'Bearer ' + SUPABASE_KEY,
-      'Content-Type': 'application/json',
-      'Prefer': options.prefer || 'return=representation'
-    };
-    const res = await fetch(`${SUPABASE_URL}/${path}`, { ...options, headers });
-    if (!res.ok) {
-      const errText = await res.text();
-      throw new Error(errText || res.statusText);
-    }
-    const text = await res.text();
-    return text ? JSON.parse(text) : [];
+  function showLoginError(msg) {
+    const box = document.getElementById('loginErrorBox');
+    box.textContent = msg;
+    box.classList.remove('hidden');
   }
 
   async function login() {
+    document.getElementById('loginErrorBox').classList.add('hidden');
     const u = document.getElementById('loginUser').value.trim();
     const p = document.getElementById('loginPass').value.trim();
-    if (!u || !p) return showToast('Kullanıcı adı ve şifre girin.', true);
-    try {
-      const rows = await sbFetch(`kullanicilar?kullanici_adi=eq.${encodeURIComponent(u)}&sifre=eq.${encodeURIComponent(p)}&aktif=eq.true`);
-      if (!rows.length) return showToast('Hatalı kullanıcı adı veya şifre!', true);
-      currentUser = rows[0];
-      initApp();
-    } catch (e) {
-      showToast('Bağlantı hatası: ' + e.message, true);
+    if (!u || !p) return showLoginError('Lütfen kullanıcı adı ve şifre girin.');
+
+    const { data, error } = await sbClient
+      .from('kullanicilar')
+      .select('*')
+      .eq('kullanici_adi', u)
+      .eq('sifre', p)
+      .eq('aktif', true);
+
+    if (error) {
+      showLoginError('Bağlantı/Veritabanı Hatası: ' + error.message);
+      return showToast('Veritabanı hatası: ' + error.message, true);
     }
+    if (!data || !data.length) {
+      return showLoginError('Kullanıcı adı veya şifre hatalı ya da hesap pasif.');
+    }
+
+    currentUser = data[0];
+    initApp();
   }
 
   function logout() {
@@ -666,7 +665,6 @@
     });
     document.getElementById('raporBaslangic').value = today.slice(0, 8) + '01';
 
-    // Rol bazlı tarih kilidi (Toplayıcı ve Depocu sadece bugün)
     if (currentUser.rol !== 'ADMIN') {
       document.getElementById('sutTarih').setAttribute('readonly', true);
       document.getElementById('depoTarih').setAttribute('readonly', true);
@@ -719,8 +717,10 @@
   }
 
   async function refreshMasterData() {
-    allMustahsiller = await sbFetch('mustahsiller?order=cari_kodu.asc');
-    allTarifeler = await sbFetch('maliyet_tarifeleri?order=gecerlilik_tarihi.desc');
+    const { data: mData } = await sbClient.from('mustahsiller').select('*').order('cari_kodu', { ascending: true });
+    const { data: tData } = await sbClient.from('maliyet_tarifeleri').select('*').order('gecerlilik_tarihi', { ascending: false });
+    allMustahsiller = mData || [];
+    allTarifeler = tData || [];
 
     const plakalar = [...new Set(allMustahsiller.map(m => m.plaka))];
     if (currentUser.atanan_plaka) {
@@ -763,42 +763,37 @@
       return showToast('Geçerli müstahsil ve süt miktarı girin.', true);
     }
     const mst = allMustahsiller.find(m => m.id === mustahsilId);
-    try {
-      await sbFetch('sut_girisleri', {
-        method: 'POST',
-        body: JSON.stringify({
-          tarih,
-          vardiya,
-          plaka: mst ? mst.plaka : document.getElementById('sutPlaka').value,
-          mustahsil_id: mustahsilId,
-          miktar_kg: miktar,
-          ayri_gugum: ayri,
-          toplayici_kullanici: currentUser.kullanici_adi
-        })
-      });
-      document.getElementById('sutMiktar').value = '';
-      document.getElementById('sutAyriGugum').checked = false;
-      showToast('Süt girişi kaydedildi.');
-      loadSutGirisleri();
-    } catch (e) {
-      showToast('Kayıt hatası: ' + e.message, true);
-    }
+    const { error } = await sbClient.from('sut_girisleri').insert([{
+      tarih,
+      vardiya,
+      plaka: mst ? mst.plaka : document.getElementById('sutPlaka').value,
+      mustahsil_id: mustahsilId,
+      miktar_kg: miktar,
+      ayri_gugum: ayri,
+      toplayici_kullanici: currentUser.kullanici_adi
+    }]);
+    if (error) return showToast('Kayıt hatası: ' + error.message, true);
+
+    document.getElementById('sutMiktar').value = '';
+    document.getElementById('sutAyriGugum').checked = false;
+    showToast('Süt girişi kaydedildi.');
+    loadSutGirisleri();
   }
 
   async function loadSutGirisleri() {
     const tarih = document.getElementById('sutTarih').value;
     const vardiya = document.getElementById('sutVardiya').value;
-    const plaka = document.getElementById('sutPlaka').value;
 
-    let query = `sut_girisleri?tarih=eq.${tarih}&vardiya=eq.${vardiya}&order=created_at.desc`;
+    let query = sbClient.from('sut_girisleri').select('*').eq('tarih', tarih).eq('vardiya', vardiya).order('created_at', { ascending: false });
     if (currentUser.rol === 'TOPLAYICI' && currentUser.atanan_plaka) {
-      query += `&plaka=eq.${encodeURIComponent(currentUser.atanan_plaka)}`;
+      query = query.eq('plaka', currentUser.atanan_plaka);
     }
-    const rows = await sbFetch(query);
-    let topKg = 0, topTutar = 0;
+    const { data: rows, error } = await query;
+    if (error) return showToast('Liste hatası: ' + error.message, true);
 
+    let topKg = 0, topTutar = 0;
     const tbody = document.getElementById('sutListBody');
-    tbody.innerHTML = rows.map(r => {
+    tbody.innerHTML = (rows || []).map(r => {
       const m = allMustahsiller.find(x => x.id === r.mustahsil_id) || {};
       const kg = Number(r.miktar_kg || 0);
       const fiyat = Number(m.birim_fiyat || 0);
@@ -835,21 +830,15 @@
     const not = document.getElementById('kantarNot').value;
 
     if (isNaN(kantarKg) || kantarKg <= 0) return showToast('Geçerli kantar tartımı girin.', true);
-    try {
-      await sbFetch('merkez_kantar?on_conflict=tarih,vardiya,plaka', {
-        method: 'POST',
-        prefer: 'resolution=merge-duplicates,return=representation',
-        body: JSON.stringify({
-          tarih, vardiya, plaka, kantar_kg: kantarKg,
-          aciklama_notu: not, depocu_kullanici: currentUser.kullanici_adi
-        })
-      });
-      document.getElementById('kantarKg').value = '';
-      showToast('Kantar tartımı kaydedildi.');
-      loadDepoData();
-    } catch (e) {
-      showToast('Kantar kayıt hatası: ' + e.message, true);
-    }
+    const { error } = await sbClient.from('merkez_kantar').upsert([{
+      tarih, vardiya, plaka, kantar_kg: kantarKg,
+      aciklama_notu: not, depocu_kullanici: currentUser.kullanici_adi
+    }], { onConflict: 'tarih,vardiya,plaka' });
+
+    if (error) return showToast('Kantar kayıt hatası: ' + error.message, true);
+    document.getElementById('kantarKg').value = '';
+    showToast('Kantar tartımı kaydedildi.');
+    loadDepoData();
   }
 
   function calcRandimanPreview() {
@@ -883,41 +872,35 @@
     const k9 = parseInt(document.getElementById('adet900Gr').value) || 0;
 
     if (isNaN(sut) || sut <= 0) return showToast('Mayalanan süt miktarını girin.', true);
-    try {
-      await sbFetch('yogurt_uretim?on_conflict=tarih,vardiya', {
-        method: 'POST',
-        prefer: 'resolution=merge-duplicates,return=representation',
-        body: JSON.stringify({
-          tarih, vardiya, mayalanan_sut_kg: sut,
-          normal_10kg_adet: n, sert_10kg_adet: s,
-          kase_2kg_adet: k2, kase_900g_adet: k9,
-          depocu_kullanici: currentUser.kullanici_adi
-        })
-      });
-      showToast('Vardiya süzme yoğurt üretimi kaydedildi.');
-      loadDepoData();
-    } catch (e) {
-      showToast('Üretim kayıt hatası: ' + e.message, true);
-    }
+    const { error } = await sbClient.from('yogurt_uretim').upsert([{
+      tarih, vardiya, mayalanan_sut_kg: sut,
+      normal_10kg_adet: n, sert_10kg_adet: s,
+      kase_2kg_adet: k2, kase_900g_adet: k9,
+      depocu_kullanici: currentUser.kullanici_adi
+    }], { onConflict: 'tarih,vardiya' });
+
+    if (error) return showToast('Üretim kayıt hatası: ' + error.message, true);
+    showToast('Vardiya süzme yoğurt üretimi kaydedildi.');
+    loadDepoData();
   }
 
   async function loadDepoData() {
     const tarih = document.getElementById('depoTarih').value;
     const vardiya = document.getElementById('depoVardiya').value;
 
-    const [sutRows, kantarRows, uretimRows] = await Promise.all([
-      sbFetch(`sut_girisleri?tarih=eq.${tarih}&vardiya=eq.${vardiya}`),
-      sbFetch(`merkez_kantar?tarih=eq.${tarih}&vardiya=eq.${vardiya}`),
-      sbFetch(`yogurt_uretim?tarih=eq.${tarih}&order=vardiya.asc`)
+    const [{ data: sutRows }, { data: kantarRows }, { data: uretimRows }] = await Promise.all([
+      sbClient.from('sut_girisleri').select('*').eq('tarih', tarih).eq('vardiya', vardiya),
+      sbClient.from('merkez_kantar').select('*').eq('tarih', tarih).eq('vardiya', vardiya),
+      sbClient.from('yogurt_uretim').select('*').eq('tarih', tarih).order('vardiya', { ascending: true })
     ]);
 
     const sahaByPlaka = {};
-    sutRows.forEach(r => { sahaByPlaka[r.plaka] = (sahaByPlaka[r.plaka] || 0) + Number(r.miktar_kg); });
+    (sutRows || []).forEach(r => { sahaByPlaka[r.plaka] = (sahaByPlaka[r.plaka] || 0) + Number(r.miktar_kg); });
 
-    const allPlakalar = [...new Set([...Object.keys(sahaByPlaka), ...kantarRows.map(k => k.plaka)])];
+    const allPlakalar = [...new Set([...Object.keys(sahaByPlaka), ...(kantarRows || []).map(k => k.plaka)])];
     document.getElementById('kantarListBody').innerHTML = allPlakalar.map(p => {
       const saha = sahaByPlaka[p] || 0;
-      const kRec = kantarRows.find(k => k.plaka === p);
+      const kRec = (kantarRows || []).find(k => k.plaka === p);
       const kantar = kRec ? Number(kRec.kantar_kg) : 0;
       const fark = kRec ? (kantar - saha) : 0;
       return `<tr>
@@ -929,7 +912,7 @@
       </tr>`;
     }).join('');
 
-    document.getElementById('uretimListBody').innerHTML = uretimRows.map(u => {
+    document.getElementById('uretimListBody').innerHTML = (uretimRows || []).map(u => {
       const topKg = (u.normal_10kg_adet * 10) + (u.sert_10kg_adet * 10) + (u.kase_2kg_adet * 2) + (u.kase_900g_adet * 0.9);
       const oran = topKg > 0 ? (Number(u.mayalanan_sut_kg) / topKg) : 0;
       return `<tr>
@@ -972,18 +955,13 @@
         dokuz_yuz_g: parseFloat(document.getElementById('perakende900Gr').value) || 0
       }
     };
-    try {
-      await sbFetch('maliyet_tarifeleri?on_conflict=gecerlilik_tarihi', {
-        method: 'POST',
-        prefer: 'resolution=merge-duplicates,return=representation',
-        body: JSON.stringify(payload)
-      });
-      allTarifeler = await sbFetch('maliyet_tarifeleri?order=gecerlilik_tarihi.desc');
-      showToast('Maliyet tarifesi kaydedildi.');
-      renderGunlukAnaliz();
-    } catch (e) {
-      showToast('Tarife hatası: ' + e.message, true);
-    }
+    const { error } = await sbClient.from('maliyet_tarifeleri').upsert([payload], { onConflict: 'gecerlilik_tarihi' });
+    if (error) return showToast('Tarife hatası: ' + error.message, true);
+
+    const { data: tData } = await sbClient.from('maliyet_tarifeleri').select('*').order('gecerlilik_tarihi', { ascending: false });
+    allTarifeler = tData || [];
+    showToast('Maliyet tarifesi kaydedildi.');
+    renderGunlukAnaliz();
   }
 
   function getEffectiveTarife(tarih) {
@@ -994,13 +972,13 @@
     const tarih = document.getElementById('analizTarih').value;
     const tarife = getEffectiveTarife(tarih);
 
-    const [sutRows, uretimRows] = await Promise.all([
-      sbFetch(`sut_girisleri?tarih=eq.${tarih}`),
-      sbFetch(`yogurt_uretim?tarih=eq.${tarih}`)
+    const [{ data: sutRows }, { data: uretimRows }] = await Promise.all([
+      sbClient.from('sut_girisleri').select('*').eq('tarih', tarih),
+      sbClient.from('yogurt_uretim').select('*').eq('tarih', tarih)
     ]);
 
     let topSutKg = 0, topSutTutar = 0;
-    sutRows.forEach(r => {
+    (sutRows || []).forEach(r => {
       const m = allMustahsiller.find(x => x.id === r.mustahsil_id);
       const kg = Number(r.miktar_kg || 0);
       topSutKg += kg;
@@ -1009,7 +987,7 @@
     const ortSutFiyat = topSutKg > 0 ? (topSutTutar / topSutKg) : 0;
 
     let mayalananTop = 0, cikanYogurtTop = 0;
-    uretimRows.forEach(u => {
+    (uretimRows || []).forEach(u => {
       mayalananTop += Number(u.mayalanan_sut_kg || 0);
       cikanYogurtTop += (u.normal_10kg_adet * 10) + (u.sert_10kg_adet * 10) + (u.kase_2kg_adet * 2) + (u.kase_900g_adet * 0.9);
     });
@@ -1075,20 +1053,15 @@
 
     if (!cari || !ad || !plaka) return showToast('Cari Kod, Ad Soyad ve Plaka zorunludur.', true);
 
-    try {
-      await sbFetch('mustahsiller', {
-        method: 'POST',
-        body: JSON.stringify({
-          cari_kodu: cari, ad_soyad: ad, tc_no: tc, isletme_no: isletme,
-          baba_adi: baba, telefon: tel, plaka, birim_fiyat: fiyat,
-          qr_kod: 'ALK-' + cari
-        })
-      });
-      showToast('Müstahsil kaydedildi.');
-      await refreshMasterData();
-    } catch (e) {
-      showToast('Mükerrer veya geçersiz kayıt: ' + e.message, true);
-    }
+    const { error } = await sbClient.from('mustahsiller').insert([{
+      cari_kodu: cari, ad_soyad: ad, tc_no: tc, isletme_no: isletme,
+      baba_adi: baba, telefon: tel, plaka, birim_fiyat: fiyat,
+      qr_kod: 'ALK-' + cari
+    }]);
+    if (error) return showToast('Mükerrer veya geçersiz kayıt: ' + error.message, true);
+
+    showToast('Müstahsil kaydedildi.');
+    await refreshMasterData();
   }
 
   function renderMustahsilTable() {
@@ -1108,40 +1081,29 @@
   }
 
   async function updateSinglePrice(id, val) {
-    try {
-      await sbFetch(`mustahsiller?id=eq.${id}`, {
-        method: 'PATCH',
-        body: JSON.stringify({ birim_fiyat: parseFloat(val) || 0 })
-      });
-      showToast('Müstahsil fiyatı güncellendi.');
-      await refreshMasterData();
-    } catch (e) {
-      showToast('Fiyat güncelleme hatası: ' + e.message, true);
-    }
+    const { error } = await sbClient.from('mustahsiller').update({ birim_fiyat: parseFloat(val) || 0 }).eq('id', id);
+    if (error) return showToast('Fiyat güncelleme hatası: ' + error.message, true);
+    showToast('Müstahsil fiyatı güncellendi.');
+    await refreshMasterData();
   }
 
   async function applyBulkPrice() {
     const val = parseFloat(document.getElementById('topluFiyatInput').value);
     if (isNaN(val) || val < 0) return showToast('Geçerli fiyat girin.', true);
-    try {
-      await sbFetch('mustahsiller?id=not.is.null', {
-        method: 'PATCH',
-        body: JSON.stringify({ birim_fiyat: val })
-      });
-      showToast('Tüm müstahsillerin birim fiyatı güncellendi.');
-      await refreshMasterData();
-    } catch (e) {
-      showToast('Toplu güncelleme hatası: ' + e.message, true);
-    }
+    const { error } = await sbClient.from('mustahsiller').update({ birim_fiyat: val }).not('id', 'is', null);
+    if (error) return showToast('Toplu güncelleme hatası: ' + error.message, true);
+    showToast('Tüm müstahsillerin birim fiyatı güncellendi.');
+    await refreshMasterData();
   }
 
   async function loadTopluRapor() {
     const bas = document.getElementById('raporBaslangic').value;
     const bit = document.getElementById('raporBitis').value;
-    const rows = await sbFetch(`sut_girisleri?tarih=gte.${bas}&tarih=lte.${bit}`);
+    const { data: rows, error } = await sbClient.from('sut_girisleri').select('*').gte('tarih', bas).lte('tarih', bit);
+    if (error) return showToast('Rapor hatası: ' + error.message, true);
 
     const map = {};
-    rows.forEach(r => {
+    (rows || []).forEach(r => {
       map[r.mustahsil_id] = (map[r.mustahsil_id] || 0) + Number(r.miktar_kg || 0);
     });
 
