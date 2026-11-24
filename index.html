@@ -119,6 +119,28 @@
     input:focus, select:focus { outline: none; border-color: var(--primary); }
     .input-xl { font-size: 1.35rem; font-weight: 700; padding: 14px; text-align: center; }
 
+    .vardiya-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .vardiya-btn {
+      padding: 10px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      background: #f8fafc;
+      color: #334155;
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: 0.15s;
+    }
+    .vardiya-btn.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+    }
+
     .perm-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
@@ -208,7 +230,6 @@
     .badge-green { background: #dcfce7; color: #15803d; }
     .badge-amber { background: #fef3c7; color: #b45309; }
 
-    /* Modal Pencere */
     .modal-backdrop {
       position: fixed;
       inset: 0;
@@ -322,25 +343,22 @@
   <div id="tab-toplama" class="tab-panel hidden">
     <div class="card">
       <h3>Saha Günlük Süt Girişi</h3>
-      <div class="grid-4" style="margin-bottom:14px;">
+      <div class="grid-3" style="margin-bottom:14px;">
         <div>
           <label>Tarih</label>
           <input type="date" id="sutTarih" onchange="loadSutGirisleri()" />
         </div>
         <div>
           <label>Vardiya</label>
-          <select id="sutVardiya" onchange="loadSutGirisleri()">
-            <option value="SABAH">SABAH</option>
-            <option value="AKSAM">AKŞAM</option>
-          </select>
+          <input type="hidden" id="sutVardiya" value="SABAH" />
+          <div class="vardiya-group">
+            <button type="button" id="btnVardiyaSABAH" class="vardiya-btn active" onclick="setSutVardiya('SABAH')">☀️ Sabah</button>
+            <button type="button" id="btnVardiyaAKSAM" class="vardiya-btn" onclick="setSutVardiya('AKSAM')">🌙 Akşam</button>
+          </div>
         </div>
         <div>
-          <label>Araç Plakası (Boş ise Tüm Araçlar)</label>
-          <input type="text" id="sutPlaka" placeholder="Örn: 42 ALK 01" oninput="filterMustahsilSelect(); loadSutGirisleri();" />
-        </div>
-        <div>
-          <label>QR / Cari Kod ile Hızlı Seçim</label>
-          <input type="text" id="qrSearch" placeholder="QR okutun veya Cari/Ad yazın..." oninput="filterMustahsilSelect()" />
+          <label>Araç Plakası</label>
+          <select id="sutPlaka" onchange="filterMustahsilSelect(); loadSutGirisleri();"></select>
         </div>
       </div>
 
@@ -721,7 +739,7 @@
           <label>Giriş Şifresi *</label>
           <input type="text" id="uSifre" placeholder="Şifre belirleyin" />
         </div>
-       <div>
+        <div>
           <label>Atanan Plaka</label>
           <select id="uPlaka">
             <option value="">Tüm Plakalar (Kısıt Yok)</option>
@@ -797,6 +815,13 @@
     box.classList.remove('hidden');
   }
 
+  function setSutVardiya(vardiya) {
+    document.getElementById('sutVardiya').value = vardiya;
+    document.getElementById('btnVardiyaSABAH').classList.toggle('active', vardiya === 'SABAH');
+    document.getElementById('btnVardiyaAKSAM').classList.toggle('active', vardiya === 'AKSAM');
+    loadSutGirisleri();
+  }
+
   async function login() {
     document.getElementById('loginErrorBox').classList.add('hidden');
     const u = document.getElementById('loginUser').value.trim();
@@ -847,6 +872,7 @@
       document.getElementById(id).value = today;
     });
     document.getElementById('raporBaslangic').value = today.slice(0, 8) + '01';
+    setSutVardiya('SABAH');
 
     const canSeeHistoryAndPrice = hasPerm('gecmis_tarih') || hasPerm('maliyet');
     if (!canSeeHistoryAndPrice) {
@@ -904,25 +930,38 @@
   }
 
   async function refreshMasterData() {
-    const { data: mData } = await sbClient.from('mustahsiller').select('*').order('cari_kodu', { ascending: true });
-    const { data: tData } = await sbClient.from('maliyet_tarifeleri').select('*').order('gecerlilik_tarihi', { ascending: false });
+    const [{ data: mData }, { data: tData }, { data: uData }] = await Promise.all([
+      sbClient.from('mustahsiller').select('*').order('cari_kodu', { ascending: true }),
+      sbClient.from('maliyet_tarifeleri').select('*').order('gecerlilik_tarihi', { ascending: false }),
+      sbClient.from('kullanicilar').select('*')
+    ]);
     allMustahsiller = mData || [];
     allTarifeler = tData || [];
+    allUsers = uData || [];
 
-    const plakalar = [...new Set(allMustahsiller.map(m => m.plaka))];
-    const plakaInput = document.getElementById('sutPlaka');
-    if (currentUser.atanan_plaka) {
-      plakaInput.value = currentUser.atanan_plaka;
-      plakaInput.setAttribute('readonly', true);
-      plakaInput.style.background = '#f1f5f9';
+    const allKnownPlakalar = [...new Set([
+      ...allMustahsiller.map(m => (m.plaka || '').trim().toUpperCase()).filter(Boolean),
+      ...allUsers.map(u => (u.atanan_plaka || '').trim().toUpperCase()).filter(Boolean)
+    ])].sort((a, b) => a.localeCompare(b, 'tr'));
+
+    const assignedPlakalar = currentUser.atanan_plaka
+      ? currentUser.atanan_plaka.split(',').map(p => p.trim().toUpperCase()).filter(Boolean)
+      : [];
+
+    const sutPlakaSel = document.getElementById('sutPlaka');
+    if (assignedPlakalar.length) {
+      sutPlakaSel.innerHTML = assignedPlakalar.map(p => `<option value="${p}">${p}</option>`).join('');
+      sutPlakaSel.value = assignedPlakalar[0];
     } else {
-      plakaInput.value = '';
-      plakaInput.removeAttribute('readonly');
-      plakaInput.style.background = '#fff';
+      const options = allKnownPlakalar.length ? allKnownPlakalar : ['42 ALK 01', '42 ALK 02'];
+      sutPlakaSel.innerHTML =
+        `<option value="">Tüm Araçlar</option>` +
+        options.map(p => `<option value="${p}">${p}</option>`).join('');
+      sutPlakaSel.value = '';
     }
 
     const kp = document.getElementById('kantarPlaka');
-    kp.innerHTML = (plakalar.length ? plakalar : ['42 ALK 01', '42 ALK 02'])
+    kp.innerHTML = (allKnownPlakalar.length ? allKnownPlakalar : ['42 ALK 01', '42 ALK 02'])
       .map(p => `<option value="${p}">${p}</option>`).join('');
 
     filterMustahsilSelect();
@@ -930,19 +969,15 @@
   }
 
   function filterMustahsilSelect() {
-    const q = document.getElementById('qrSearch').value.toLowerCase().trim();
     const plaka = document.getElementById('sutPlaka').value.trim().toUpperCase();
     const sel = document.getElementById('sutMustahsil');
     const filtered = allMustahsiller.filter(m => {
-      const plakaOk = currentUser.atanan_plaka
-        ? m.plaka.toUpperCase() === currentUser.atanan_plaka.toUpperCase()
-        : (!plaka || m.plaka.toUpperCase().includes(plaka));
-      const textOk = !q || m.ad_soyad.toLowerCase().includes(q) || m.cari_kodu.toLowerCase().includes(q) || m.qr_kod.toLowerCase().includes(q);
-      return plakaOk && textOk;
+      const mPlaka = (m.plaka || '').trim().toUpperCase();
+      return !plaka || mPlaka === plaka;
     });
     sel.innerHTML = filtered.length
       ? filtered.map(m => `<option value="${m.id}" data-plaka="${m.plaka}">${m.cari_kodu} - ${m.ad_soyad} (${m.plaka})</option>`).join('')
-      : '<option value="">Kayıtlı müstahsil bulunamadı</option>';
+      : '<option value="">Seçili araçta müstahsil bulunamadı</option>';
   }
 
   async function saveSutGirisi() {
@@ -956,10 +991,11 @@
       return showToast('Geçerli müstahsil ve süt miktarı girin.', true);
     }
     const mst = allMustahsiller.find(m => m.id === mustahsilId);
+    const seciliPlaka = document.getElementById('sutPlaka').value;
     const { error } = await sbClient.from('sut_girisleri').insert([{
       tarih,
       vardiya,
-      plaka: mst ? mst.plaka : (document.getElementById('sutPlaka').value || '42 ALK 01'),
+      plaka: mst ? mst.plaka : (seciliPlaka || '42 ALK 01'),
       mustahsil_id: mustahsilId,
       miktar_kg: miktar,
       ayri_gugum: ayri,
@@ -979,10 +1015,8 @@
     const plakaFilter = document.getElementById('sutPlaka').value.trim().toUpperCase();
 
     let query = sbClient.from('sut_girisleri').select('*').eq('tarih', tarih).eq('vardiya', vardiya).order('created_at', { ascending: false });
-    if (currentUser.atanan_plaka) {
-      query = query.eq('plaka', currentUser.atanan_plaka);
-    } else if (plakaFilter) {
-      query = query.ilike('plaka', `%${plakaFilter}%`);
+    if (plakaFilter) {
+      query = query.eq('plaka', plakaFilter);
     }
 
     const { data: rows, error } = await query;
@@ -1363,34 +1397,6 @@
     });
   }
 
-  function openUserModal(u = null) {
-    const modal = document.getElementById('userModal');
-    if (u) {
-      document.getElementById('userModalTitle').textContent = `Kullanıcı Düzenle: ${u.ad_soyad}`;
-      document.getElementById('editUserId').value = u.id;
-      document.getElementById('uAdSoyad').value = u.ad_soyad || '';
-      document.getElementById('uKullaniciAdi').value = u.kullanici_adi || '';
-      document.getElementById('uSifre').value = u.sifre || '';
-      document.getElementById('uAktif').checked = !!u.aktif;
-      
-
-      const perms = Array.isArray(u.yetkiler) ? u.yetkiler : [];
-      document.querySelectorAll('.u-perm').forEach(cb => {
-        cb.checked = perms.includes(cb.value);
-      });
-    } else {
-      document.getElementById('userModalTitle').textContent = 'Yeni Kullanıcı Ekle';
-      document.getElementById('editUserId').value = '';
-      document.getElementById('uAdSoyad').value = '';
-      document.getElementById('uKullaniciAdi').value = '';
-      document.getElementById('uSifre').value = '';
-      document.getElementById('uPlaka').value = '';
-      document.getElementById('uAktif').checked = true;
-      document.querySelectorAll('.u-perm').forEach(cb => { cb.checked = cb.value === 'toplama'; });
-    }
-    modal.classList.remove('hidden');
-    document.getElementById('uAdSoyad').focus();
-  }
   async function populateUserPlakaSelect(selectedPlaka = '') {
     const sel = document.getElementById('uPlaka');
     const plakaSet = new Set();
