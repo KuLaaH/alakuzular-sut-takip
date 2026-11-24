@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Alakuzular Gıda | Süt Toplama, Süzme Yoğurt & Maliyet Sistemi</title>
@@ -363,9 +364,12 @@
       </div>
 
       <div class="grid-3" style="align-items:end;">
-        <div>
+     <div>
           <label>Müstahsil Seçimi</label>
-          <select id="sutMustahsil"></select>
+          <div style="display:flex;gap:8px;">
+            <select id="sutMustahsil"></select>
+            <button type="button" class="btn btn-primary" style="white-space:nowrap;" onclick="openQrScanner()">📷 QR Okut</button>
+          </div>
         </div>
         <div>
           <label>Süt Miktarı (KG / Litre)</label>
@@ -767,7 +771,28 @@
     </div>
   </div>
 </div>
-
+<!-- QR KAMERA OKUYUCU PENCERESİ -->
+<div id="qrModal" class="modal-backdrop hidden" onclick="if(event.target===this) closeQrScanner()">
+  <div class="modal-dialog" style="max-width:460px;">
+    <div class="modal-header">
+      <h3>📷 Müstahsil QR Kodu Okut</h3>
+      <button type="button" class="modal-close" onclick="closeQrScanner()" title="Kapat">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div id="qrReaderBox" style="width:100%;border-radius:10px;overflow:hidden;background:#0f172a;"></div>
+      <div style="margin-top:12px;">
+        <label>Veya QR / Cari Kodu Manuel Girin:</label>
+        <div style="display:flex;gap:8px;">
+          <input type="text" id="manualQrInput" placeholder="Örn: ALK-MST-001 veya MST-001" onkeydown="if(event.key==='Enter') selectMustahsilByQr(this.value)" />
+          <button type="button" class="btn btn-success" onclick="selectMustahsilByQr(document.getElementById('manualQrInput').value)">Seç</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-outline" onclick="closeQrScanner()">Kapat</button>
+    </div>
+  </div>
+</div>
 <div id="toast"></div>
 
 <script>
@@ -1517,6 +1542,86 @@
     if (error) return showToast('Silme hatası: ' + error.message, true);
     showToast('Kullanıcı silindi.');
     loadUsersList();
+  }
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeUserModal();
+      closeQrScanner();
+    }
+  });
+  // ==========================================
+  // QR İLE MÜSTAHSİL SEÇİMİ
+  // ==========================================
+  let html5QrInstance = null;
+
+  async function openQrScanner() {
+    document.getElementById('manualQrInput').value = '';
+    document.getElementById('qrModal').classList.remove('hidden');
+
+    if (typeof Html5Qrcode === 'undefined') {
+      return showToast('Kamera kütüphanesi yüklenemedi, alttaki kutudan kod girebilirsiniz.', true);
+    }
+
+    try {
+      html5QrInstance = new Html5Qrcode('qrReaderBox');
+      await html5QrInstance.start(
+        { facingMode: 'environment' },
+        { fps: 10, qrbox: { width: 240, height: 240 } },
+        (decodedText) => {
+          selectMustahsilByQr(decodedText);
+        },
+        () => {}
+      );
+    } catch (err) {
+      showToast('Kameraya erişilemedi; kod kutusunu kullanabilirsiniz.', true);
+    }
+  }
+
+  async function closeQrScanner() {
+    const modal = document.getElementById('qrModal');
+    if (modal) modal.classList.add('hidden');
+    if (html5QrInstance) {
+      try {
+        await html5QrInstance.stop();
+        html5QrInstance.clear();
+      } catch (e) {}
+      html5QrInstance = null;
+    }
+  }
+
+  function selectMustahsilByQr(rawCode) {
+    const code = (rawCode || '').trim().toUpperCase();
+    if (!code) return;
+
+    const found = allMustahsiller.find(m =>
+      (m.qr_kod || '').trim().toUpperCase() === code ||
+      (m.cari_kodu || '').trim().toUpperCase() === code ||
+      ('ALK-' + (m.cari_kodu || '').trim().toUpperCase()) === code
+    );
+
+    if (!found) {
+      return showToast(`"${code}" koduna ait müstahsil bulunamadı.`, true);
+    }
+
+    // Kullanıcıya plaka kısıtı varsa kontrol et, yoksa ilgili aracın plakasını otomatik seç
+    const plakaSel = document.getElementById('sutPlaka');
+    const foundPlaka = (found.plaka || '').trim().toUpperCase();
+    const hasOption = [...plakaSel.options].some(opt => opt.value === foundPlaka);
+
+    if (currentUser.atanan_plaka && !hasOption) {
+      return showToast(`Bu müstahsil (${found.ad_soyad}) sizin aracınıza (${foundPlaka}) tanımlı değil!`, true);
+    }
+
+    if (hasOption) {
+      plakaSel.value = foundPlaka;
+    }
+    filterMustahsilSelect();
+    loadSutGirisleri();
+
+    document.getElementById('sutMustahsil').value = found.id;
+    closeQrScanner();
+    showToast(`✅ ${found.cari_kodu} - ${found.ad_soyad} seçildi.`);
+    document.getElementById('sutMiktar').focus();
   }
 </script>
 </body>
