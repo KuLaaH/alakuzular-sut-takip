@@ -32,7 +32,7 @@
       flex-wrap: wrap;
       gap: 10px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-    } 
+    }
     header h1 { font-size: 1.15rem; font-weight: 700; letter-spacing: 0.3px; }
     header .sub { font-size: 0.78rem; opacity: 0.85; }
     .badge-status {
@@ -108,12 +108,33 @@
     input:focus, select:focus { outline: none; border-color: var(--primary); }
     .input-xl { font-size: 1.35rem; font-weight: 700; padding: 14px; text-align: center; }
 
+    .perm-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 10px;
+      background: #f8fafc;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #e2e8f0;
+      margin: 10px 0 14px;
+    }
+    .perm-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.86rem;
+      font-weight: 600;
+      color: #1e293b;
+      cursor: pointer;
+    }
+    .perm-item input { width: 17px; height: 17px; cursor: pointer; }
+
     .btn {
       border: none;
       border-radius: 8px;
-      padding: 11px 18px;
+      padding: 10px 16px;
       font-weight: 700;
-      font-size: 0.92rem;
+      font-size: 0.9rem;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
@@ -121,10 +142,12 @@
       gap: 6px;
       transition: 0.15s;
     }
+    .btn-sm { padding: 6px 10px; font-size: 0.8rem; }
     .btn-primary { background: var(--primary); color: #fff; }
     .btn-primary:hover { background: var(--primary-dark); }
     .btn-success { background: var(--accent); color: #fff; }
     .btn-danger { background: var(--danger); color: #fff; }
+    .btn-outline { background: #fff; border: 1.5px solid var(--border); color: var(--text); }
     .btn-lg { width: 100%; padding: 14px; font-size: 1.05rem; }
 
     .kpi-box {
@@ -155,17 +178,20 @@
       margin: 12px 0;
     }
 
-    table { width: 100%; border-collapse: collapse; font-size: 0.88rem; margin-top: 10px; }
-    th, td { border: 1px solid #e2e8f0; padding: 9px 10px; text-align: left; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.86rem; margin-top: 10px; }
+    th, td { border: 1px solid #e2e8f0; padding: 8px 10px; text-align: left; vertical-align: middle; }
     th { background: #f1f5f9; font-weight: 700; color: #1e293b; }
     tr:nth-child(even) { background: #f8fafc; }
 
     .badge {
       padding: 3px 8px;
       border-radius: 6px;
-      font-size: 0.76rem;
+      font-size: 0.75rem;
       font-weight: 700;
+      display: inline-block;
+      margin: 2px 2px 2px 0;
     }
+    .badge-blue { background: #dbeafe; color: #1e40af; }
     .badge-red { background: #fee2e2; color: #b91c1c; }
     .badge-green { background: #dcfce7; color: #15803d; }
     .badge-amber { background: #fef3c7; color: #b45309; }
@@ -206,7 +232,7 @@
   <p>Yetkili kullanıcı adı ve şifrenizle giriş yapın.</p>
   <div style="margin-bottom:12px;">
     <label>Kullanıcı Adı</label>
-    <input type="text" id="loginUser" placeholder="Örn: admin, depocu, toplayici1" />
+    <input type="text" id="loginUser" placeholder="Kullanıcı adınız" />
   </div>
   <div style="margin-bottom:18px;">
     <label>Şifre</label>
@@ -214,11 +240,6 @@
   </div>
   <button class="btn btn-primary btn-lg" onclick="login()">Giriş Yap</button>
   <div id="loginErrorBox" class="alert-danger hidden" style="font-size:0.84rem;font-weight:600;"></div>
-  <div style="margin-top:14px;font-size:0.78rem;color:var(--muted);line-height:1.5;">
-    <strong>Varsayılan Test Hesapları:</strong><br/>
-    Yönetici: <code>admin / 1234</code> | Depocu: <code>depocu / 1234</code><br/>
-    Toplayıcı 1: <code>toplayici1 / 1234</code> | Toplayıcı 2: <code>toplayici2 / 1234</code>
-  </div>
 </div>
 
 <!-- ANA UYGULAMA EKRANI -->
@@ -242,8 +263,8 @@
           </select>
         </div>
         <div>
-          <label>Araç Plakası</label>
-          <input type="text" id="sutPlaka" readonly style="background:#f1f5f9;font-weight:700;" />
+          <label>Araç Plakası (Boş ise Tüm Araçlar)</label>
+          <input type="text" id="sutPlaka" placeholder="Örn: 42 ALK 01" oninput="filterMustahsilSelect(); loadSutGirisleri();" />
         </div>
         <div>
           <label>QR / Cari Kod ile Hızlı Seçim</label>
@@ -283,8 +304,8 @@
               <th>Vardiya</th>
               <th>Miktar (Kg)</th>
               <th>Durum</th>
-              <th class="admin-only">Birim Fiyat</th>
-              <th class="admin-only">Günlük Hakediş</th>
+              <th class="finans-yetki">Birim Fiyat</th>
+              <th class="finans-yetki">Günlük Hakediş</th>
             </tr>
           </thead>
           <tbody id="sutListBody"></tbody>
@@ -395,7 +416,7 @@
     </div>
   </div>
 
-  <!-- 3. YÖNETİCİ MALİYET TARİFESİ & KÂR ANALİZİ -->
+  <!-- 3. MALİYET TARİFESİ & KÂR ANALİZİ -->
   <div id="tab-maliyet" class="tab-panel hidden">
     <div class="card">
       <h3>Tarihten İtibaren Geçerli Maliyet Tarifesi Tanımlama</h3>
@@ -438,22 +459,10 @@
 
       <h4 style="font-size:0.92rem;color:#334155;margin:10px 0 8px;">Euro Endeksli Kova / Ambalaj Birim Maliyetleri (€ / Adet)</h4>
       <div class="grid-4" style="margin-bottom:14px;">
-        <div>
-          <label>10 Kg Normal Kova (€)</label>
-          <input type="number" step="0.0001" id="kovaNormalEur" value="0" />
-        </div>
-        <div>
-          <label>10 Kg Sert Kova (€)</label>
-          <input type="number" step="0.0001" id="kovaSertEur" value="0" />
-        </div>
-        <div>
-          <label>2 Kg Kova (€)</label>
-          <input type="number" step="0.0001" id="kova2KgEur" value="0" />
-        </div>
-        <div>
-          <label>900 Gr Kova (€)</label>
-          <input type="number" step="0.0001" id="kova900GrEur" value="0" />
-        </div>
+        <div><label>10 Kg Normal Kova (€)</label><input type="number" step="0.0001" id="kovaNormalEur" value="0" /></div>
+        <div><label>10 Kg Sert Kova (€)</label><input type="number" step="0.0001" id="kovaSertEur" value="0" /></div>
+        <div><label>2 Kg Kova (€)</label><input type="number" step="0.0001" id="kova2KgEur" value="0" /></div>
+        <div><label>900 Gr Kova (€)</label><input type="number" step="0.0001" id="kova900GrEur" value="0" /></div>
       </div>
 
       <h4 style="font-size:0.92rem;color:#334155;margin:10px 0 8px;">Toptan & Perakende Satış Fiyatları (₺ / Adet)</h4>
@@ -519,7 +528,7 @@
     </div>
   </div>
 
-  <!-- 4. MÜSTAHSİL, FİYAT & YÖNETİM -->
+  <!-- 4. MÜSTAHSİL, FİYAT & TOPLU RAPOR -->
   <div id="tab-yonetim" class="tab-panel hidden">
     <div class="card">
       <h3>Yeni Müstahsil Kartı Ekle</h3>
@@ -588,6 +597,70 @@
       </div>
     </div>
   </div>
+
+  <!-- 5. DİNAMİK KULLANICI & BÖLÜM YETKİ YÖNETİMİ -->
+  <div id="tab-kullanicilar" class="tab-panel hidden">
+    <div class="card">
+      <h3 id="userFormTitle">Yeni Kullanıcı Oluştur / Düzenle</h3>
+      <input type="hidden" id="editUserId" />
+      <div class="grid-4" style="margin-bottom:10px;">
+        <div>
+          <label>Ad Soyad / Ünvan *</label>
+          <input type="text" id="uAdSoyad" placeholder="Örn: Ahmet Yılmaz" />
+        </div>
+        <div>
+          <label>Kullanıcı Adı *</label>
+          <input type="text" id="uKullaniciAdi" placeholder="Örn: ahmet42" />
+        </div>
+        <div>
+          <label>Giriş Şifresi *</label>
+          <input type="text" id="uSifre" placeholder="Şifre belirleyin" />
+        </div>
+        <div>
+          <label>Atanan Plaka (Boş ise Tüm Plakalar)</label>
+          <input type="text" id="uPlaka" placeholder="Örn: 42 ALK 01" />
+        </div>
+      </div>
+
+      <label>Bu Kullanıcıya Açılacak Bölümler ve Özel Yetkiler:</label>
+      <div class="perm-grid">
+        <label class="perm-item"><input type="checkbox" class="u-perm" value="toplama" checked /> Saha Süt Toplama</label>
+        <label class="perm-item"><input type="checkbox" class="u-perm" value="depo" /> Merkez Kantar & Süzme Yoğurt</label>
+        <label class="perm-item"><input type="checkbox" class="u-perm" value="maliyet" /> Maliyet Tarifesi & Kâr Analizi</label>
+        <label class="perm-item"><input type="checkbox" class="u-perm" value="yonetim" /> Müstahsiller & Toplu Rapor</label>
+        <label class="perm-item"><input type="checkbox" class="u-perm" value="kullanicilar" /> Kullanıcı & Yetki Yönetimi</label>
+        <label class="perm-item"><input type="checkbox" class="u-perm" value="gecmis_tarih" /> Geçmiş Tarih & Fiyat Görme Yetkisi</label>
+      </div>
+
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+        <label style="display:flex;align-items:center;gap:6px;margin:0;cursor:pointer;">
+          <input type="checkbox" id="uAktif" checked style="width:18px;height:18px;" /> Hesap Aktif (Giriş Yapabilir)
+        </label>
+        <button class="btn btn-success" onclick="saveDynamicUser()">Kullanıcıyı Kaydet</button>
+        <button class="btn btn-outline" onclick="resetUserForm()">Formu Temizle</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Kayıtlı Kullanıcılar & Açık Modül Yetkileri</h3>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Ad Soyad</th>
+              <th>Kullanıcı Adı</th>
+              <th>Şifre</th>
+              <th>Plaka Kısıtı</th>
+              <th>Açık Bölümler & Yetkiler</th>
+              <th>Durum</th>
+              <th>İşlem</th>
+            </tr>
+          </thead>
+          <tbody id="usersTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div id="toast"></div>
@@ -597,11 +670,27 @@
   const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_BQ_BNqstu9zltJq8qMYMXw_8rIVJggf";
   const sbClient = window.supabase.createClient(SUPABASE_PROJECT_URL, SUPABASE_PUBLISHABLE_KEY);
 
+  const MODULE_LABELS = {
+    toplama: "Saha Süt Toplama",
+    depo: "Kantar & Yoğurt Üretim",
+    maliyet: "Maliyet & Kâr Analizi",
+    yonetim: "Müstahsiller & Rapor",
+    kullanicilar: "Kullanıcı Yönetimi",
+    gecmis_tarih: "Geçmiş Tarih & Fiyat"
+  };
+
   let currentUser = null;
   let allMustahsiller = [];
   let allTarifeler = [];
+  let allUsers = [];
 
   const todayStr = () => new Date().toISOString().split('T')[0];
+
+  function hasPerm(permKey) {
+    if (!currentUser) return false;
+    const list = Array.isArray(currentUser.yetkiler) ? currentUser.yetkiler : [];
+    return list.includes(permKey);
+  }
 
   function showToast(msg, isErr = false) {
     const t = document.getElementById('toast');
@@ -630,15 +719,17 @@
       .eq('sifre', p)
       .eq('aktif', true);
 
-    if (error) {
-      showLoginError('Bağlantı/Veritabanı Hatası: ' + error.message);
-      return showToast('Veritabanı hatası: ' + error.message, true);
-    }
-    if (!data || !data.length) {
-      return showLoginError('Kullanıcı adı veya şifre hatalı ya da hesap pasif.');
+    if (error) return showLoginError('Bağlantı/Veritabanı Hatası: ' + error.message);
+    if (!data || !data.length) return showLoginError('Kullanıcı adı veya şifre hatalı ya da hesap pasif.');
+
+    const user = data[0];
+    if (!Array.isArray(user.yetkiler) || user.yetkiler.length === 0) {
+      if (user.rol === 'ADMIN') user.yetkiler = ['toplama', 'depo', 'maliyet', 'yonetim', 'kullanicilar', 'gecmis_tarih'];
+      else if (user.rol === 'DEPOCU') user.yetkiler = ['depo'];
+      else user.yetkiler = ['toplama'];
     }
 
-    currentUser = data[0];
+    currentUser = user;
     initApp();
   }
 
@@ -655,7 +746,7 @@
     document.getElementById('appView').classList.remove('hidden');
 
     const ub = document.getElementById('userBadge');
-    ub.textContent = `${currentUser.ad_soyad} (${currentUser.rol}${currentUser.atanan_plaka ? ' - ' + currentUser.atanan_plaka : ''})`;
+    ub.textContent = `${currentUser.ad_soyad}${currentUser.atanan_plaka ? ' (' + currentUser.atanan_plaka + ')' : ''}`;
     ub.classList.remove('hidden');
     document.getElementById('logoutBtn').classList.remove('hidden');
 
@@ -665,14 +756,16 @@
     });
     document.getElementById('raporBaslangic').value = today.slice(0, 8) + '01';
 
-    if (currentUser.rol !== 'ADMIN') {
+    // Geçmiş tarih ve fiyat görme yetkisi
+    const canSeeHistoryAndPrice = hasPerm('gecmis_tarih') || hasPerm('maliyet');
+    if (!canSeeHistoryAndPrice) {
       document.getElementById('sutTarih').setAttribute('readonly', true);
       document.getElementById('depoTarih').setAttribute('readonly', true);
-      document.querySelectorAll('.admin-only').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.finans-yetki').forEach(el => el.classList.add('hidden'));
     } else {
       document.getElementById('sutTarih').removeAttribute('readonly');
       document.getElementById('depoTarih').removeAttribute('readonly');
-      document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden'));
+      document.querySelectorAll('.finans-yetki').forEach(el => el.classList.remove('hidden'));
     }
 
     buildTabs();
@@ -682,26 +775,28 @@
   function buildTabs() {
     const nav = document.getElementById('navTabs');
     nav.innerHTML = '';
-    const tabs = [];
-    if (currentUser.rol === 'TOPLAYICI' || currentUser.rol === 'ADMIN') {
-      tabs.push({ id: 'toplama', label: 'Saha Süt Toplama' });
-    }
-    if (currentUser.rol === 'DEPOCU' || currentUser.rol === 'ADMIN') {
-      tabs.push({ id: 'depo', label: 'Merkez Kantar & Süzme Yoğurt' });
-    }
-    if (currentUser.rol === 'ADMIN') {
-      tabs.push({ id: 'maliyet', label: 'Maliyet Tarifesi & Kâr Analizi' });
-      tabs.push({ id: 'yonetim', label: 'Müstahsiller & Toplu Rapor' });
-    }
+    const candidateTabs = [
+      { id: 'toplama', label: 'Saha Süt Toplama' },
+      { id: 'depo', label: 'Merkez Kantar & Süzme Yoğurt' },
+      { id: 'maliyet', label: 'Maliyet Tarifesi & Kâr Analizi' },
+      { id: 'yonetim', label: 'Müstahsiller & Toplu Rapor' },
+      { id: 'kullanicilar', label: 'Kullanıcı & Yetki Yönetimi' }
+    ];
 
-    tabs.forEach((t, idx) => {
+    const allowedTabs = candidateTabs.filter(t => hasPerm(t.id));
+    allowedTabs.forEach((t, idx) => {
       const btn = document.createElement('button');
       btn.className = 'tab-btn' + (idx === 0 ? ' active' : '');
       btn.textContent = t.label;
       btn.onclick = () => switchTab(t.id, btn);
       nav.appendChild(btn);
     });
-    if (tabs.length) switchTab(tabs[0].id, nav.firstChild);
+
+    if (allowedTabs.length) {
+      switchTab(allowedTabs[0].id, nav.firstChild);
+    } else {
+      showToast('Hesabınıza tanımlı açık bölüm bulunmuyor. Yönetici ile görüşün.', true);
+    }
   }
 
   function switchTab(tabId, btnEl) {
@@ -714,6 +809,7 @@
     if (tabId === 'depo') loadDepoData();
     if (tabId === 'maliyet') renderGunlukAnaliz();
     if (tabId === 'yonetim') renderMustahsilTable();
+    if (tabId === 'kullanicilar') loadUsersList();
   }
 
   async function refreshMasterData() {
@@ -723,11 +819,15 @@
     allTarifeler = tData || [];
 
     const plakalar = [...new Set(allMustahsiller.map(m => m.plaka))];
+    const plakaInput = document.getElementById('sutPlaka');
     if (currentUser.atanan_plaka) {
-      document.getElementById('sutPlaka').value = currentUser.atanan_plaka;
+      plakaInput.value = currentUser.atanan_plaka;
+      plakaInput.setAttribute('readonly', true);
+      plakaInput.style.background = '#f1f5f9';
     } else {
-      document.getElementById('sutPlaka').value = plakalar[0] || '42 ALK 01';
-      document.getElementById('sutPlaka').removeAttribute('readonly');
+      plakaInput.value = '';
+      plakaInput.removeAttribute('readonly');
+      plakaInput.style.background = '#fff';
     }
 
     const kp = document.getElementById('kantarPlaka');
@@ -740,10 +840,12 @@
 
   function filterMustahsilSelect() {
     const q = document.getElementById('qrSearch').value.toLowerCase().trim();
-    const plaka = document.getElementById('sutPlaka').value.trim();
+    const plaka = document.getElementById('sutPlaka').value.trim().toUpperCase();
     const sel = document.getElementById('sutMustahsil');
     const filtered = allMustahsiller.filter(m => {
-      const plakaOk = currentUser.rol === 'ADMIN' ? true : m.plaka === plaka;
+      const plakaOk = currentUser.atanan_plaka
+        ? m.plaka.toUpperCase() === currentUser.atanan_plaka.toUpperCase()
+        : (!plaka || m.plaka.toUpperCase().includes(plaka));
       const textOk = !q || m.ad_soyad.toLowerCase().includes(q) || m.cari_kodu.toLowerCase().includes(q) || m.qr_kod.toLowerCase().includes(q);
       return plakaOk && textOk;
     });
@@ -766,7 +868,7 @@
     const { error } = await sbClient.from('sut_girisleri').insert([{
       tarih,
       vardiya,
-      plaka: mst ? mst.plaka : document.getElementById('sutPlaka').value,
+      plaka: mst ? mst.plaka : (document.getElementById('sutPlaka').value || '42 ALK 01'),
       mustahsil_id: mustahsilId,
       miktar_kg: miktar,
       ayri_gugum: ayri,
@@ -783,14 +885,19 @@
   async function loadSutGirisleri() {
     const tarih = document.getElementById('sutTarih').value;
     const vardiya = document.getElementById('sutVardiya').value;
+    const plakaFilter = document.getElementById('sutPlaka').value.trim().toUpperCase();
 
     let query = sbClient.from('sut_girisleri').select('*').eq('tarih', tarih).eq('vardiya', vardiya).order('created_at', { ascending: false });
-    if (currentUser.rol === 'TOPLAYICI' && currentUser.atanan_plaka) {
+    if (currentUser.atanan_plaka) {
       query = query.eq('plaka', currentUser.atanan_plaka);
+    } else if (plakaFilter) {
+      query = query.ilike('plaka', `%${plakaFilter}%`);
     }
+
     const { data: rows, error } = await query;
     if (error) return showToast('Liste hatası: ' + error.message, true);
 
+    const showFinans = hasPerm('gecmis_tarih') || hasPerm('maliyet');
     let topKg = 0, topTutar = 0;
     const tbody = document.getElementById('sutListBody');
     tbody.innerHTML = (rows || []).map(r => {
@@ -808,14 +915,14 @@
         <td>${r.vardiya}</td>
         <td><strong>${kg.toFixed(1)} Kg</strong></td>
         <td>${r.ayri_gugum ? '<span class="badge badge-amber">Ayrı Güğüm</span>' : '<span class="badge badge-green">Normal</span>'}</td>
-        ${currentUser.rol === 'ADMIN' ? `<td>${fiyat.toFixed(2)} ₺</td><td><strong>${tutar.toFixed(2)} ₺</strong></td>` : ''}
+        ${showFinans ? `<td>${fiyat.toFixed(2)} ₺</td><td><strong>${tutar.toFixed(2)} ₺</strong></td>` : ''}
       </tr>`;
     }).join('');
 
     const ortFiyat = topKg > 0 ? (topTutar / topKg) : 0;
     document.getElementById('sutOzetKpi').innerHTML = `
       <div class="kpi-box"><div class="lbl">Vardiya Toplanan Süt</div><div class="val">${topKg.toFixed(1)} Kg</div></div>
-      ${currentUser.rol === 'ADMIN' ? `
+      ${showFinans ? `
         <div class="kpi-box"><div class="lbl">Ağırlıklı Ort. Süt Fiyatı</div><div class="val">${ortFiyat.toFixed(2)} ₺/Kg</div></div>
         <div class="kpi-box"><div class="lbl">Vardiya Süt Hakedişi</div><div class="val">${topTutar.toFixed(2)} ₺</div></div>
       ` : ''}
@@ -1119,6 +1226,125 @@
         <td><strong>${(kg * fiyat).toFixed(2)} ₺</strong></td>
       </tr>`;
     }).join('');
+  }
+
+  // ==========================================
+  // DİNAMİK KULLANICI & YETKİ YÖNETİMİ
+  // ==========================================
+  async function loadUsersList() {
+    const { data, error } = await sbClient.from('kullanicilar').select('*').order('created_at', { ascending: true });
+    if (error) return showToast('Kullanıcı listesi hatası: ' + error.message, true);
+    allUsers = data || [];
+
+    document.getElementById('usersTableBody').innerHTML = allUsers.map(u => {
+      const perms = Array.isArray(u.yetkiler) ? u.yetkiler : [];
+      const permBadges = perms.length
+        ? perms.map(p => `<span class="badge badge-blue">${MODULE_LABELS[p] || p}</span>`).join(' ')
+        : '<span class="badge badge-amber">Yetki Seçilmemiş</span>';
+
+      return `<tr>
+        <td><strong>${u.ad_soyad}</strong></td>
+        <td><code>${u.kullanici_adi}</code></td>
+        <td><code>${u.sifre}</code></td>
+        <td>${u.atanan_plaka || '<span style="color:#64748b;">Tüm Plakalar</span>'}</td>
+        <td>${permBadges}</td>
+        <td>${u.aktif ? '<span class="badge badge-green">Aktif</span>' : '<span class="badge badge-red">Pasif</span>'}</td>
+        <td style="white-space:nowrap;">
+          <button class="btn btn-primary btn-sm" onclick="editUser('${u.id}')">Düzenle</button>
+          ${u.kullanici_adi !== 'admin' ? `<button class="btn btn-danger btn-sm" onclick="deleteUser('${u.id}', '${u.kullanici_adi}')">Sil</button>` : ''}
+        </td>
+      </tr>`;
+    }).join('');
+  }
+
+  function editUser(id) {
+    const u = allUsers.find(x => x.id === id);
+    if (!u) return;
+    document.getElementById('userFormTitle').textContent = `Kullanıcı Düzenleniyor: ${u.ad_soyad}`;
+    document.getElementById('editUserId').value = u.id;
+    document.getElementById('uAdSoyad').value = u.ad_soyad;
+    document.getElementById('uKullaniciAdi').value = u.kullanici_adi;
+    document.getElementById('uSifre').value = u.sifre;
+    document.getElementById('uPlaka').value = u.atanan_plaka || '';
+    document.getElementById('uAktif').checked = !!u.aktif;
+
+    const perms = Array.isArray(u.yetkiler) ? u.yetkiler : [];
+    document.querySelectorAll('.u-perm').forEach(cb => {
+      cb.checked = perms.includes(cb.value);
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function resetUserForm() {
+    document.getElementById('userFormTitle').textContent = 'Yeni Kullanıcı Oluştur / Düzenle';
+    document.getElementById('editUserId').value = '';
+    document.getElementById('uAdSoyad').value = '';
+    document.getElementById('uKullaniciAdi').value = '';
+    document.getElementById('uSifre').value = '';
+    document.getElementById('uPlaka').value = '';
+    document.getElementById('uAktif').checked = true;
+    document.querySelectorAll('.u-perm').forEach(cb => { cb.checked = cb.value === 'toplama'; });
+  }
+
+  async function saveDynamicUser() {
+    const id = document.getElementById('editUserId').value.trim();
+    const adSoyad = document.getElementById('uAdSoyad').value.trim();
+    const kullaniciAdi = document.getElementById('uKullaniciAdi').value.trim();
+    const sifre = document.getElementById('uSifre').value.trim();
+    const plaka = document.getElementById('uPlaka').value.trim().toUpperCase() || null;
+    let aktif = document.getElementById('uAktif').checked;
+
+    const seciliYetkiler = [];
+    document.querySelectorAll('.u-perm:checked').forEach(cb => seciliYetkiler.push(cb.value));
+
+    if (!adSoyad || !kullaniciAdi || !sifre) {
+      return showToast('Ad Soyad, Kullanıcı Adı ve Şifre zorunludur.', true);
+    }
+    if (!seciliYetkiler.length) {
+      return showToast('Kullanıcı için en az bir bölüm seçmelisiniz.', true);
+    }
+
+    // Ana admin kilidi
+    if (kullaniciAdi === 'admin') {
+      aktif = true;
+      if (!seciliYetkiler.includes('kullanicilar')) seciliYetkiler.push('kullanicilar');
+    }
+
+    const payload = {
+      ad_soyad: adSoyad,
+      kullanici_adi: kullaniciAdi,
+      sifre: sifre,
+      rol: seciliYetkiler.includes('kullanicilar') ? 'ADMIN' : 'OZEL',
+      atanan_plaka: plaka,
+      aktif: aktif,
+      yetkiler: seciliYetkiler
+    };
+
+    let res;
+    if (id) {
+      res = await sbClient.from('kullanicilar').update(payload).eq('id', id);
+    } else {
+      res = await sbClient.from('kullanicilar').insert([payload]);
+    }
+
+    if (res.error) return showToast('Kullanıcı kayıt hatası: ' + res.error.message, true);
+
+    showToast(id ? 'Kullanıcı yetkileri güncellendi.' : 'Yeni kullanıcı oluşturuldu.');
+    if (currentUser.id === id) {
+      currentUser = { ...currentUser, ...payload };
+      buildTabs();
+    }
+    resetUserForm();
+    loadUsersList();
+  }
+
+  async function deleteUser(id, username) {
+    if (username === 'admin') return showToast('Ana admin hesabı silinemez.', true);
+    if (!confirm(`"${username}" kullanıcısını silmek istediğinize emin misiniz?`)) return;
+    const { error } = await sbClient.from('kullanicilar').delete().eq('id', id);
+    if (error) return showToast('Silme hatası: ' + error.message, true);
+    showToast('Kullanıcı silindi.');
+    loadUsersList();
   }
 </script>
 </body>
