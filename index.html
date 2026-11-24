@@ -90,6 +90,17 @@
       box-shadow: 0 2px 6px rgba(15,23,42,0.04);
     }
     .card h3 { font-size: 1.05rem; color: var(--primary); margin-bottom: 12px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; }
+    .card-header-flex {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 10px;
+      margin-bottom: 12px;
+    }
+    .card-header-flex h3 { border-bottom: none; padding-bottom: 0; margin-bottom: 0; }
 
     .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
     .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
@@ -116,7 +127,7 @@
       padding: 12px;
       border-radius: 10px;
       border: 1px solid #e2e8f0;
-      margin: 10px 0 14px;
+      margin: 8px 0 14px;
     }
     .perm-item {
       display: flex;
@@ -148,6 +159,7 @@
     .btn-success { background: var(--accent); color: #fff; }
     .btn-danger { background: var(--danger); color: #fff; }
     .btn-outline { background: #fff; border: 1.5px solid var(--border); color: var(--text); }
+    .btn-outline:hover { background: #f8fafc; }
     .btn-lg { width: 100%; padding: 14px; font-size: 1.05rem; }
 
     .kpi-box {
@@ -195,6 +207,66 @@
     .badge-red { background: #fee2e2; color: #b91c1c; }
     .badge-green { background: #dcfce7; color: #15803d; }
     .badge-amber { background: #fef3c7; color: #b45309; }
+
+    /* Modal Pencere */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.55);
+      backdrop-filter: blur(2px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 9000;
+    }
+    .modal-dialog {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      width: 100%;
+      max-width: 720px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 45px rgba(15, 23, 42, 0.28);
+      animation: modalFadeIn 0.16s ease-out;
+    }
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: translateY(-8px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .modal-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #f8fafc;
+      border-radius: 14px 14px 0 0;
+    }
+    .modal-header h3 { color: var(--primary); font-size: 1.08rem; margin: 0; }
+    .modal-close {
+      background: transparent;
+      border: none;
+      font-size: 1.35rem;
+      line-height: 1;
+      color: var(--muted);
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 6px;
+    }
+    .modal-close:hover { background: #e2e8f0; color: var(--text); }
+    .modal-body { padding: 20px; }
+    .modal-footer {
+      padding: 14px 20px;
+      border-top: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      flex-wrap: wrap;
+      background: #f8fafc;
+      border-radius: 0 0 14px 14px;
+    }
 
     #toast {
       position: fixed;
@@ -601,9 +673,40 @@
   <!-- 5. DİNAMİK KULLANICI & BÖLÜM YETKİ YÖNETİMİ -->
   <div id="tab-kullanicilar" class="tab-panel hidden">
     <div class="card">
-      <h3 id="userFormTitle">Yeni Kullanıcı Oluştur / Düzenle</h3>
+      <div class="card-header-flex">
+        <h3>Kayıtlı Kullanıcılar & Açık Modül Yetkileri</h3>
+        <button type="button" class="btn btn-success" onclick="openUserModal()">+ Yeni Kullanıcı Ekle</button>
+      </div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Ad Soyad</th>
+              <th>Kullanıcı Adı</th>
+              <th>Şifre</th>
+              <th>Plaka Kısıtı</th>
+              <th>Açık Bölümler & Yetkiler</th>
+              <th>Durum</th>
+              <th>İşlem</th>
+            </tr>
+          </thead>
+          <tbody id="usersTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- KULLANICI EKLE / DÜZENLE MODAL PENCERESİ -->
+<div id="userModal" class="modal-backdrop hidden" onclick="if(event.target===this) closeUserModal()">
+  <div class="modal-dialog">
+    <div class="modal-header">
+      <h3 id="userModalTitle">Yeni Kullanıcı Ekle</h3>
+      <button type="button" class="modal-close" onclick="closeUserModal()" title="Kapat">&times;</button>
+    </div>
+    <div class="modal-body">
       <input type="hidden" id="editUserId" />
-      <div class="grid-4" style="margin-bottom:10px;">
+      <div class="grid-2" style="margin-bottom:12px;">
         <div>
           <label>Ad Soyad / Ünvan *</label>
           <input type="text" id="uAdSoyad" placeholder="Örn: Ahmet Yılmaz" />
@@ -612,6 +715,8 @@
           <label>Kullanıcı Adı *</label>
           <input type="text" id="uKullaniciAdi" placeholder="Örn: ahmet42" />
         </div>
+      </div>
+      <div class="grid-2" style="margin-bottom:14px;">
         <div>
           <label>Giriş Şifresi *</label>
           <input type="text" id="uSifre" placeholder="Şifre belirleyin" />
@@ -632,33 +737,13 @@
         <label class="perm-item"><input type="checkbox" class="u-perm" value="gecmis_tarih" /> Geçmiş Tarih & Fiyat Görme Yetkisi</label>
       </div>
 
-      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-        <label style="display:flex;align-items:center;gap:6px;margin:0;cursor:pointer;">
-          <input type="checkbox" id="uAktif" checked style="width:18px;height:18px;" /> Hesap Aktif (Giriş Yapabilir)
-        </label>
-        <button class="btn btn-success" onclick="saveDynamicUser()">Kullanıcıyı Kaydet</button>
-        <button class="btn btn-outline" onclick="resetUserForm()">Formu Temizle</button>
-      </div>
+      <label style="display:flex;align-items:center;gap:8px;margin:0;cursor:pointer;">
+        <input type="checkbox" id="uAktif" checked style="width:18px;height:18px;" /> Hesap Aktif (Giriş Yapabilir)
+      </label>
     </div>
-
-    <div class="card">
-      <h3>Kayıtlı Kullanıcılar & Açık Modül Yetkileri</h3>
-      <div style="overflow-x:auto;">
-        <table>
-          <thead>
-            <tr>
-              <th>Ad Soyad</th>
-              <th>Kullanıcı Adı</th>
-              <th>Şifre</th>
-              <th>Plaka Kısıtı</th>
-              <th>Açık Bölümler & Yetkiler</th>
-              <th>Durum</th>
-              <th>İşlem</th>
-            </tr>
-          </thead>
-          <tbody id="usersTableBody"></tbody>
-        </table>
-      </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-outline" onclick="closeUserModal()">İptal</button>
+      <button type="button" class="btn btn-success" onclick="saveDynamicUser()">Kaydet</button>
     </div>
   </div>
 </div>
@@ -685,6 +770,10 @@
   let allUsers = [];
 
   const todayStr = () => new Date().toISOString().split('T')[0];
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeUserModal();
+  });
 
   function hasPerm(permKey) {
     if (!currentUser) return false;
@@ -735,6 +824,7 @@
 
   function logout() {
     currentUser = null;
+    closeUserModal();
     document.getElementById('appView').classList.add('hidden');
     document.getElementById('loginView').classList.remove('hidden');
     document.getElementById('userBadge').classList.add('hidden');
@@ -756,7 +846,6 @@
     });
     document.getElementById('raporBaslangic').value = today.slice(0, 8) + '01';
 
-    // Geçmiş tarih ve fiyat görme yetkisi
     const canSeeHistoryAndPrice = hasPerm('gecmis_tarih') || hasPerm('maliyet');
     if (!canSeeHistoryAndPrice) {
       document.getElementById('sutTarih').setAttribute('readonly', true);
@@ -1229,14 +1318,15 @@
   }
 
   // ==========================================
-  // DİNAMİK KULLANICI & YETKİ YÖNETİMİ
+  // DİNAMİK KULLANICI & YETKİ YÖNETİMİ (MODAL)
   // ==========================================
   async function loadUsersList() {
     const { data, error } = await sbClient.from('kullanicilar').select('*').order('created_at', { ascending: true });
     if (error) return showToast('Kullanıcı listesi hatası: ' + error.message, true);
     allUsers = data || [];
 
-    document.getElementById('usersTableBody').innerHTML = allUsers.map(u => {
+    const tbody = document.getElementById('usersTableBody');
+    tbody.innerHTML = allUsers.map((u, idx) => {
       const perms = Array.isArray(u.yetkiler) ? u.yetkiler : [];
       const permBadges = perms.length
         ? perms.map(p => `<span class="badge badge-blue">${MODULE_LABELS[p] || p}</span>`).join(' ')
@@ -1250,40 +1340,58 @@
         <td>${permBadges}</td>
         <td>${u.aktif ? '<span class="badge badge-green">Aktif</span>' : '<span class="badge badge-red">Pasif</span>'}</td>
         <td style="white-space:nowrap;">
-          <button class="btn btn-primary btn-sm" onclick="editUser('${u.id}')">Düzenle</button>
-          ${u.kullanici_adi !== 'admin' ? `<button class="btn btn-danger btn-sm" onclick="deleteUser('${u.id}', '${u.kullanici_adi}')">Sil</button>` : ''}
+          <button type="button" class="btn btn-primary btn-sm btn-edit-user" data-idx="${idx}">Düzenle</button>
+          ${u.kullanici_adi !== 'admin' ? `<button type="button" class="btn btn-danger btn-sm btn-del-user" data-idx="${idx}">Sil</button>` : ''}
         </td>
       </tr>`;
     }).join('');
-  }
 
-  function editUser(id) {
-    const u = allUsers.find(x => x.id === id);
-    if (!u) return;
-    document.getElementById('userFormTitle').textContent = `Kullanıcı Düzenleniyor: ${u.ad_soyad}`;
-    document.getElementById('editUserId').value = u.id;
-    document.getElementById('uAdSoyad').value = u.ad_soyad;
-    document.getElementById('uKullaniciAdi').value = u.kullanici_adi;
-    document.getElementById('uSifre').value = u.sifre;
-    document.getElementById('uPlaka').value = u.atanan_plaka || '';
-    document.getElementById('uAktif').checked = !!u.aktif;
-
-    const perms = Array.isArray(u.yetkiler) ? u.yetkiler : [];
-    document.querySelectorAll('.u-perm').forEach(cb => {
-      cb.checked = perms.includes(cb.value);
+    tbody.querySelectorAll('.btn-edit-user').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const u = allUsers[Number(btn.dataset.idx)];
+        if (u) openUserModal(u);
+      });
     });
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    tbody.querySelectorAll('.btn-del-user').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const u = allUsers[Number(btn.dataset.idx)];
+        if (u) deleteUser(u.id, u.kullanici_adi);
+      });
+    });
   }
 
-  function resetUserForm() {
-    document.getElementById('userFormTitle').textContent = 'Yeni Kullanıcı Oluştur / Düzenle';
-    document.getElementById('editUserId').value = '';
-    document.getElementById('uAdSoyad').value = '';
-    document.getElementById('uKullaniciAdi').value = '';
-    document.getElementById('uSifre').value = '';
-    document.getElementById('uPlaka').value = '';
-    document.getElementById('uAktif').checked = true;
-    document.querySelectorAll('.u-perm').forEach(cb => { cb.checked = cb.value === 'toplama'; });
+  function openUserModal(u = null) {
+    const modal = document.getElementById('userModal');
+    if (u) {
+      document.getElementById('userModalTitle').textContent = `Kullanıcı Düzenle: ${u.ad_soyad}`;
+      document.getElementById('editUserId').value = u.id;
+      document.getElementById('uAdSoyad').value = u.ad_soyad || '';
+      document.getElementById('uKullaniciAdi').value = u.kullanici_adi || '';
+      document.getElementById('uSifre').value = u.sifre || '';
+      document.getElementById('uPlaka').value = u.atanan_plaka || '';
+      document.getElementById('uAktif').checked = !!u.aktif;
+
+      const perms = Array.isArray(u.yetkiler) ? u.yetkiler : [];
+      document.querySelectorAll('.u-perm').forEach(cb => {
+        cb.checked = perms.includes(cb.value);
+      });
+    } else {
+      document.getElementById('userModalTitle').textContent = 'Yeni Kullanıcı Ekle';
+      document.getElementById('editUserId').value = '';
+      document.getElementById('uAdSoyad').value = '';
+      document.getElementById('uKullaniciAdi').value = '';
+      document.getElementById('uSifre').value = '';
+      document.getElementById('uPlaka').value = '';
+      document.getElementById('uAktif').checked = true;
+      document.querySelectorAll('.u-perm').forEach(cb => { cb.checked = cb.value === 'toplama'; });
+    }
+    modal.classList.remove('hidden');
+    document.getElementById('uAdSoyad').focus();
+  }
+
+  function closeUserModal() {
+    document.getElementById('userModal').classList.add('hidden');
   }
 
   async function saveDynamicUser() {
@@ -1304,7 +1412,6 @@
       return showToast('Kullanıcı için en az bir bölüm seçmelisiniz.', true);
     }
 
-    // Ana admin kilidi
     if (kullaniciAdi === 'admin') {
       aktif = true;
       if (!seciliYetkiler.includes('kullanicilar')) seciliYetkiler.push('kullanicilar');
@@ -1334,7 +1441,7 @@
       currentUser = { ...currentUser, ...payload };
       buildTabs();
     }
-    resetUserForm();
+    closeUserModal();
     loadUsersList();
   }
 
