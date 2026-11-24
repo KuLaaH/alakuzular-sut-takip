@@ -1,0 +1,3279 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Alakuzular Gıda - Süt Toplama, Süzme Yoğurt & Maliyet Sistemi</title>
+  <style>
+    :root {
+      --navy: #0F294A;
+      --navy-light: #163660;
+      --navy-hover: #1d467a;
+      --amber: #F59E0B;
+      --amber-light: #FEF3C7;
+      --card-cream: #F3D899;
+      --card-border: #8B6914;
+      --bg: #F4F5F7;
+      --surface: #FFFFFF;
+      --text: #1E293B;
+      --muted: #64748B;
+      --border: #CBD5E1;
+      --green: #059669;
+      --green-bg: #ECFDF5;
+      --red: #DC2626;
+      --red-bg: #FEF2F2;
+      --purple: #7C3AED;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.45;
+      overflow-x: hidden;
+      padding-bottom: 48px;
+    }
+
+    button, input, select, textarea {
+      font-family: inherit;
+    }
+
+    button {
+      cursor: pointer;
+      border: none;
+      transition: all 0.15s ease;
+    }
+
+    button:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    /* LAYOUT & CONTAINERS */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 14px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: 0 2px 8px rgba(15, 41, 74, 0.06);
+      overflow: hidden;
+      margin-bottom: 18px;
+    }
+
+    .card-header {
+      background: var(--navy);
+      color: #fff;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .card-header h2, .card-header h3 {
+      font-size: 16px;
+      font-weight: 800;
+    }
+
+    .card-body {
+      padding: 18px;
+    }
+
+    /* GRID HELPERS */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    @media (max-width: 900px) {
+      .grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .grid-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 640px) {
+      .grid-4, .grid-3, .grid-2 { grid-template-columns: 1fr; }
+    }
+
+    /* FORMS */
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .form-label {
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      color: var(--muted);
+      letter-spacing: 0.4px;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 11px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: 11px;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+      background: #F8FAFC;
+      outline: none;
+    }
+
+    .form-control:focus {
+      border-color: var(--navy);
+      background: #fff;
+    }
+
+    .form-control:disabled {
+      background: #E2E8F0;
+      color: #475569;
+    }
+
+    /* BUTTONS */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 11px 16px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 800;
+      text-align: center;
+    }
+
+    .btn-primary { background: var(--navy); color: #fff; }
+    .btn-primary:hover:not(:disabled) { background: var(--navy-hover); }
+
+    .btn-success { background: var(--green); color: #fff; }
+    .btn-success:hover:not(:disabled) { background: #047857; }
+
+    .btn-amber { background: var(--amber); color: var(--navy); }
+    .btn-amber:hover:not(:disabled) { background: #D97706; color: #fff; }
+
+    .btn-danger { background: var(--red); color: #fff; }
+    .btn-danger:hover:not(:disabled) { background: #B91C1C; }
+
+    .btn-outline {
+      background: #fff;
+      color: var(--navy);
+      border: 1.5px solid var(--border);
+    }
+    .btn-outline:hover:not(:disabled) { background: #F1F5F9; border-color: var(--navy); }
+
+    .btn-sm {
+      padding: 7px 11px;
+      font-size: 12px;
+      border-radius: 9px;
+    }
+
+    .btn-block { width: 100%; }
+
+    /* BADGES */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 800;
+    }
+    .badge-navy { background: var(--navy); color: #fff; }
+    .badge-amber { background: #FEF3C7; color: #92400E; border: 1px solid #F59E0B; }
+    .badge-green { background: #D1FAE5; color: #065F46; }
+    .badge-red { background: #FEE2E2; color: #991B1B; border: 1px solid #EF4444; }
+    .badge-purple { background: #EDE9FE; color: #5B21B6; }
+
+    /* HEADER & NAV */
+    .topbar {
+      background: var(--navy);
+      color: #fff;
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      box-shadow: 0 3px 12px rgba(0, 0, 0, 0.18);
+    }
+
+    .topbar-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 14px;
+      max-width: 1200px;
+      margin: 0 auto;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .brand-title {
+      font-size: 19px;
+      font-weight: 900;
+      letter-spacing: 0.3px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .brand-sub {
+      font-size: 12px;
+      color: #CBD5E1;
+      margin-top: 2px;
+    }
+
+    .nav-bar {
+      background: var(--navy-light);
+      border-top: 1px solid rgba(255, 255, 255, 0.12);
+      overflow-x: auto;
+    }
+
+    .nav-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 7px 14px;
+      display: flex;
+      gap: 8px;
+    }
+
+    .nav-btn {
+      background: transparent;
+      color: #E2E8F0;
+      padding: 9px 14px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 800;
+      white-space: nowrap;
+      flex: 1;
+      min-width: max-content;
+    }
+
+    .nav-btn:hover { background: rgba(255, 255, 255, 0.12); }
+    .nav-btn.active {
+      background: #fff;
+      color: var(--navy);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    }
+
+    /* LOGIN SCREEN */
+    .login-wrapper {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #091B32 0%, #163660 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .login-box {
+      background: #fff;
+      width: 100%;
+      max-width: 520px;
+      border-radius: 22px;
+      overflow: hidden;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+    }
+
+    .login-hero {
+      background: var(--navy);
+      color: #fff;
+      padding: 24px 20px;
+      text-align: center;
+      border-bottom: 4px solid var(--amber);
+    }
+
+    .quick-role-btn {
+      text-align: left;
+      background: #F8FAFC;
+      border: 2px solid var(--border);
+      border-radius: 14px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .quick-role-btn:hover {
+      border-color: var(--navy);
+      background: #EFF6FF;
+    }
+
+    /* COLLECTOR BIG ACCESSIBLE UI */
+    .big-action-btn {
+      width: 100%;
+      padding: 18px 16px;
+      border-radius: 16px;
+      font-size: clamp(16px, 3.8vw, 20px);
+      font-weight: 900;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: 0 4px 12px rgba(15, 41, 74, 0.15);
+    }
+
+    .producer-select-card {
+      width: 100%;
+      text-align: left;
+      background: #fff;
+      border: 2px solid var(--border);
+      border-radius: 14px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .producer-select-card:hover {
+      border-color: var(--navy);
+      background: #F0F9FF;
+    }
+
+    .huge-milk-input {
+      width: 100%;
+      padding: 14px 8px;
+      font-size: clamp(26px, 6vw, 38px);
+      font-weight: 900;
+      text-align: center;
+      border: 3px solid var(--navy);
+      border-radius: 16px;
+      color: var(--navy);
+      background: #fff;
+      outline: none;
+    }
+
+    .huge-milk-input:focus {
+      border-color: var(--green);
+      box-shadow: 0 0 0 4px rgba(5, 150, 105, 0.15);
+    }
+
+    .quick-add-btn {
+      background: #E0F2FE;
+      color: var(--navy);
+      border: 1.5px solid #7DD3FC;
+      border-radius: 12px;
+      padding: 12px 6px;
+      font-size: 15px;
+      font-weight: 900;
+    }
+
+    .quick-add-btn:hover { background: #BAE6FD; }
+
+    /* STAT BOXES */
+    .stat-box {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 15px;
+    }
+
+    .stat-title {
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
+    .stat-value {
+      font-size: clamp(20px, 3vw, 26px);
+      font-weight: 900;
+      color: var(--navy);
+      margin-top: 4px;
+    }
+
+    /* ALERTS */
+    .alert-banner {
+      padding: 14px 16px;
+      border-radius: 14px;
+      font-weight: 800;
+      font-size: 13px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .alert-danger {
+      background: var(--red);
+      color: #fff;
+      border: 2px solid #991B1B;
+    }
+
+    .alert-warning {
+      background: #FEF3C7;
+      color: #92400E;
+      border: 1.5px solid #F59E0B;
+    }
+
+    .alert-success {
+      background: #D1FAE5;
+      color: #065F46;
+      border: 1.5px solid #10B981;
+    }
+
+    /* TABLES */
+    .table-wrap {
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12.5px;
+    }
+
+    th {
+      background: var(--navy);
+      color: #fff;
+      padding: 10px 10px;
+      text-align: left;
+      font-weight: 800;
+      text-transform: uppercase;
+      font-size: 11px;
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 10px 10px;
+      border-bottom: 1px solid #E2E8F0;
+      vertical-align: middle;
+    }
+
+    tr:hover td { background: #F8FAFC; }
+
+    .text-right { text-align: right; }
+    .text-center { text-align: center; }
+
+    /* PHYSICAL CREAM PRODUCER CARD */
+    .physical-card {
+      background: var(--card-cream);
+      border: 3px solid var(--card-border);
+      border-radius: 16px;
+      padding: 18px;
+      color: #1E1B18;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+    }
+
+    .physical-card table th {
+      background: #D9B36C;
+      color: #1E1B18;
+      border: 1px solid var(--card-border);
+      text-align: center;
+      padding: 6px 4px;
+    }
+
+    .physical-card table td {
+      border: 1px solid var(--card-border);
+      padding: 5px 6px;
+      text-align: center;
+      font-weight: 700;
+      background: rgba(255, 255, 255, 0.45);
+    }
+
+    /* TOAST & OVERLAYS */
+    .toast-box {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      z-index: 999;
+      padding: 14px 18px;
+      border-radius: 14px;
+      color: #fff;
+      font-weight: 800;
+      font-size: 13px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+      max-width: 380px;
+    }
+
+    .save-flash {
+      position: fixed;
+      inset: 0;
+      background: rgba(5, 150, 105, 0.96);
+      color: #fff;
+      z-index: 998;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 24px;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.75);
+      z-index: 900;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      overflow-y: auto;
+    }
+
+    .modal-box {
+      background: #fff;
+      border-radius: 20px;
+      max-width: 480px;
+      width: 100%;
+      overflow: hidden;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+    }
+
+    .shift-toggle {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      background: #E2E8F0;
+      padding: 4px;
+      border-radius: 12px;
+    }
+
+    .shift-btn {
+      padding: 10px;
+      border-radius: 9px;
+      font-weight: 800;
+      font-size: 13px;
+      background: transparent;
+      color: #475569;
+    }
+
+    .shift-btn.active-sabah {
+      background: var(--amber);
+      color: #fff;
+    }
+
+    .shift-btn.active-aksam {
+      background: var(--navy);
+      color: #fff;
+    }
+
+    @media print {
+      .no-print, .topbar, .nav-bar { display: none !important; }
+      body { background: #fff; padding: 0; }
+      .card { box-shadow: none; border: 1px solid #000; }
+    }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+
+  <script>
+    (function () {
+      'use strict';
+
+      // =========================================================================
+      // 1. TARİH VE FORMAT YARDIMCILARI
+      // =========================================================================
+      function getLocalYMD(offsetDays) {
+        const d = new Date();
+        if (offsetDays) d.setDate(d.getDate() + offsetDays);
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${y}-${m}-${day}`;
+      }
+
+      const TODAY_STR = getLocalYMD(0);
+      const YESTERDAY_STR = getLocalYMD(-1);
+      const STRAINED_LIMIT = 3.20;
+
+      function fmtKg(val) {
+        const n = Number(val);
+        if (isNaN(n)) return '0,0';
+        return n.toLocaleString('tr-TR', { minimumFractionDigits: 1, maximumFractionDigits: 2 });
+      }
+
+      function fmtRatio(val) {
+        const n = Number(val);
+        if (isNaN(n) || !isFinite(n)) return '0,00';
+        return n.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      }
+
+      function fmtMoney(val) {
+        const n = Number(val);
+        if (isNaN(n) || !isFinite(n)) return '0,00 ₺';
+        return n.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ₺';
+      }
+
+      function escHtml(str) {
+        if (str === null || str === undefined) return '';
+        return String(str)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+      }
+
+      // =========================================================================
+      // 2. VARSAYILAN BAŞLANGIÇ VERİLERİ
+      // =========================================================================
+      const DEFAULT_ROUTES = [
+        { id: 'arac-1', plate: '42 ALK 01', name: 'Kuzey Köy Rotası (Ladik)' },
+        { id: 'arac-2', plate: '42 ALK 02', name: 'Güney Köy Rotası (Sarayönü)' },
+        { id: 'arac-3', plate: '42 ALK 03', name: 'Batı Köy Rotası (Kadınhanı)' }
+      ];
+
+      const DEFAULT_USERS = [
+        { id: 'u-admin', name: 'Ahmet Ömer (Yönetici)', username: 'admin', password: '1234', role: 'admin', assignedRouteId: null },
+        { id: 'u-top1', name: 'Mehmet Yılmaz (Toplayıcı 1)', username: 'toplayici1', password: '1234', role: 'collector', assignedRouteId: 'arac-1' },
+        { id: 'u-top2', name: 'Ali Kaya (Toplayıcı 2)', username: 'toplayici2', password: '1234', role: 'collector', assignedRouteId: 'arac-2' },
+        { id: 'u-depo', name: 'Hasan Demir (Depo & Üretim)', username: 'depocu', password: '1234', role: 'warehouse', assignedRouteId: null }
+      ];
+
+      const DEFAULT_PRODUCERS = [
+        {
+          id: 'p-1',
+          code: 'ALAKUZU-MST-101',
+          cariKodu: '120.01.001',
+          tc: '12345678902',
+          name: 'Hasan Hüseyin Doğan',
+          fatherName: 'Mehmet',
+          birthDate: '1972-04-15',
+          farmNo: 'TR-42-001482',
+          phone: '0532 111 22 33',
+          city: 'Konya',
+          district: 'Sarayönü',
+          village: 'Ladik',
+          routeId: 'arac-1',
+          unitPrice: 18.50
+        },
+        {
+          id: 'p-2',
+          code: 'ALAKUZU-MST-102',
+          cariKodu: '120.01.002',
+          tc: '23456789014',
+          name: 'Mustafa Şahin',
+          fatherName: 'Ali',
+          birthDate: '1980-08-12',
+          farmNo: 'TR-42-001519',
+          phone: '0533 222 33 44',
+          city: 'Konya',
+          district: 'Sarayönü',
+          village: 'Ladik',
+          routeId: 'arac-1',
+          unitPrice: 18.00
+        },
+        {
+          id: 'p-3',
+          code: 'ALAKUZU-MST-103',
+          cariKodu: '120.01.003',
+          tc: '34567890126',
+          name: 'Ayşe Kaya',
+          fatherName: 'Hüseyin',
+          birthDate: '1978-02-10',
+          farmNo: 'TR-42-001604',
+          phone: '0535 333 44 55',
+          city: 'Konya',
+          district: 'Sarayönü',
+          village: 'Merkez Mah.',
+          routeId: 'arac-2',
+          unitPrice: 18.25
+        },
+        {
+          id: 'p-4',
+          code: 'ALAKUZU-MST-104',
+          cariKodu: '120.01.004',
+          tc: '45678901238',
+          name: 'İbrahim Demir',
+          fatherName: 'Osman',
+          birthDate: '1969-11-05',
+          farmNo: 'TR-42-001720',
+          phone: '0536 444 55 66',
+          city: 'Konya',
+          district: 'Sarayönü',
+          village: 'Gözlü',
+          routeId: 'arac-2',
+          unitPrice: 17.75
+        },
+        {
+          id: 'p-5',
+          code: 'ALAKUZU-MST-105',
+          cariKodu: '120.01.005',
+          tc: '56789012340',
+          name: 'Ramazan Öztürk',
+          fatherName: 'Veli',
+          birthDate: '1985-06-30',
+          farmNo: 'TR-42-001895',
+          phone: '0537 555 66 77',
+          city: 'Konya',
+          district: 'Kadınhanı',
+          village: 'Atlantı',
+          routeId: 'arac-3',
+          unitPrice: 18.00
+        }
+      ];
+
+      function buildInitialCollections() {
+        const octData = [
+          ['08', 360.0], ['09', 175.5], ['10', 187.5], ['11', 185.0],
+          ['12', 184.5], ['13', 190.5], ['14', 171.5], ['15', 175.5],
+          ['16', 150.5], ['17', 167.0], ['18', 166.0], ['19', 166.5],
+          ['20', 163.0], ['21', 167.0], ['22', 174.0], ['23', 172.5],
+          ['24', 169.5], ['25', 177.0], ['26', 173.5], ['27', 144.5],
+          ['28', 163.0], ['29', 162.5], ['30', 162.5], ['31', 167.5]
+        ];
+        const list = octData.map((row, idx) => ({
+          id: 'oct-' + idx,
+          date: '2026-10-' + row[0],
+          shift: 'Sabah',
+          routeId: 'arac-1',
+          producerId: 'p-1',
+          amount: row[1],
+          antibioticWarning: false
+        }));
+
+        list.push(
+          { id: 'c-y1', date: YESTERDAY_STR, shift: 'Sabah', routeId: 'arac-1', producerId: 'p-1', amount: 420.0, antibioticWarning: false },
+          { id: 'c-y2', date: YESTERDAY_STR, shift: 'Akşam', routeId: 'arac-2', producerId: 'p-3', amount: 380.0, antibioticWarning: false },
+          { id: 'c-t1', date: TODAY_STR, shift: 'Sabah', routeId: 'arac-1', producerId: 'p-1', amount: 310.0, antibioticWarning: false },
+          { id: 'c-t2', date: TODAY_STR, shift: 'Sabah', routeId: 'arac-1', producerId: 'p-2', amount: 290.0, antibioticWarning: false },
+          { id: 'c-t3', date: TODAY_STR, shift: 'Sabah', routeId: 'arac-2', producerId: 'p-3', amount: 340.0, antibioticWarning: false },
+          { id: 'c-t4', date: TODAY_STR, shift: 'Sabah', routeId: 'arac-2', producerId: 'p-4', amount: 210.0, antibioticWarning: true }
+        );
+        return list;
+      }
+
+      function buildInitialWeighings() {
+        return [
+          { id: `w-${YESTERDAY_STR}-Sabah-arac-1`, date: YESTERDAY_STR, shift: 'Sabah', routeId: 'arac-1', centerWeight: 420.0, note: 'Dün sabah tam teslim alındı.' },
+          { id: `w-${YESTERDAY_STR}-Akşam-arac-2`, date: YESTERDAY_STR, shift: 'Akşam', routeId: 'arac-2', centerWeight: 380.0, note: 'Dün akşam tam teslim alındı.' },
+          { id: `w-${TODAY_STR}-Sabah-arac-1`, date: TODAY_STR, shift: 'Sabah', routeId: 'arac-1', centerWeight: 599.0, note: '1 kg köpük payı, normal.' },
+          { id: `w-${TODAY_STR}-Sabah-arac-2`, date: TODAY_STR, shift: 'Sabah', routeId: 'arac-2', centerWeight: 532.0, note: '18 kg eksik! İlaçlı güğüm ayrı tartıldı.' }
+        ];
+      }
+
+      function buildInitialYogurt() {
+        return [
+          {
+            id: `yog-${YESTERDAY_STR}-Sabah`,
+            date: YESTERDAY_STR,
+            shift: 'Sabah',
+            fermentedMilkKg: 420.0,
+            normalCount: 8,
+            sertCount: 4,
+            ikiKgCount: 6,
+            dokuzYuzGrCount: 10,
+            note: 'Süzme kıvamı ideal (Oran: 2,98).'
+          },
+          {
+            id: `yog-${YESTERDAY_STR}-Akşam`,
+            date: YESTERDAY_STR,
+            shift: 'Akşam',
+            fermentedMilkKg: 360.0,
+            normalCount: 6,
+            sertCount: 3,
+            ikiKgCount: 5,
+            dokuzYuzGrCount: 10,
+            note: 'Fazla süzülme nedeniyle oran 3,30 çıktı!'
+          },
+          {
+            id: `yog-${TODAY_STR}-Sabah`,
+            date: TODAY_STR,
+            shift: 'Sabah',
+            fermentedMilkKg: 620.0,
+            normalCount: 12,
+            sertCount: 5,
+            ikiKgCount: 10,
+            dokuzYuzGrCount: 12,
+            note: 'Bugün sabah süzme yoğurt üretimi.'
+          }
+        ];
+      }
+
+      function buildInitialTariffs() {
+        return [
+          {
+            id: 'trf-2026-10-01',
+            effectiveFrom: '2026-10-01',
+            dogalgaz: 500,
+            elektrik: 420,
+            mazot: 650,
+            iscilik: 1400,
+            yemek: 250,
+            su: 120,
+            euroRate: 37.50,
+            kova10NormalEur: 0.62,
+            kova10SertEur: 0.65,
+            kova2Eur: 0.24,
+            kova900Eur: 0.14,
+            wholesale10Normal: 780,
+            retail10Normal: 920,
+            wholesale10Sert: 820,
+            retail10Sert: 960,
+            wholesale2Kg: 170,
+            retail2Kg: 205,
+            wholesale900Gr: 82,
+            retail900Gr: 98,
+            note: 'Ekim ayı baz maliyet tarifesi'
+          },
+          {
+            id: `trf-${YESTERDAY_STR}`,
+            effectiveFrom: YESTERDAY_STR,
+            dogalgaz: 560,
+            elektrik: 460,
+            mazot: 700,
+            iscilik: 1550,
+            yemek: 280,
+            su: 140,
+            euroRate: 38.20,
+            kova10NormalEur: 0.64,
+            kova10SertEur: 0.68,
+            kova2Eur: 0.25,
+            kova900Eur: 0.15,
+            wholesale10Normal: 820,
+            retail10Normal: 960,
+            wholesale10Sert: 860,
+            retail10Sert: 1010,
+            wholesale2Kg: 180,
+            retail2Kg: 215,
+            wholesale900Gr: 86,
+            retail900Gr: 105,
+            note: 'Güncel enerji, işçilik ve Euro kova tarifesi'
+          }
+        ];
+      }
+
+      // =========================================================================
+      // 3. LOCALSTORAGE YÖNETİMİ
+      // =========================================================================
+      const STORAGE_PREFIX = 'alakuzular_html_v1_';
+
+      function loadStore(key, fallback) {
+        try {
+          const raw = localStorage.getItem(STORAGE_PREFIX + key);
+          return raw ? JSON.parse(raw) : fallback;
+        } catch (e) {
+          return fallback;
+        }
+      }
+
+      function saveStore(key, val) {
+        try {
+          localStorage.setItem(STORAGE_PREFIX + key, JSON.stringify(val));
+        } catch (e) {}
+      }
+
+      // =========================================================================
+      // 4. UYGULAMA DURUMU (STATE)
+      // =========================================================================
+      const state = {
+        routes: loadStore('routes', DEFAULT_ROUTES),
+        users: loadStore('users', DEFAULT_USERS),
+        producers: loadStore('producers', DEFAULT_PRODUCERS),
+        collections: loadStore('collections', buildInitialCollections()),
+        weighings: loadStore('weighings', buildInitialWeighings()),
+        yogurtBatches: loadStore('yogurt', buildInitialYogurt()),
+        tariffs: loadStore('tariffs', buildInitialTariffs()),
+
+        currentUser: null,
+        activeTab: 'collector',
+
+        // Ortak Tarih / Vardiya / Plaka
+        selectedDate: TODAY_STR,
+        selectedShift: 'Sabah',
+        selectedRoute: 'arac-1',
+
+        // Toplayıcı Ekranı
+        collectorMode: 'select', // 'select' | 'entry'
+        collectorSearch: '',
+        selectedProducerId: '',
+        kiloInput: '',
+        gramInput: '',
+        antibioticWarning: false,
+        editingCollectionId: null,
+
+        // QR Modalları
+        qrLabelProducerId: null,
+        qrScannerOpen: false,
+        cameraError: '',
+        manualQrInput: '',
+
+        // Yoğurt Üretim
+        yogurtDate: TODAY_STR,
+        yogurtShift: 'Sabah',
+
+        // Maliyet & Kâr Analizi
+        costDate: TODAY_STR,
+        tariffFormDate: TODAY_STR,
+
+        // Dijital Kart
+        cardProducerId: 'p-1',
+        cardMonth: '2026-10',
+
+        // Toplu Rapor Filtreleri
+        repStart: '2026-10-01',
+        repEnd: '2026-12-31',
+        repRoute: 'ALL',
+        repDistrict: 'ALL',
+        repVillage: 'ALL',
+        repSearch: '',
+        repOnlyMilk: false,
+        repSortField: 'totalMilk',
+        repSortDir: 'desc',
+
+        // Bildirim
+        toast: null,
+        flashOverlay: null
+      };
+
+      let cameraStream = null;
+      let barcodeTimer = null;
+
+      function stopCamera() {
+        if (barcodeTimer) {
+          clearInterval(barcodeTimer);
+          barcodeTimer = null;
+        }
+        if (cameraStream) {
+          cameraStream.getTracks().forEach(t => t.stop());
+          cameraStream = null;
+        }
+      }
+
+      function persistAll() {
+        saveStore('routes', state.routes);
+        saveStore('users', state.users);
+        saveStore('producers', state.producers);
+        saveStore('collections', state.collections);
+        saveStore('weighings', state.weighings);
+        saveStore('yogurt', state.yogurtBatches);
+        saveStore('tariffs', state.tariffs);
+      }
+
+      function notify(msg, type) {
+        state.toast = { msg, type: type || 'success' };
+        render();
+        setTimeout(() => {
+          state.toast = null;
+          render();
+        }, 3800);
+      }
+
+      // =========================================================================
+      // 5. HESAPLAMA MOTORLARI
+      // =========================================================================
+      function getRoute(id) {
+        return state.routes.find(r => r.id === id) || { id, plate: 'PLAKA YOK', name: 'Tanımsız Rota' };
+      }
+
+      function getProducer(id) {
+        return state.producers.find(p => p.id === id) || null;
+      }
+
+      function getEffectiveRouteId() {
+        if (state.currentUser && state.currentUser.role === 'collector' && state.currentUser.assignedRouteId) {
+          return state.currentUser.assignedRouteId;
+        }
+        return state.selectedRoute;
+      }
+
+      function getDepotStock() {
+        const totalIn = state.weighings.reduce((s, w) => s + (Number(w.centerWeight) || 0), 0);
+        const totalOut = state.yogurtBatches.reduce((s, b) => s + (Number(b.fermentedMilkKg) || 0), 0);
+        return {
+          totalIn: Math.round(totalIn * 100) / 100,
+          totalOut: Math.round(totalOut * 100) / 100,
+          remaining: Math.round((totalIn - totalOut) * 100) / 100
+        };
+      }
+
+      function getEffectiveTariff(targetDate) {
+        const sorted = [...state.tariffs].sort((a, b) => b.effectiveFrom.localeCompare(a.effectiveFrom));
+        return sorted.find(t => t.effectiveFrom <= targetDate) || sorted[sorted.length - 1];
+      }
+
+      function calculateDayFinancials(targetDate) {
+        const tariff = getEffectiveTariff(targetDate);
+        const dayCols = state.collections.filter(c => c.date === targetDate);
+
+        const prodMap = new Map();
+        dayCols.forEach(c => {
+          const p = getProducer(c.producerId);
+          const uPrice = p ? Number(p.unitPrice) || 18.0 : 18.0;
+          const item = prodMap.get(c.producerId) || {
+            producer: p,
+            producerId: c.producerId,
+            sabah: 0,
+            aksam: 0,
+            totalKg: 0,
+            unitPrice: uPrice,
+            payable: 0
+          };
+          if (c.shift === 'Sabah') item.sabah += Number(c.amount) || 0;
+          else item.aksam += Number(c.amount) || 0;
+          item.totalKg = Math.round((item.sabah + item.aksam) * 100) / 100;
+          item.payable = Math.round(item.totalKg * item.unitPrice * 100) / 100;
+          prodMap.set(c.producerId, item);
+        });
+
+        const breakdown = Array.from(prodMap.values()).sort((a, b) => b.payable - a.payable);
+        const totalMilkKg = Math.round(breakdown.reduce((s, x) => s + x.totalKg, 0) * 100) / 100;
+        const totalPayable = Math.round(breakdown.reduce((s, x) => s + x.payable, 0) * 100) / 100;
+
+        const fallbackAvg = state.producers.length
+          ? state.producers.reduce((s, p) => s + (Number(p.unitPrice) || 18), 0) / state.producers.length
+          : 18.0;
+
+        const avgMilkPrice = totalMilkKg > 0
+          ? Math.round((totalPayable / totalMilkKg) * 1000) / 1000
+          : Math.round(fallbackAvg * 1000) / 1000;
+
+        const dayYogurts = state.yogurtBatches.filter(b => b.date === targetDate);
+        let fermentedMilk = 0, nCnt = 0, sCnt = 0, k2Cnt = 0, g900Cnt = 0;
+        dayYogurts.forEach(b => {
+          fermentedMilk += Number(b.fermentedMilkKg) || 0;
+          nCnt += Number(b.normalCount) || 0;
+          sCnt += Number(b.sertCount) || 0;
+          k2Cnt += Number(b.ikiKgCount) || 0;
+          g900Cnt += Number(b.dokuzYuzGrCount) || 0;
+        });
+
+        const nKg = Math.round(nCnt * 10 * 100) / 100;
+        const sKg = Math.round(sCnt * 10 * 100) / 100;
+        const k2Kg = Math.round(k2Cnt * 2 * 100) / 100;
+        const g900Kg = Math.round(g900Cnt * 0.9 * 100) / 100;
+        const totalYogurtKg = Math.round((nKg + sKg + k2Kg + g900Kg) * 100) / 100;
+
+        const hasActualYogurt = totalYogurtKg > 0 && fermentedMilk > 0;
+        const actualRatio = hasActualYogurt ? Math.round((fermentedMilk / totalYogurtKg) * 100) / 100 : null;
+        const usedRatio = actualRatio !== null ? actualRatio : 3.10;
+
+        const milkCostPerKgYogurt = Math.round(avgMilkPrice * usedRatio * 100) / 100;
+
+        const overheadDaily = Math.round((
+          (Number(tariff.dogalgaz) || 0) +
+          (Number(tariff.elektrik) || 0) +
+          (Number(tariff.mazot) || 0) +
+          (Number(tariff.iscilik) || 0) +
+          (Number(tariff.yemek) || 0) +
+          (Number(tariff.su) || 0)
+        ) * 100) / 100;
+
+        const overheadPerKg = totalYogurtKg > 0 ? Math.round((overheadDaily / totalYogurtKg) * 100) / 100 : 0;
+        const eur = Number(tariff.euroRate) || 38.0;
+
+        function buildProduct(name, weightKg, count, prodKg, packEur, whPrice, rtPrice) {
+          const packTl = Math.round((Number(packEur) || 0) * eur * 100) / 100;
+          const milkCost = Math.round(milkCostPerKgYogurt * weightKg * 100) / 100;
+          const ovhCost = Math.round(overheadPerKg * weightKg * 100) / 100;
+          const unitCost = Math.round((milkCost + ovhCost + packTl) * 100) / 100;
+
+          const wh = Number(whPrice) || 0;
+          const rt = Number(rtPrice) || 0;
+          const whProfit = Math.round((wh - unitCost) * 100) / 100;
+          const rtProfit = Math.round((rt - unitCost) * 100) / 100;
+          const whPct = unitCost > 0 ? Math.round((whProfit / unitCost) * 1000) / 10 : 0;
+          const rtPct = unitCost > 0 ? Math.round((rtProfit / unitCost) * 1000) / 10 : 0;
+
+          return {
+            name, weightKg, count, prodKg, packEur, packTl, milkCost, ovhCost, unitCost,
+            wh, whProfit, whPct,
+            rt, rtProfit, rtPct,
+            batchCost: Math.round(unitCost * count * 100) / 100,
+            batchWhRev: Math.round(wh * count * 100) / 100,
+            batchRtRev: Math.round(rt * count * 100) / 100
+          };
+        }
+
+        const products = [
+          buildProduct('10 Kg Normal Süzme Yoğurt', 10, nCnt, nKg, tariff.kova10NormalEur, tariff.wholesale10Normal, tariff.retail10Normal),
+          buildProduct('10 Kg Sert Süzme Yoğurt', 10, sCnt, sKg, tariff.kova10SertEur, tariff.wholesale10Sert, tariff.retail10Sert),
+          buildProduct('2 Kg Süzme Yoğurt', 2, k2Cnt, k2Kg, tariff.kova2Eur, tariff.wholesale2Kg, tariff.retail2Kg),
+          buildProduct('900 g Süzme Yoğurt', 0.9, g900Cnt, g900Kg, tariff.kova900Eur, tariff.wholesale900Gr, tariff.retail900Gr)
+        ];
+
+        const rawMilkExpense = Math.round(fermentedMilk * avgMilkPrice * 100) / 100;
+        const packExpense = Math.round(products.reduce((s, p) => s + p.packTl * p.count, 0) * 100) / 100;
+        const grandCost = Math.round((rawMilkExpense + overheadDaily + packExpense) * 100) / 100;
+        const grandWhRev = Math.round(products.reduce((s, p) => s + p.batchWhRev, 0) * 100) / 100;
+        const grandRtRev = Math.round(products.reduce((s, p) => s + p.batchRtRev, 0) * 100) / 100;
+
+        return {
+          tariff,
+          breakdown,
+          totalMilkKg,
+          totalPayable,
+          avgMilkPrice,
+          fermentedMilk,
+          totalYogurtKg,
+          actualRatio,
+          usedRatio,
+          milkCostPerKgYogurt,
+          overheadDaily,
+          overheadPerKg,
+          products,
+          grandCost,
+          grandWhRev,
+          grandRtRev,
+          grandWhProfit: Math.round((grandWhRev - grandCost) * 100) / 100,
+          grandRtProfit: Math.round((grandRtRev - grandCost) * 100) / 100
+        };
+      }
+
+      // =========================================================================
+      // 6. ÇEVRİMDIŞI QR KOD SVG ÜRETİCİSİ
+      // =========================================================================
+      function buildQrSvg(code, size) {
+        const s = size || 180;
+        const n = 21;
+        const grid = Array.from({ length: n }, () => Array(n).fill(false));
+
+        function finder(r0, c0) {
+          for (let r = 0; r < 7; r++) {
+            for (let c = 0; c < 7; c++) {
+              const border = r === 0 || r === 6 || c === 0 || c === 6;
+              const center = r >= 2 && r <= 4 && c >= 2 && c <= 4;
+              grid[r0 + r][c0 + c] = border || center;
+            }
+          }
+        }
+        finder(0, 0);
+        finder(0, n - 7);
+        finder(n - 7, 0);
+
+        let seed = 0;
+        const txt = String(code || 'ALAKUZU');
+        for (let i = 0; i < txt.length; i++) {
+          seed = (seed * 31 + txt.charCodeAt(i)) % 1000003;
+        }
+        for (let r = 0; r < n; r++) {
+          for (let c = 0; c < n; c++) {
+            if ((r < 8 && c < 8) || (r < 8 && c >= n - 8) || (r >= n - 8 && c < 8)) continue;
+            seed = (seed * 1103515245 + 12345) & 0x7fffffff;
+            grid[r][c] = (seed % 100) < 48;
+          }
+        }
+
+        let rects = `<rect width="21" height="21" fill="#FFFFFF"/>`;
+        for (let r = 0; r < n; r++) {
+          for (let c = 0; c < n; c++) {
+            if (grid[r][c]) {
+              rects += `<rect x="${c}" y="${r}" width="1" height="1" fill="#0F294A"/>`;
+            }
+          }
+        }
+        return `<svg width="${s}" height="${s}" viewBox="0 0 21 21" shape-rendering="crispEdges" style="border:3px solid #0F294A;border-radius:12px;background:#fff;padding:6px;display:block;margin:0 auto;">${rects}</svg>`;
+      }
+
+      // =========================================================================
+      // 7. GİRİŞ EKRANI RENDER
+      // =========================================================================
+      function renderLogin() {
+        const quickCards = state.users.map(u => {
+          const rObj = u.assignedRouteId ? getRoute(u.assignedRouteId) : null;
+          let badgeHtml = '';
+          if (u.role === 'admin') badgeHtml = `<span class="badge badge-purple">ADMIN • Tam Yetki & Finans</span>`;
+          if (u.role === 'collector') badgeHtml = `<span class="badge badge-amber">TOPLAYICI • ${escHtml(rObj ? rObj.plate : '')}</span>`;
+          if (u.role === 'warehouse') badgeHtml = `<span class="badge badge-green">DEPOCU • Kantar & Süzme Yoğurt</span>`;
+
+          return `
+            <button type="button" class="quick-role-btn" data-action="quick-login" data-uid="${escHtml(u.id)}">
+              <strong style="font-size:13.5px;color:#0F294A;">${escHtml(u.name)}</strong>
+              <div>${badgeHtml}</div>
+              <span style="font-size:11px;color:#64748B;">Kullanıcı: <b>${escHtml(u.username)}</b> • Şifre: <b>1234</b></span>
+            </button>
+          `;
+        }).join('');
+
+        return `
+          <div class="login-wrapper">
+            <div class="login-box">
+              <div class="login-hero">
+                <div style="font-size:24px;font-weight:900;letter-spacing:0.5px;">ALAKUZULAR GIDA</div>
+                <div style="font-size:12px;color:#FCD34D;font-weight:800;margin-top:4px;">SÜT TOPLAMA, SÜZME YOĞURT & MALİYET SİSTEMİ</div>
+                <div style="font-size:11px;color:#CBD5E1;margin-top:6px;">Tarih: <b>${TODAY_STR}</b></div>
+              </div>
+
+              <div style="padding:22px;">
+                <form id="login-form" style="display:flex;flex-direction:column;gap:12px;">
+                  <div class="form-group">
+                    <label class="form-label">Kullanıcı Adı</label>
+                    <input id="login-user" type="text" class="form-control" placeholder="admin, toplayici1, toplayici2, depocu" required />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Şifre</label>
+                    <input id="login-pass" type="password" class="form-control" placeholder="1234" required />
+                  </div>
+                  <button type="submit" class="btn btn-primary btn-block" style="padding:14px;font-size:15px;">
+                    SİSTEME GİRİŞ YAP
+                  </button>
+                </form>
+
+                <div style="margin-top:20px;padding-top:16px;border-top:1.5px solid #E2E8F0;">
+                  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+                    <span style="font-size:11px;font-weight:900;color:#475569;text-transform:uppercase;">Tek Tıkla Hızlı Giriş (Test)</span>
+                    <span style="font-size:11px;color:#64748B;">Şifre: 1234</span>
+                  </div>
+                  <div class="grid-2">${quickCards}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      // =========================================================================
+      // 8. SAHA TOPLAYICI SEKMESİ (SADE, BÜYÜK PUNTOLU, TAŞMASIZ)
+      // =========================================================================
+      function renderCollectorTab() {
+        const user = state.currentUser;
+        const isAdmin = user.role === 'admin';
+        const routeId = getEffectiveRouteId();
+        const routeObj = getRoute(routeId);
+        const isLocked = !isAdmin && state.selectedDate !== TODAY_STR;
+
+        const routeProducers = state.producers.filter(p => p.routeId === routeId);
+        const q = state.collectorSearch.trim().toLowerCase();
+        const filteredProducers = q
+          ? routeProducers.filter(p =>
+              p.name.toLowerCase().includes(q) ||
+              (p.cariKodu && p.cariKodu.toLowerCase().includes(q)) ||
+              (p.code && p.code.toLowerCase().includes(q)) ||
+              (p.village && p.village.toLowerCase().includes(q))
+            )
+          : routeProducers;
+
+        const todayShiftCols = state.collections.filter(
+          c => c.date === state.selectedDate && c.shift === state.selectedShift && c.routeId === routeId
+        );
+        const shiftSumKg = todayShiftCols.reduce((s, c) => s + (Number(c.amount) || 0), 0);
+
+        // Üst Sefer Kontrol Şeridi
+        const topControls = `
+          <div class="card">
+            <div class="card-body">
+              <div class="grid-3">
+                <div class="form-group">
+                  <label class="form-label">Araç / Plaka ${!isAdmin ? '(Sabit)' : ''}</label>
+                  ${isAdmin ? `
+                    <select id="col-route-select" class="form-control">
+                      ${state.routes.map(r => `<option value="${escHtml(r.id)}" ${r.id === routeId ? 'selected' : ''}>${escHtml(r.plate)} — ${escHtml(r.name)}</option>`).join('')}
+                    </select>
+                  ` : `
+                    <div class="form-control" style="background:#FEF3C7;border-color:#F59E0B;color:#0F294A;">
+                      ${escHtml(routeObj.plate)} — ${escHtml(routeObj.name)}
+                    </div>
+                  `}
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Toplama Tarihi ${!isAdmin ? '(Bugüne Kilitli)' : '(Admin Serbest)'}</label>
+                  ${isAdmin ? `
+                    <input id="col-date-input" type="date" class="form-control" value="${escHtml(state.selectedDate)}" />
+                  ` : `
+                    <div class="form-control" style="background:#E2E8F0;color:#334155;">
+                      ${TODAY_STR} (Bugün)
+                    </div>
+                  `}
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Vardiya Seçimi</label>
+                  <div class="shift-toggle">
+                    <button type="button" class="shift-btn ${state.selectedShift === 'Sabah' ? 'active-sabah' : ''}" data-action="set-shift" data-shift="Sabah">SABAH</button>
+                    <button type="button" class="shift-btn ${state.selectedShift === 'Akşam' ? 'active-aksam' : ''}" data-action="set-shift" data-shift="Akşam">AKŞAM</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+
+        if (isLocked) {
+          return topControls + `
+            <div class="alert-banner alert-danger">
+              <span>Toplayıcı yalnızca BUGÜNÜN (${TODAY_STR}) tarihine süt girişi yapabilir!</span>
+              <button type="button" class="btn btn-outline btn-sm" data-action="reset-today">Bugüne Dön</button>
+            </div>
+          `;
+        }
+
+        // MOD 2: MÜŞTERİ SEÇİLDİ -> BÜYÜK, SADE SÜT GİRİŞ EKRANI
+        if (state.collectorMode === 'entry') {
+          const prod = getProducer(state.selectedProducerId);
+          if (!prod) {
+            state.collectorMode = 'select';
+            return renderCollectorTab();
+          }
+
+          return topControls + `
+            <div class="card" style="border:3px solid var(--navy);">
+              <div class="card-header">
+                <div>
+                  <div style="font-size:11px;color:#FCD34D;font-weight:800;">${escHtml(routeObj.plate)} • ${escHtml(state.selectedDate)} • ${escHtml(state.selectedShift).toUpperCase()}</div>
+                  <h2 style="font-size:clamp(18px, 4vw, 22px);margin-top:2px;">${escHtml(prod.name)}</h2>
+                  <div style="font-size:12px;color:#CBD5E1;">Cari: ${escHtml(prod.cariKodu)} • Mahalle: ${escHtml(prod.village)}</div>
+                </div>
+                <button type="button" class="btn btn-amber btn-sm" data-action="back-to-select">← Müşteri Değiştir</button>
+              </div>
+
+              <div class="card-body">
+                <form id="milk-entry-form" style="display:flex;flex-direction:column;gap:16px;">
+                  <div class="grid-2">
+                    <div class="form-group">
+                      <label class="form-label" style="font-size:13px;color:var(--navy);text-align:center;">KİLO (KG)</label>
+                      <input id="entry-kilo" type="number" inputmode="numeric" min="0" step="1" class="huge-milk-input" placeholder="0" value="${escHtml(state.kiloInput)}" autofocus />
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label" style="font-size:13px;color:var(--navy);text-align:center;">GRAM (GR)</label>
+                      <input id="entry-gram" type="number" inputmode="numeric" min="0" max="999" step="1" class="huge-milk-input" placeholder="000" value="${escHtml(state.gramInput)}" />
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="form-label" style="margin-bottom:6px;">Hızlı Ekleme Butonları</div>
+                    <div class="grid-4" style="grid-template-columns:repeat(4,1fr);gap:8px;">
+                      <button type="button" class="quick-add-btn" data-action="quick-add" data-val="0.5">+0.5 kg</button>
+                      <button type="button" class="quick-add-btn" data-action="quick-add" data-val="5">+5 kg</button>
+                      <button type="button" class="quick-add-btn" data-action="quick-add" data-val="10">+10 kg</button>
+                      <button type="button" class="quick-add-btn" data-action="quick-add" data-val="25">+25 kg</button>
+                    </div>
+                  </div>
+
+                  <label style="display:flex;align-items:center;gap:12px;padding:14px;border-radius:14px;border:2px solid ${state.antibioticWarning ? '#DC2626' : '#CBD5E1'};background:${state.antibioticWarning ? '#FEF2F2' : '#F8FAFC'};cursor:pointer;">
+                    <input id="entry-antibiotic" type="checkbox" style="width:24px;height:24px;accent-color:#DC2626;" ${state.antibioticWarning ? 'checked' : ''} />
+                    <div>
+                      <div style="font-weight:900;font-size:14px;color:${state.antibioticWarning ? '#991B1B' : '#1E293B'};">İğneli / Antibiyotikli Süt (Ayrı Güğüm)</div>
+                      <div style="font-size:11.5px;color:#64748B;">Temiz süte karıştırmayınız, merkez uyarılır.</div>
+                    </div>
+                  </label>
+
+                  <button type="submit" class="big-action-btn btn-success">
+                    ✓ SÜTÜ KAYDET
+                  </button>
+                </form>
+              </div>
+            </div>
+          `;
+        }
+
+        // MOD 1: MÜŞTERİ BULMA (KAREKOD OKUT + MÜŞTERİ ARA/SEÇ + BUGÜNKÜ LİSTE)
+        return topControls + `
+          <div class="grid-2" style="margin-bottom:16px;">
+            <button type="button" class="big-action-btn btn-primary" data-action="open-qr-scanner">
+              📷 KAREKOD OKUT (QR)
+            </button>
+            <div class="stat-box" style="display:flex;flex-direction:column;justify-content:center;">
+              <span class="stat-title">${escHtml(routeObj.plate)} • ${escHtml(state.selectedShift)} Vardiyası Toplamı</span>
+              <span class="stat-value" style="color:var(--green);">${fmtKg(shiftSumKg)} kg <small style="font-size:13px;color:#64748B;">(${todayShiftCols.length} teslimat)</small></span>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3>Müşteri Ara / Seç (${escHtml(routeObj.plate)})</h3>
+              <span class="badge badge-amber">${routeProducers.length} Müstahsil</span>
+            </div>
+            <div class="card-body">
+              <div class="form-group" style="margin-bottom:14px;">
+                <input id="collector-search-input" type="text" class="form-control" style="font-size:16px;padding:14px;" placeholder="İsim, Cari Kodu veya Mahalle yazarak ara..." value="${escHtml(state.collectorSearch)}" />
+              </div>
+
+              ${filteredProducers.length === 0 ? `
+                <div style="text-align:center;padding:24px;color:#64748B;font-weight:700;">
+                  Bu araç rotasında eşleşen müstahsil bulunamadı.
+                </div>
+              ` : filteredProducers.map(p => {
+                const alreadyToday = todayShiftCols.filter(c => c.producerId === p.id).reduce((s, c) => s + c.amount, 0);
+                return `
+                  <button type="button" class="producer-select-card" data-action="pick-producer" data-pid="${escHtml(p.id)}">
+                    <div style="min-width:0;">
+                      <div style="font-size:16px;font-weight:900;color:#0F294A;word-break:break-word;">${escHtml(p.name)}</div>
+                      <div style="font-size:12px;color:#64748B;margin-top:2px;">
+                        <b>${escHtml(p.village)}</b> • Cari: ${escHtml(p.cariKodu)} • QR: ${escHtml(p.code)}
+                      </div>
+                      ${alreadyToday > 0 ? `<div style="margin-top:5px;"><span class="badge badge-green">Bu vardiyada girildi: ${fmtKg(alreadyToday)} kg</span></div>` : ''}
+                    </div>
+                    <span class="btn btn-primary btn-sm" style="flex-shrink:0;">Süt Gir →</span>
+                  </button>
+                `;
+              }).join('')}
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3>${escHtml(state.selectedDate)} (${escHtml(state.selectedShift)}) Girilen Kayıtlar</h3>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Müstahsil</th>
+                    <th>Mahalle</th>
+                    <th class="text-right">Miktar (Kg)</th>
+                    <th class="text-center">Durum</th>
+                    <th class="text-center">İşlem</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${todayShiftCols.length === 0 ? `
+                    <tr><td colspan="5" class="text-center" style="padding:20px;color:#64748B;font-weight:700;">Henüz süt girişi yapılmadı.</td></tr>
+                  ` : todayShiftCols.map(c => {
+                    const p = getProducer(c.producerId);
+                    return `
+                      <tr>
+                        <td><strong>${escHtml(p ? p.name : 'Bilinmeyen')}</strong></td>
+                        <td>${escHtml(p ? p.village : '-')}</td>
+                        <td class="text-right" style="font-weight:900;color:#0F294A;">${fmtKg(c.amount)} kg</td>
+                        <td class="text-center">
+                          ${c.antibioticWarning ? `<span class="badge badge-red">Ayrı Güğüm!</span>` : `<span class="badge badge-green">Temiz</span>`}
+                        </td>
+                        <td class="text-center">
+                          <button type="button" class="btn btn-outline btn-sm" data-action="edit-col" data-cid="${escHtml(c.id)}">Düzenle</button>
+                          <button type="button" class="btn btn-danger btn-sm" data-action="del-col" data-cid="${escHtml(c.id)}">Sil</button>
+                        </td>
+                      </tr>
+                    `;
+                  }).join('')}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        `;
+      }
+
+      // =========================================================================
+      // 9. MERKEZ KANTAR & FARK KONTROLÜ SEKMESİ (DEPOCU & ADMIN - TL GİZLİ)
+      // =========================================================================
+      function renderCenterTab() {
+        const isAdmin = state.currentUser.role === 'admin';
+        const isLocked = !isAdmin && state.selectedDate !== TODAY_STR;
+        const routeObj = getRoute(state.selectedRoute);
+
+        const shiftCols = state.collections.filter(
+          c => c.date === state.selectedDate && c.shift === state.selectedShift && c.routeId === state.selectedRoute
+        );
+        const fieldTotal = Math.round(shiftCols.reduce((s, c) => s + (Number(c.amount) || 0), 0) * 100) / 100;
+        const antiCount = shiftCols.filter(c => c.antibioticWarning).length;
+
+        const wId = `w-${state.selectedDate}-${state.selectedShift}-${state.selectedRoute}`;
+        const existingW = state.weighings.find(w => w.id === wId);
+        const centerVal = existingW ? existingW.centerWeight : '';
+        const noteVal = existingW ? existingW.note : '';
+
+        const hasCenter = existingW && existingW.centerWeight !== '' && !isNaN(Number(existingW.centerWeight));
+        const diff = hasCenter ? Math.round((Number(existingW.centerWeight) - fieldTotal) * 100) / 100 : null;
+        const isCritical = diff !== null && Math.abs(diff) > 2;
+
+        return `
+          <div class="card">
+            <div class="card-body">
+              <div class="grid-3">
+                <div class="form-group">
+                  <label class="form-label">Tarih ${!isAdmin ? '(Bugüne Kilitli)' : ''}</label>
+                  ${isAdmin ? `
+                    <input id="center-date-input" type="date" class="form-control" value="${escHtml(state.selectedDate)}" />
+                  ` : `
+                    <div class="form-control" style="background:#E2E8F0;">${TODAY_STR} (Bugün)</div>
+                  `}
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Vardiya</label>
+                  <div class="shift-toggle">
+                    <button type="button" class="shift-btn ${state.selectedShift === 'Sabah' ? 'active-sabah' : ''}" data-action="set-shift" data-shift="Sabah">SABAH</button>
+                    <button type="button" class="shift-btn ${state.selectedShift === 'Akşam' ? 'active-aksam' : ''}" data-action="set-shift" data-shift="Akşam">AKŞAM</button>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Araç Plakası</label>
+                  <select id="center-route-select" class="form-control">
+                    ${state.routes.map(r => `<option value="${escHtml(r.id)}" ${r.id === state.selectedRoute ? 'selected' : ''}>${escHtml(r.plate)} — ${escHtml(r.name)}</option>`).join('')}
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          ${isLocked ? `
+            <div class="alert-banner alert-danger">
+              <span>Depocu yalnızca BUGÜNÜN (${TODAY_STR}) kantar tartımını girebilir!</span>
+              <button type="button" class="btn btn-outline btn-sm" data-action="reset-today">Bugüne Dön</button>
+            </div>
+          ` : ''}
+
+          ${antiCount > 0 ? `
+            <div class="alert-banner alert-warning">
+              <span>⚠️ DİKKAT: Bu seferde ${antiCount} müstahsilde "İğneli / Antibiyotikli Süt (Ayrı Güğüm)" işareti var!</span>
+            </div>
+          ` : ''}
+
+          ${isCritical ? `
+            <div class="alert-banner alert-danger">
+              <span>🚨 FİRE / EKSİK UYARISI: Saha toplamı (${fmtKg(fieldTotal)} kg) ile Merkez Kantar (${fmtKg(existingW.centerWeight)} kg) arasında ${fmtKg(diff)} kg fark var!</span>
+            </div>
+          ` : ''}
+
+          <div class="grid-3" style="margin-bottom:16px;">
+            <div class="stat-box">
+              <span class="stat-title">Saha Toplayıcı Toplamı</span>
+              <span class="stat-value">${fmtKg(fieldTotal)} kg</span>
+              <div style="font-size:11px;color:#64748B;margin-top:4px;">${shiftCols.length} müstahsil (Salt Okunur)</div>
+            </div>
+            <div class="stat-box">
+              <span class="stat-title">Merkez Kantar Tartımı</span>
+              <span class="stat-value" style="color:var(--green);">${hasCenter ? fmtKg(existingW.centerWeight) + ' kg' : 'Girilmedi'}</span>
+              <div style="font-size:11px;color:#64748B;margin-top:4px;">${escHtml(routeObj.plate)} • ${escHtml(state.selectedShift)}</div>
+            </div>
+            <div class="stat-box" style="${isCritical ? 'background:#FEF2F2;border-color:#DC2626;' : ''}">
+              <span class="stat-title">Litre / Kilo Farkı</span>
+              <span class="stat-value" style="color:${diff === null ? '#64748B' : isCritical ? '#DC2626' : '#059669'};">
+                ${diff === null ? '—' : (diff > 0 ? '+' : '') + fmtKg(diff) + ' kg'}
+              </span>
+              <div style="font-size:11px;color:#64748B;margin-top:4px;">Tolerans sınırı: ±2,0 kg</div>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-header">
+                <h3>Merkez Kantar Tartımı Gir (${escHtml(routeObj.plate)})</h3>
+              </div>
+              <div class="card-body">
+                <form id="weighing-form" style="display:flex;flex-direction:column;gap:14px;">
+                  <div class="form-group">
+                    <label class="form-label">Araçtan Alınan Toplam Süt (Kg) *</label>
+                    <input id="center-weight-input" type="number" step="0.1" min="0" class="huge-milk-input" style="font-size:28px;" placeholder="Örn: 600" value="${escHtml(centerVal)}" ${isLocked ? 'disabled' : ''} required />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Fark / Fire Müdahale Notu</label>
+                    <textarea id="center-note-input" rows="3" class="form-control" placeholder="Eksik veya fazla çıkma nedenini not alınız..." ${isLocked ? 'disabled' : ''}>${escHtml(noteVal)}</textarea>
+                  </div>
+                  <button type="submit" class="btn btn-primary btn-block" style="padding:14px;font-size:14px;" ${isLocked ? 'disabled' : ''}>
+                    KANTAR TARTIMINI KAYDET
+                  </button>
+                </form>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <h3>Sahadan Gelen Müstahsil Listesi (Salt Okunur)</h3>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Müstahsil</th>
+                      <th>Mahalle</th>
+                      <th class="text-right">Süt (Kg)</th>
+                      <th class="text-center">Güğüm</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${shiftCols.length === 0 ? `
+                      <tr><td colspan="4" class="text-center" style="padding:20px;color:#64748B;">Bu sefer için saha girişi yok.</td></tr>
+                    ` : shiftCols.map(c => {
+                      const p = getProducer(c.producerId);
+                      return `
+                        <tr>
+                          <td><strong>${escHtml(p ? p.name : '-')}</strong></td>
+                          <td>${escHtml(p ? p.village : '-')}</td>
+                          <td class="text-right"><strong>${fmtKg(c.amount)} kg</strong></td>
+                          <td class="text-center">${c.antibioticWarning ? '<span class="badge badge-red">İlaçlı/Ayrı</span>' : '<span class="badge badge-green">Normal</span>'}</td>
+                        </tr>
+                      `;
+                    }).join('')}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      // =========================================================================
+      // 10. SÜZME YOĞURT ÜRETİM & MAYALAMA SEKMESİ (DEPOCU & ADMIN - TL GİZLİ)
+      // =========================================================================
+      function renderYogurtTab() {
+        const isAdmin = state.currentUser.role === 'admin';
+        const isLocked = !isAdmin && state.yogurtDate !== TODAY_STR;
+        const stock = getDepotStock();
+
+        const batchId = `yog-${state.yogurtDate}-${state.yogurtShift}`;
+        const existing = state.yogurtBatches.find(b => b.id === batchId);
+        const maxAllowed = Math.round((stock.remaining + (existing ? Number(existing.fermentedMilkKg) : 0)) * 100) / 100;
+
+        const dayBatches = state.yogurtBatches.filter(b => b.date === state.yogurtDate);
+        const dayFerm = dayBatches.reduce((s, b) => s + (Number(b.fermentedMilkKg) || 0), 0);
+        const dayYog = dayBatches.reduce((s, b) => {
+          return s + (b.normalCount * 10) + (b.sertCount * 10) + (b.ikiKgCount * 2) + (b.dokuzYuzGrCount * 0.9);
+        }, 0);
+        const dayRatio = dayYog > 0 && dayFerm > 0 ? Math.round((dayFerm / dayYog) * 100) / 100 : null;
+        const dayHighWarn = dayRatio !== null && dayRatio > STRAINED_LIMIT;
+
+        return `
+          ${isLocked ? `
+            <div class="alert-banner alert-danger">
+              <span>Depocu yalnızca BUGÜNÜN (${TODAY_STR}) tarihine mayalama/üretim girebilir!</span>
+              <button type="button" class="btn btn-outline btn-sm" data-action="reset-yogurt-today">Bugüne Dön</button>
+            </div>
+          ` : ''}
+
+          <div class="grid-4" style="margin-bottom:16px;">
+            <div class="stat-box" style="background:var(--navy);color:#fff;">
+              <span class="stat-title" style="color:#FCD34D;">Depoda Kalan Çiğ Süt</span>
+              <span class="stat-value" style="color:#fff;">${fmtKg(stock.remaining)} kg</span>
+              <div style="font-size:11px;color:#CBD5E1;margin-top:4px;">Mayalamaya hazır stok</div>
+            </div>
+            <div class="stat-box">
+              <span class="stat-title">Seçili Gün Mayalanan</span>
+              <span class="stat-value">${fmtKg(dayFerm)} kg</span>
+              <div style="font-size:11px;color:#64748B;margin-top:4px;">${escHtml(state.yogurtDate)} toplamı</div>
+            </div>
+            <div class="stat-box">
+              <span class="stat-title">Çıkan Süzme Yoğurt</span>
+              <span class="stat-value" style="color:var(--green);">${fmtKg(dayYog)} kg</span>
+              <div style="font-size:11px;color:#64748B;margin-top:4px;">4 çeşit toplamı</div>
+            </div>
+            <div class="stat-box" style="${dayHighWarn ? 'background:#DC2626;color:#fff;border-color:#991B1B;' : ''}">
+              <span class="stat-title" style="${dayHighWarn ? 'color:#FEF2F2;' : ''}">Süzme Oranı (Sınır: ≤ 3,20)</span>
+              <span class="stat-value" style="${dayHighWarn ? 'color:#fff;' : ''}">${dayRatio !== null ? fmtRatio(dayRatio) : '—'}</span>
+              <div style="font-size:11px;font-weight:800;margin-top:4px;color:${dayHighWarn ? '#FCD34D' : '#059669'};">
+                ${dayRatio === null ? 'Üretim bekleniyor' : dayHighWarn ? 'DİKKAT: 3,20 ÜZERİNDE!' : 'İdeal Oran'}
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3>Süzme Yoğurt Mayalama & Üretim Girişi</h3>
+              <span class="badge badge-amber">${escHtml(state.yogurtDate)} • ${escHtml(state.yogurtShift)}</span>
+            </div>
+            <div class="card-body">
+              <form id="yogurt-form" style="display:flex;flex-direction:column;gap:14px;">
+                <div class="grid-2">
+                  <div class="form-group">
+                    <label class="form-label">Üretim Tarihi ${!isAdmin ? '(Bugüne Kilitli)' : ''}</label>
+                    ${isAdmin ? `
+                      <input id="yog-date-input" type="date" class="form-control" value="${escHtml(state.yogurtDate)}" />
+                    ` : `
+                      <div class="form-control" style="background:#E2E8F0;">${TODAY_STR} (Bugün)</div>
+                    `}
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Üretim Vardiyası (Sabah / Akşam)</label>
+                    <div class="shift-toggle">
+                      <button type="button" class="shift-btn ${state.yogurtShift === 'Sabah' ? 'active-sabah' : ''}" data-action="set-yog-shift" data-shift="Sabah">SABAH</button>
+                      <button type="button" class="shift-btn ${state.yogurtShift === 'Akşam' ? 'active-aksam' : ''}" data-action="set-yog-shift" data-shift="Akşam">AKŞAM</button>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-group" style="background:#EFF6FF;padding:14px;border-radius:14px;border:1.5px solid #93C5FD;">
+                  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">
+                    <label class="form-label" style="color:var(--navy);font-size:12px;">Mayalanacak Çiğ Süt (Kg) *</label>
+                    <span class="badge badge-green">Kullanılabilir Maksimum Stok: ${fmtKg(maxAllowed)} kg</span>
+                  </div>
+                  <input id="yog-fermented" type="number" step="0.1" min="0" max="${maxAllowed}" class="huge-milk-input" style="font-size:26px;" placeholder="Örn: 600" value="${existing ? escHtml(existing.fermentedMilkKg) : ''}" ${isLocked ? 'disabled' : ''} required />
+                </div>
+
+                <div class="grid-4">
+                  <div class="form-group" style="background:#F8FAFC;padding:12px;border-radius:12px;border:1px solid #CBD5E1;">
+                    <label class="form-label">Normal Yoğurt (Adet × 10 kg)</label>
+                    <input id="yog-normal" type="number" min="0" step="1" class="form-control" value="${existing ? escHtml(existing.normalCount) : '0'}" ${isLocked ? 'disabled' : ''} />
+                  </div>
+                  <div class="form-group" style="background:#F8FAFC;padding:12px;border-radius:12px;border:1px solid #CBD5E1;">
+                    <label class="form-label">Sert Yoğurt (Adet × 10 kg)</label>
+                    <input id="yog-sert" type="number" min="0" step="1" class="form-control" value="${existing ? escHtml(existing.sertCount) : '0'}" ${isLocked ? 'disabled' : ''} />
+                  </div>
+                  <div class="form-group" style="background:#F8FAFC;padding:12px;border-radius:12px;border:1px solid #CBD5E1;">
+                    <label class="form-label">2 Kg Yoğurt (Adet × 2 kg)</label>
+                    <input id="yog-2kg" type="number" min="0" step="1" class="form-control" value="${existing ? escHtml(existing.ikiKgCount) : '0'}" ${isLocked ? 'disabled' : ''} />
+                  </div>
+                  <div class="form-group" style="background:#F8FAFC;padding:12px;border-radius:12px;border:1px solid #CBD5E1;">
+                    <label class="form-label">900 g Yoğurt (Adet × 0,9 kg)</label>
+                    <input id="yog-900g" type="number" min="0" step="1" class="form-control" value="${existing ? escHtml(existing.dokuzYuzGrCount) : '0'}" ${isLocked ? 'disabled' : ''} />
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Üretim / Süzme Notu</label>
+                  <input id="yog-note" type="text" class="form-control" placeholder="Süzme süresi, kıvam veya fire notu..." value="${existing ? escHtml(existing.note || '') : ''}" ${isLocked ? 'disabled' : ''} />
+                </div>
+
+                <button type="submit" class="btn btn-success btn-block" style="padding:14px;font-size:15px;" ${isLocked ? 'disabled' : ''}>
+                  ${escHtml(state.yogurtShift).toUpperCase()} VARDİYASI ÜRETİMİNİ KAYDET
+                </button>
+              </form>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3>Üretim Kayıtları (${escHtml(state.yogurtDate)})</h3>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Vardiya</th>
+                    <th class="text-right">Mayalanan Süt</th>
+                    <th class="text-right">Normal (10kg)</th>
+                    <th class="text-right">Sert (10kg)</th>
+                    <th class="text-right">2 Kg</th>
+                    <th class="text-right">900 g</th>
+                    <th class="text-right">Toplam Yoğurt</th>
+                    <th class="text-center">Süzme Oranı (≤3,20)</th>
+                    <th class="text-center">İşlem</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${dayBatches.length === 0 ? `
+                    <tr><td colspan="9" class="text-center" style="padding:20px;color:#64748B;">Bu tarihte süzme yoğurt üretimi girilmemiş.</td></tr>
+                  ` : dayBatches.map(b => {
+                    const totY = Math.round(((b.normalCount * 10) + (b.sertCount * 10) + (b.ikiKgCount * 2) + (b.dokuzYuzGrCount * 0.9)) * 100) / 100;
+                    const ratio = totY > 0 ? Math.round((b.fermentedMilkKg / totY) * 100) / 100 : 0;
+                    const high = ratio > STRAINED_LIMIT;
+                    return `
+                      <tr style="${high ? 'background:#FEF2F2;' : ''}">
+                        <td><strong>${escHtml(b.shift)}</strong></td>
+                        <td class="text-right"><strong>${fmtKg(b.fermentedMilkKg)} kg</strong></td>
+                        <td class="text-right">${b.normalCount} ad (${fmtKg(b.normalCount * 10)} kg)</td>
+                        <td class="text-right">${b.sertCount} ad (${fmtKg(b.sertCount * 10)} kg)</td>
+                        <td class="text-right">${b.ikiKgCount} ad (${fmtKg(b.ikiKgCount * 2)} kg)</td>
+                        <td class="text-right">${b.dokuzYuzGrCount} ad (${fmtKg(b.dokuzYuzGrCount * 0.9)} kg)</td>
+                        <td class="text-right" style="font-weight:900;color:var(--green);">${fmtKg(totY)} kg</td>
+                        <td class="text-center">
+                          ${high
+                            ? `<span class="badge badge-red">⚠️ ${fmtRatio(ratio)} (3,20 Üzeri!)</span>`
+                            : `<span class="badge badge-green">${fmtRatio(ratio)} (İdeal)</span>`}
+                        </td>
+                        <td class="text-center">
+                          ${(isAdmin || b.date === TODAY_STR)
+                            ? `<button type="button" class="btn btn-danger btn-sm" data-action="del-yog" data-yid="${escHtml(b.id)}">Sil</button>`
+                            : '—'}
+                        </td>
+                      </tr>
+                    `;
+                  }).join('')}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        `;
+      }
+
+      // =========================================================================
+      // 11. YÖNETİCİ MALİYET TARİFESİ & TOPTAN/PERAKENDE KÂR ANALİZİ (SADECE ADMIN)
+      // =========================================================================
+      function renderCostTab() {
+        const fin = calculateDayFinancials(state.costDate);
+        const editTariff = getEffectiveTariff(state.tariffFormDate);
+
+        return `
+          <div class="card">
+            <div class="card-body" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+              <div>
+                <h2 style="font-size:18px;font-weight:900;color:var(--navy);">Yönetici Maliyet Tarifesi, Toptan & Perakende Kâr Analizi</h2>
+                <div style="font-size:12px;color:#64748B;">Tarihten itibaren geçerli gider ve Euro endeksli kova maliyetlerini girin; kâr oranlarını görün.</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <label class="form-label">Analiz Tarihi:</label>
+                <input id="cost-analysis-date" type="date" class="form-control" style="width:auto;" value="${escHtml(state.costDate)}" />
+              </div>
+            </div>
+          </div>
+
+          <div class="grid-4" style="margin-bottom:16px;">
+            <div class="stat-box">
+              <span class="stat-title">Gelen Süt Ort. Fiyatı</span>
+              <span class="stat-value" style="color:var(--green);">${fmtMoney(fin.avgMilkPrice)}/kg</span>
+              <div style="font-size:11px;color:#64748B;margin-top:4px;">1 kg yoğurt süt maliyeti: <b>${fmtMoney(fin.milkCostPerKgYogurt)}</b></div>
+            </div>
+            <div class="stat-box">
+              <span class="stat-title">Müstahsil Süt Parası (${escHtml(state.costDate)})</span>
+              <span class="stat-value">${fmtMoney(fin.totalPayable)}</span>
+              <div style="font-size:11px;color:#64748B;margin-top:4px;">${fmtKg(fin.totalMilkKg)} kg toplam süt</div>
+            </div>
+            <div class="stat-box">
+              <span class="stat-title">Günlük Sabit İşletme Gideri</span>
+              <span class="stat-value">${fmtMoney(fin.overheadDaily)}</span>
+              <div style="font-size:11px;color:#64748B;margin-top:4px;">Aktif Tarife: <b>${escHtml(fin.tariff.effectiveFrom)}</b></div>
+            </div>
+            <div class="stat-box" style="background:var(--navy);color:#fff;">
+              <span class="stat-title" style="color:#FCD34D;">Günlük Kâr (Üretim Bazlı)</span>
+              <div style="font-size:14px;font-weight:900;color:#6EE7B7;margin-top:6px;">Toptan: ${fmtMoney(fin.grandWhProfit)}</div>
+              <div style="font-size:14px;font-weight:900;color:#FCD34D;margin-top:2px;">Perakende: ${fmtMoney(fin.grandRtProfit)}</div>
+            </div>
+          </div>
+
+          <!-- ÜRÜN BAZLI MALİYET & TOPTAN/PERAKENDE KÂR TABLOSU -->
+          <div class="card">
+            <div class="card-header">
+              <h3>Ürün Bazlı Maliyet ve Toptan / Perakende Kâr Oranları (${escHtml(state.costDate)})</h3>
+              <span class="badge badge-amber">Euro Kuru: ${fin.tariff.euroRate} ₺ • Süzme Oranı: ${fmtRatio(fin.usedRatio)}</span>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Ürün Çeşidi</th>
+                    <th class="text-right">Süt Maliyeti</th>
+                    <th class="text-right">Genel Gider</th>
+                    <th class="text-right">Kova (€ / ₺)</th>
+                    <th class="text-right" style="background:#1E293B;color:#FCD34D;">Toplam Maliyet</th>
+                    <th class="text-right" style="background:#F59E0B;color:#0F294A;">Toptan Fiyat</th>
+                    <th class="text-right">Toptan Kâr & Oran</th>
+                    <th class="text-right" style="background:#059669;color:#fff;">Perakende Fiyat</th>
+                    <th class="text-right">Perakende Kâr & Oran</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${fin.products.map(p => `
+                    <tr>
+                      <td>
+                        <strong>${escHtml(p.name)}</strong>
+                        <div style="font-size:11px;color:#64748B;">Üretim: ${p.count} ad (${fmtKg(p.prodKg)} kg)</div>
+                      </td>
+                      <td class="text-right">${fmtMoney(p.milkCost)}</td>
+                      <td class="text-right">${fmtMoney(p.ovhCost)}</td>
+                      <td class="text-right">${fmtMoney(p.packTl)} <small style="color:#64748B;">(${p.packEur} €)</small></td>
+                      <td class="text-right" style="font-weight:900;background:#F1F5F9;color:#0F294A;">${fmtMoney(p.unitCost)}</td>
+                      <td class="text-right" style="font-weight:900;background:#FFFBEB;">${fmtMoney(p.wh)}</td>
+                      <td class="text-right">
+                        <strong style="color:${p.whProfit >= 0 ? '#059669' : '#DC2626'};">${fmtMoney(p.whProfit)}</strong>
+                        <div style="font-size:11px;font-weight:800;">%${p.whPct} kâr</div>
+                      </td>
+                      <td class="text-right" style="font-weight:900;background:#ECFDF5;">${fmtMoney(p.rt)}</td>
+                      <td class="text-right">
+                        <strong style="color:${p.rtProfit >= 0 ? '#059669' : '#DC2626'};">${fmtMoney(p.rtProfit)}</strong>
+                        <div style="font-size:11px;font-weight:800;">%${p.rtPct} kâr</div>
+                      </td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- TARİHTEN İTİBAREN GEÇERLİ MALİYET & SATIŞ TARİFESİ FORMU -->
+          <div class="card">
+            <div class="card-header">
+              <h3>Tarihten İtibaren Geçerli Maliyet & Satış Fiyatı Tanımla</h3>
+              <span class="badge badge-purple">Girdiğiniz tarihten itibaren geçerli olur</span>
+            </div>
+            <div class="card-body">
+              <form id="tariff-form" style="display:flex;flex-direction:column;gap:14px;">
+                <div class="grid-3" style="background:#F5F3FF;padding:12px;border-radius:12px;border:1px solid #DDD6FE;">
+                  <div class="form-group">
+                    <label class="form-label">Geçerlilik Başlangıç Tarihi *</label>
+                    <input id="trf-date" type="date" class="form-control" value="${escHtml(state.tariffFormDate)}" required />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Euro Kuru (₺ / €) *</label>
+                    <input id="trf-eur" type="number" step="0.01" class="form-control" value="${escHtml(editTariff.euroRate)}" required />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Tarife Notu</label>
+                    <input id="trf-note" type="text" class="form-control" value="${escHtml(editTariff.effectiveFrom === state.tariffFormDate ? (editTariff.note || '') : '')}" placeholder="Örn: Kasım 2. hafta tarifesi" />
+                  </div>
+                </div>
+
+                <div class="grid-3">
+                  <div class="form-group"><label class="form-label">Doğalgaz (₺/Gün)</label><input id="trf-dogalgaz" type="number" step="0.01" class="form-control" value="${escHtml(editTariff.dogalgaz)}" /></div>
+                  <div class="form-group"><label class="form-label">Elektrik (₺/Gün)</label><input id="trf-elektrik" type="number" step="0.01" class="form-control" value="${escHtml(editTariff.elektrik)}" /></div>
+                  <div class="form-group"><label class="form-label">Mazot (₺/Gün)</label><input id="trf-mazot" type="number" step="0.01" class="form-control" value="${escHtml(editTariff.mazot)}" /></div>
+                  <div class="form-group"><label class="form-label">İşçilik (₺/Gün)</label><input id="trf-iscilik" type="number" step="0.01" class="form-control" value="${escHtml(editTariff.iscilik)}" /></div>
+                  <div class="form-group"><label class="form-label">Yemek (₺/Gün)</label><input id="trf-yemek" type="number" step="0.01" class="form-control" value="${escHtml(editTariff.yemek)}" /></div>
+                  <div class="form-group"><label class="form-label">Su (₺/Gün)</label><input id="trf-su" type="number" step="0.01" class="form-control" value="${escHtml(editTariff.su)}" /></div>
+                </div>
+
+                <div class="table-wrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Ürün Çeşidi</th>
+                        <th>Kova Maliyeti (€)</th>
+                        <th>Toptan Satış Fiyatı (₺)</th>
+                        <th>Perakende Satış Fiyatı (₺)</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td><strong>10 Kg Normal Kova</strong></td>
+                        <td><input id="trf-k10n-eur" type="number" step="0.01" class="form-control" value="${escHtml(editTariff.kova10NormalEur)}" /></td>
+                        <td><input id="trf-w10n" type="number" step="0.5" class="form-control" value="${escHtml(editTariff.wholesale10Normal)}" /></td>
+                        <td><input id="trf-r10n" type="number" step="0.5" class="form-control" value="${escHtml(editTariff.retail10Normal)}" /></td>
+                      </tr>
+                      <tr>
+                        <td><strong>10 Kg Sert Kova</strong></td>
+                        <td><input id="trf-k10s-eur" type="number" step="0.01" class="form-control" value="${escHtml(editTariff.kova10SertEur)}" /></td>
+                        <td><input id="trf-w10s" type="number" step="0.5" class="form-control" value="${escHtml(editTariff.wholesale10Sert)}" /></td>
+                        <td><input id="trf-r10s" type="number" step="0.5" class="form-control" value="${escHtml(editTariff.retail10Sert)}" /></td>
+                      </tr>
+                      <tr>
+                        <td><strong>2 Kg Kova</strong></td>
+                        <td><input id="trf-k2-eur" type="number" step="0.01" class="form-control" value="${escHtml(editTariff.kova2Eur)}" /></td>
+                        <td><input id="trf-w2" type="number" step="0.5" class="form-control" value="${escHtml(editTariff.wholesale2Kg)}" /></td>
+                        <td><input id="trf-r2" type="number" step="0.5" class="form-control" value="${escHtml(editTariff.retail2Kg)}" /></td>
+                      </tr>
+                      <tr>
+                        <td><strong>900 g Kova</strong></td>
+                        <td><input id="trf-k900-eur" type="number" step="0.01" class="form-control" value="${escHtml(editTariff.kova900Eur)}" /></td>
+                        <td><input id="trf-w900" type="number" step="0.5" class="form-control" value="${escHtml(editTariff.wholesale900Gr)}" /></td>
+                        <td><input id="trf-r900" type="number" step="0.5" class="form-control" value="${escHtml(editTariff.retail900Gr)}" /></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <button type="submit" class="btn btn-success btn-block" style="padding:14px;">
+                  TARİFEYİ KAYDET VE UYGULA
+                </button>
+              </form>
+            </div>
+          </div>
+
+          <!-- MÜSTAHSİL GÜNLÜK HAKEDİŞ LİSTESİ -->
+          <div class="card">
+            <div class="card-header">
+              <h3>Müstahsil Bazlı Günlük Süt Parası (Hakediş) — ${escHtml(state.costDate)}</h3>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Cari Kodu</th>
+                    <th>Müstahsil</th>
+                    <th class="text-right">Sabah (Kg)</th>
+                    <th class="text-right">Akşam (Kg)</th>
+                    <th class="text-right">Toplam (Kg)</th>
+                    <th class="text-right">Birim Fiyat</th>
+                    <th class="text-right">Günlük Süt Parası</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${fin.breakdown.length === 0 ? `
+                    <tr><td colspan="7" class="text-center" style="padding:18px;color:#64748B;">Bu tarihte süt teslimatı yok.</td></tr>
+                  ` : fin.breakdown.map(b => `
+                    <tr>
+                      <td><strong>${escHtml(b.producer ? b.producer.cariKodu : '-')}</strong></td>
+                      <td><strong>${escHtml(b.producer ? b.producer.name : '-')}</strong></td>
+                      <td class="text-right">${fmtKg(b.sabah)}</td>
+                      <td class="text-right">${fmtKg(b.aksam)}</td>
+                      <td class="text-right"><strong>${fmtKg(b.totalKg)} kg</strong></td>
+                      <td class="text-right">${fmtMoney(b.unitPrice)}</td>
+                      <td class="text-right" style="font-weight:900;color:var(--green);">${fmtMoney(b.payable)}</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        `;
+      }
+
+      // =========================================================================
+      // 12. DİJİTAL MÜSTAHSİL KARTI & QR ETİKET SEKMESİ
+      // =========================================================================
+      function renderCardTab() {
+        const user = state.currentUser;
+        const accessible = user.role === 'collector' && user.assignedRouteId
+          ? state.producers.filter(p => p.routeId === user.assignedRouteId)
+          : state.producers;
+
+        if (accessible.length === 0) {
+          return `<div class="card"><div class="card-body">Tanımlı müstahsil bulunamadı.</div></div>`;
+        }
+
+        if (!accessible.some(p => p.id === state.cardProducerId)) {
+          state.cardProducerId = accessible[0].id;
+        }
+
+        const prod = accessible.find(p => p.id === state.cardProducerId) || accessible[0];
+        const rObj = getRoute(prod.routeId);
+
+        let sumSabah = 0, sumAksam = 0;
+        const dayRows = [];
+        for (let d = 1; d <= 31; d++) {
+          const dd = String(d).padStart(2, '0');
+          const fullDate = `${state.cardMonth}-${dd}`;
+          const cols = state.collections.filter(c => c.producerId === prod.id && c.date === fullDate);
+          const s = cols.filter(c => c.shift === 'Sabah').reduce((a, b) => a + b.amount, 0);
+          const a = cols.filter(c => c.shift === 'Akşam').reduce((a, b) => a + b.amount, 0);
+          sumSabah += s;
+          sumAksam += a;
+          dayRows.push({ d, s, a, warn: cols.some(c => c.antibioticWarning) });
+        }
+
+        const grandTotal = Math.round((sumSabah + sumAksam) * 100) / 100;
+        const totalMoney = Math.round(grandTotal * (Number(prod.unitPrice) || 18) * 100) / 100;
+
+        function halfTable(slice) {
+          return `
+            <table>
+              <thead>
+                <tr>
+                  <th>GÜN</th>
+                  <th>SABAH (KG)</th>
+                  <th>AKŞAM (KG)</th>
+                  <th>TOPLAM</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${slice.map(r => {
+                  const tot = Math.round((r.s + r.a) * 100) / 100;
+                  return `
+                    <tr>
+                      <td style="background:#E6C27A;"><strong>${r.d}</strong></td>
+                      <td>${r.s > 0 ? fmtKg(r.s) : ''}</td>
+                      <td>${r.a > 0 ? fmtKg(r.a) : ''}</td>
+                      <td>${tot > 0 ? fmtKg(tot) : ''} ${r.warn ? '⚠️' : ''}</td>
+                    </tr>
+                  `;
+                }).join('')}
+              </tbody>
+            </table>
+          `;
+        }
+
+        return `
+          <div class="card no-print">
+            <div class="card-body">
+              <div class="grid-3">
+                <div class="form-group">
+                  <label class="form-label">Müstahsil Seçimi</label>
+                  <select id="card-prod-select" class="form-control">
+                    ${accessible.map(p => `<option value="${escHtml(p.id)}" ${p.id === prod.id ? 'selected' : ''}>${escHtml(p.name)} (${escHtml(p.village)})</option>`).join('')}
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Dönem (Ay)</label>
+                  <input id="card-month-input" type="month" class="form-control" value="${escHtml(state.cardMonth)}" />
+                </div>
+                <div class="form-group" style="justify-content:flex-end;">
+                  <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                    <button type="button" class="btn btn-amber" data-action="open-qr-label" data-pid="${escHtml(prod.id)}">QR Etiketi</button>
+                    <button type="button" class="btn btn-primary" onclick="window.print()">Yazdır</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="physical-card">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:14px;border-bottom:2px solid var(--card-border);padding-bottom:14px;margin-bottom:14px;">
+              <div>
+                <div style="font-size:20px;font-weight:900;color:#0F294A;">ALAKUZULAR GIDA İHTİYAÇ MAD. NAK. TARIM LTD. ŞTİ.</div>
+                <div style="font-size:13px;font-weight:800;margin-top:4px;">MÜSTAHSİL SÜT TOPLAMA KARTI — DÖNEM: ${escHtml(state.cardMonth)}</div>
+                <div style="margin-top:8px;font-size:14px;">
+                  <strong>Adı Soyadı:</strong> ${escHtml(prod.name)} &nbsp;|&nbsp;
+                  <strong>Cari Kodu:</strong> ${escHtml(prod.cariKodu)} &nbsp;|&nbsp;
+                  <strong>Mahalle:</strong> ${escHtml(prod.village)} (${escHtml(rObj.plate)})
+                </div>
+                <div style="margin-top:6px;font-size:12px;background:#FEF2F2;border:1px solid #DC2626;color:#991B1B;padding:6px 10px;border-radius:8px;font-weight:800;">
+                  DİKKAT: İĞNELİ VE ANTİBİYOTİKLİ SÜTLERİ TEMİZ SÜTE KARIŞTIRMAYINIZ!
+                </div>
+              </div>
+              <div style="text-align:center;">
+                ${buildQrSvg(prod.code, 105)}
+                <div style="font-family:monospace;font-size:11px;font-weight:900;margin-top:4px;">${escHtml(prod.code)}</div>
+              </div>
+            </div>
+
+            <div class="grid-2">
+              <div>${halfTable(dayRows.slice(0, 15))}</div>
+              <div>${halfTable(dayRows.slice(15, 31))}</div>
+            </div>
+
+            <div style="margin-top:14px;padding:12px 16px;background:#0F294A;color:#fff;border-radius:12px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+              <div>Sabah: <b>${fmtKg(sumSabah)} kg</b> • Akşam: <b>${fmtKg(sumAksam)} kg</b></div>
+              <div style="font-size:18px;font-weight:900;color:#FCD34D;">AYLIK TOPLAM: ${fmtKg(grandTotal)} KG</div>
+              ${user.role === 'admin' ? `<div style="font-size:15px;font-weight:900;color:#6EE7B7;">HAKEDİŞ: ${fmtMoney(totalMoney)}</div>` : ''}
+            </div>
+          </div>
+        `;
+      }
+
+      // =========================================================================
+      // 13. YÖNETİM & MÜKERRER KONTROLLÜ KAYIT SEKMESİ (SADECE ADMIN)
+      // =========================================================================
+      function renderAdminTab() {
+        return `
+          <!-- YENİ MÜSTAHSİL KAYDI (MÜKERRER KONTROLLÜ) -->
+          <div class="card">
+            <div class="card-header">
+              <h3>Yeni Müstahsil Kaydı (Mükerrer Kayıt Korumalı)</h3>
+              <span class="badge badge-amber">Cari Kod, T.C., İşletme No ve Ad+Baba Adı Kontrolü Aktif</span>
+            </div>
+            <div class="card-body">
+              <form id="admin-producer-form" style="display:flex;flex-direction:column;gap:12px;">
+                <div class="grid-4">
+                  <div class="form-group"><label class="form-label">Cari Kodu *</label><input id="np-cari" type="text" class="form-control" placeholder="120.01.006" required /></div>
+                  <div class="form-group"><label class="form-label">T.C. Kimlik No (11 Hane) *</label><input id="np-tc" type="text" maxlength="11" class="form-control" placeholder="11 haneli T.C." required /></div>
+                  <div class="form-group"><label class="form-label">Adı Soyadı *</label><input id="np-name" type="text" class="form-control" placeholder="Ad Soyad" required /></div>
+                  <div class="form-group"><label class="form-label">Baba Adı</label><input id="np-father" type="text" class="form-control" placeholder="Baba Adı" /></div>
+                </div>
+                <div class="grid-4">
+                  <div class="form-group"><label class="form-label">Doğum Tarihi</label><input id="np-birth" type="date" class="form-control" /></div>
+                  <div class="form-group"><label class="form-label">İşletme No</label><input id="np-farm" type="text" class="form-control" placeholder="TR-42-00XXXX" /></div>
+                  <div class="form-group"><label class="form-label">Telefon</label><input id="np-phone" type="text" class="form-control" placeholder="05XX XXX XX XX" /></div>
+                  <div class="form-group"><label class="form-label">Birim Süt Fiyatı (₺/Kg) *</label><input id="np-price" type="number" step="0.05" class="form-control" value="18.50" required /></div>
+                </div>
+                <div class="grid-4">
+                  <div class="form-group"><label class="form-label">İl</label><input id="np-city" type="text" class="form-control" value="Konya" /></div>
+                  <div class="form-group"><label class="form-label">İlçe</label><input id="np-dist" type="text" class="form-control" value="Sarayönü" /></div>
+                  <div class="form-group"><label class="form-label">Mahalle / Köy</label><input id="np-vil" type="text" class="form-control" value="Ladik" /></div>
+                  <div class="form-group">
+                    <label class="form-label">Bağlı Araç Plakası *</label>
+                    <select id="np-route" class="form-control">
+                      ${state.routes.map(r => `<option value="${escHtml(r.id)}">${escHtml(r.plate)} — ${escHtml(r.name)}</option>`).join('')}
+                    </select>
+                  </div>
+                </div>
+                <button type="submit" class="btn btn-primary">MÜSTAHSİLİ KAYDET</button>
+              </form>
+            </div>
+          </div>
+
+          <!-- MÜSTAHSİL LİSTESİ, FİYAT VE QR ETİKET YÖNETİMİ -->
+          <div class="card">
+            <div class="card-header">
+              <h3>Kayıtlı Müstahsiller (${state.producers.length})</h3>
+              <div style="display:flex;gap:6px;align-items:center;">
+                <input id="bulk-price-val" type="number" step="0.05" class="form-control" style="width:100px;padding:6px 8px;" value="18.50" />
+                <button type="button" class="btn btn-amber btn-sm" data-action="bulk-price">Tümüne Fiyat Uygula</button>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Cari / QR</th>
+                    <th>Ad Soyad / T.C.</th>
+                    <th>İlçe / Mahalle</th>
+                    <th>Araç Plakası</th>
+                    <th>Birim Fiyat (₺/Kg)</th>
+                    <th class="text-center">QR Etiket</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${state.producers.map(p => `
+                    <tr>
+                      <td>
+                        <strong>${escHtml(p.cariKodu)}</strong>
+                        <div style="font-size:11px;font-family:monospace;color:#64748B;">${escHtml(p.code)}</div>
+                      </td>
+                      <td>
+                        <strong>${escHtml(p.name)}</strong>
+                        <div style="font-size:11px;color:#64748B;">T.C: ${escHtml(p.tc)} • Baba: ${escHtml(p.fatherName || '-')}</div>
+                      </td>
+                      <td>${escHtml(p.district)} / <strong>${escHtml(p.village)}</strong></td>
+                      <td>
+                        <select class="form-control" style="padding:6px;" data-action="change-prod-route" data-pid="${escHtml(p.id)}">
+                          ${state.routes.map(r => `<option value="${escHtml(r.id)}" ${r.id === p.routeId ? 'selected' : ''}>${escHtml(r.plate)}</option>`).join('')}
+                        </select>
+                      </td>
+                      <td>
+                        <input type="number" step="0.05" class="form-control" style="width:95px;padding:6px;" value="${escHtml(p.unitPrice)}" data-action="change-prod-price" data-pid="${escHtml(p.id)}" />
+                      </td>
+                      <td class="text-center">
+                        <button type="button" class="btn btn-outline btn-sm" data-action="open-qr-label" data-pid="${escHtml(p.id)}">QR Göster</button>
+                      </td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- KULLANICI VE ARAÇ PLAKA YÖNETİMİ -->
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-header">
+                <h3>Kullanıcı & Plaka Atama Yönetimi</h3>
+              </div>
+              <div class="card-body">
+                <form id="admin-user-form" style="display:flex;flex-direction:column;gap:10px;margin-bottom:14px;">
+                  <div class="grid-2">
+                    <input id="nu-fullname" type="text" class="form-control" placeholder="Ad Soyad" required />
+                    <input id="nu-username" type="text" class="form-control" placeholder="Kullanıcı adı" required />
+                  </div>
+                  <div class="grid-3">
+                    <input id="nu-pass" type="text" class="form-control" value="1234" placeholder="Şifre" required />
+                    <select id="nu-role" class="form-control">
+                      <option value="collector">Toplayıcı</option>
+                      <option value="warehouse">Depocu</option>
+                      <option value="admin">Admin</option>
+                    </select>
+                    <select id="nu-route" class="form-control">
+                      ${state.routes.map(r => `<option value="${escHtml(r.id)}">${escHtml(r.plate)}</option>`).join('')}
+                    </select>
+                  </div>
+                  <button type="submit" class="btn btn-primary btn-sm">Yeni Kullanıcı Ekle</button>
+                </form>
+
+                <div class="table-wrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Kullanıcı</th>
+                        <th>Rol</th>
+                        <th>Atanan Araç</th>
+                        <th>Sil</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${state.users.map(u => `
+                        <tr>
+                          <td><strong>${escHtml(u.name)}</strong><div style="font-size:11px;color:#64748B;">@${escHtml(u.username)}</div></td>
+                          <td><span class="badge badge-navy">${escHtml(u.role)}</span></td>
+                          <td>
+                            ${u.role === 'collector' ? `
+                              <select class="form-control" style="padding:5px;" data-action="change-user-route" data-uid="${escHtml(u.id)}">
+                                ${state.routes.map(r => `<option value="${escHtml(r.id)}" ${r.id === u.assignedRouteId ? 'selected' : ''}>${escHtml(r.plate)}</option>`).join('')}
+                              </select>
+                            ` : '—'}
+                          </td>
+                          <td>
+                            ${u.id !== state.currentUser.id ? `<button type="button" class="btn btn-danger btn-sm" data-action="del-user" data-uid="${escHtml(u.id)}">Sil</button>` : 'Aktif'}
+                          </td>
+                        </tr>
+                      `).join('')}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <h3>Araç Plakaları & Rotalar</h3>
+              </div>
+              <div class="card-body">
+                <form id="admin-route-form" style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+                  <input id="nr-plate" type="text" class="form-control" style="flex:1;min-width:120px;" placeholder="42 ALK 04" required />
+                  <input id="nr-name" type="text" class="form-control" style="flex:2;min-width:160px;" placeholder="Rota / Bölge Adı" required />
+                  <button type="submit" class="btn btn-success btn-sm">Araç Ekle</button>
+                </form>
+                <div class="table-wrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Plaka</th>
+                        <th>Rota Adı</th>
+                        <th class="text-right">Müstahsil Sayısı</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${state.routes.map(r => {
+                        const cnt = state.producers.filter(p => p.routeId === r.id).length;
+                        return `
+                          <tr>
+                            <td><strong>${escHtml(r.plate)}</strong></td>
+                            <td>${escHtml(r.name)}</td>
+                            <td class="text-right"><strong>${cnt}</strong></td>
+                          </tr>
+                        `;
+                      }).join('')}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      // =========================================================================
+      // 14. TOPLU RAPOR & FİLTRELEME / SIRALAMA / CSV İNDİRME (SADECE ADMIN)
+      // =========================================================================
+      function renderReportsTab() {
+        const districts = Array.from(new Set(state.producers.map(p => p.district).filter(Boolean))).sort();
+        const villages = Array.from(new Set(
+          state.producers
+            .filter(p => state.repDistrict === 'ALL' || p.district === state.repDistrict)
+            .map(p => p.village)
+            .filter(Boolean)
+        )).sort();
+
+        const q = state.repSearch.trim().toLowerCase();
+        const rows = state.producers
+          .filter(p => {
+            if (state.repRoute !== 'ALL' && p.routeId !== state.repRoute) return false;
+            if (state.repDistrict !== 'ALL' && p.district !== state.repDistrict) return false;
+            if (state.repVillage !== 'ALL' && p.village !== state.repVillage) return false;
+            if (q) {
+              const hit = p.name.toLowerCase().includes(q) ||
+                (p.cariKodu && p.cariKodu.toLowerCase().includes(q)) ||
+                (p.tc && p.tc.includes(q));
+              if (!hit) return false;
+            }
+            return true;
+          })
+          .map(p => {
+            const cols = state.collections.filter(c => {
+              if (c.producerId !== p.id) return false;
+              if (state.repStart && c.date < state.repStart) return false;
+              if (state.repEnd && c.date > state.repEnd) return false;
+              return true;
+            });
+            const sabah = cols.filter(c => c.shift === 'Sabah').reduce((s, c) => s + c.amount, 0);
+            const aksam = cols.filter(c => c.shift === 'Akşam').reduce((s, c) => s + c.amount, 0);
+            const totalMilk = Math.round((sabah + aksam) * 100) / 100;
+            const payable = Math.round(totalMilk * (Number(p.unitPrice) || 18) * 100) / 100;
+            return { ...p, route: getRoute(p.routeId), sabah, aksam, totalMilk, payable };
+          })
+          .filter(r => !state.repOnlyMilk || r.totalMilk > 0);
+
+        rows.sort((a, b) => {
+          let cmp = 0;
+          if (state.repSortField === 'totalMilk') cmp = a.totalMilk - b.totalMilk;
+          else if (state.repSortField === 'payable') cmp = a.payable - b.payable;
+          else if (state.repSortField === 'name') cmp = a.name.localeCompare(b.name, 'tr');
+          else if (state.repSortField === 'cariKodu') cmp = (a.cariKodu || '').localeCompare(b.cariKodu || '', 'tr');
+          return state.repSortDir === 'desc' ? -cmp : cmp;
+        });
+
+        const sumTotalMilk = Math.round(rows.reduce((s, r) => s + r.totalMilk, 0) * 100) / 100;
+        const sumPayable = Math.round(rows.reduce((s, r) => s + r.payable, 0) * 100) / 100;
+
+        return `
+          <div class="card no-print">
+            <div class="card-header">
+              <h3>Toplu Rapor & Filtreleme (Tarih Sınırı Yok)</h3>
+              <div style="display:flex;gap:8px;">
+                <button type="button" class="btn btn-success btn-sm" data-action="export-csv">Excel (CSV) İndir</button>
+                <button type="button" class="btn btn-amber btn-sm" onclick="window.print()">Yazdır</button>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="grid-3" style="margin-bottom:12px;">
+                <div class="form-group"><label class="form-label">Başlangıç Tarihi</label><input id="rep-start" type="date" class="form-control" value="${escHtml(state.repStart)}" /></div>
+                <div class="form-group"><label class="form-label">Bitiş Tarihi</label><input id="rep-end" type="date" class="form-control" value="${escHtml(state.repEnd)}" /></div>
+                <div class="form-group">
+                  <label class="form-label">Araç Plakası</label>
+                  <select id="rep-route" class="form-control">
+                    <option value="ALL">Tüm Plakalar</option>
+                    ${state.routes.map(r => `<option value="${escHtml(r.id)}" ${r.id === state.repRoute ? 'selected' : ''}>${escHtml(r.plate)}</option>`).join('')}
+                  </select>
+                </div>
+              </div>
+              <div class="grid-4">
+                <div class="form-group">
+                  <label class="form-label">İlçe</label>
+                  <select id="rep-dist" class="form-control">
+                    <option value="ALL">Tüm İlçeler</option>
+                    ${districts.map(d => `<option value="${escHtml(d)}" ${d === state.repDistrict ? 'selected' : ''}>${escHtml(d)}</option>`).join('')}
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Mahalle</label>
+                  <select id="rep-vil" class="form-control">
+                    <option value="ALL">Tüm Mahalleler</option>
+                    ${villages.map(v => `<option value="${escHtml(v)}" ${v === state.repVillage ? 'selected' : ''}>${escHtml(v)}</option>`).join('')}
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Müstahsil Ara</label>
+                  <input id="rep-search" type="text" class="form-control" placeholder="Ad, Cari Kod, T.C..." value="${escHtml(state.repSearch)}" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Sıralama</label>
+                  <select id="rep-sort" class="form-control">
+                    <option value="totalMilk-desc" ${state.repSortField === 'totalMilk' && state.repSortDir === 'desc' ? 'selected' : ''}>Toplam Süt (Büyükten Küçüğe)</option>
+                    <option value="totalMilk-asc" ${state.repSortField === 'totalMilk' && state.repSortDir === 'asc' ? 'selected' : ''}>Toplam Süt (Küçükten Büyüğe)</option>
+                    <option value="payable-desc" ${state.repSortField === 'payable' && state.repSortDir === 'desc' ? 'selected' : ''}>Hakediş Tutarı (Büyükten Küçüğe)</option>
+                    <option value="name-asc" ${state.repSortField === 'name' && state.repSortDir === 'asc' ? 'selected' : ''}>İsim (A - Z)</option>
+                  </select>
+                </div>
+              </div>
+              <label style="display:inline-flex;align-items:center;gap:8px;margin-top:12px;font-size:12.5px;font-weight:700;cursor:pointer;">
+                <input id="rep-only-milk" type="checkbox" ${state.repOnlyMilk ? 'checked' : ''} />
+                <span>Sadece seçili aralıkta süt teslimatı olan müstahsilleri göster</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3>Müstahsil Süt & Hakediş Toplu Dökümü (${rows.length} Müstahsil)</h3>
+              <span class="badge badge-amber">Toplam: ${fmtKg(sumTotalMilk)} kg • ${fmtMoney(sumPayable)}</span>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Cari Kodu</th>
+                    <th>Adı Soyadı</th>
+                    <th>İlçe / Mahalle</th>
+                    <th>Plaka</th>
+                    <th class="text-right">Sabah (Kg)</th>
+                    <th class="text-right">Akşam (Kg)</th>
+                    <th class="text-right">Toplam Süt (Kg)</th>
+                    <th class="text-right">Birim Fiyat</th>
+                    <th class="text-right">Toplam Hakediş</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${rows.map(r => `
+                    <tr>
+                      <td><strong>${escHtml(r.cariKodu)}</strong></td>
+                      <td><strong>${escHtml(r.name)}</strong></td>
+                      <td>${escHtml(r.district)} / ${escHtml(r.village)}</td>
+                      <td><span class="badge badge-navy">${escHtml(r.route.plate)}</span></td>
+                      <td class="text-right">${fmtKg(r.sabah)}</td>
+                      <td class="text-right">${fmtKg(r.aksam)}</td>
+                      <td class="text-right"><strong>${fmtKg(r.totalMilk)} kg</strong></td>
+                      <td class="text-right">${fmtMoney(r.unitPrice)}</td>
+                      <td class="text-right" style="font-weight:900;color:var(--green);">${fmtMoney(r.payable)}</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        `;
+      }
+
+      // =========================================================================
+      // 15. MODALLAR (QR ETİKET & QR KAMERA OKUYUCU)
+      // =========================================================================
+      function renderModals() {
+        let html = '';
+
+        if (state.qrLabelProducerId) {
+          const prod = getProducer(state.qrLabelProducerId);
+          if (prod) {
+            const rObj = getRoute(prod.routeId);
+            html += `
+              <div class="modal-backdrop">
+                <div class="modal-box" style="border:4px solid var(--navy);">
+                  <div style="background:var(--navy);color:#fff;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;" class="no-print">
+                    <strong>Müstahsil Karekod Etiketi</strong>
+                    <button type="button" class="btn btn-danger btn-sm" data-action="close-qr-label">Kapat</button>
+                  </div>
+                  <div style="padding:24px;text-align:center;background:var(--card-cream);">
+                    <div class="badge badge-navy" style="margin-bottom:8px;">ALAKUZULAR GIDA • SÜT TOPLAMA</div>
+                    <h3 style="font-size:20px;font-weight:900;color:#0F294A;">${escHtml(prod.name)}</h3>
+                    <div style="font-size:12px;font-weight:800;margin:4px 0 14px;">Cari: ${escHtml(prod.cariKodu)} • ${escHtml(prod.village)} (${escHtml(rObj.plate)})</div>
+                    ${buildQrSvg(prod.code, 190)}
+                    <div style="margin-top:12px;display:inline-block;background:#fff;border:2px solid #0F294A;padding:6px 14px;border-radius:10px;font-family:monospace;font-weight:900;font-size:15px;">
+                      ${escHtml(prod.code)}
+                    </div>
+                  </div>
+                  <div style="padding:14px;display:flex;gap:10px;background:#fff;" class="no-print">
+                    <button type="button" class="btn btn-primary btn-block" onclick="window.print()">Etiketi Yazdır</button>
+                  </div>
+                </div>
+              </div>
+            `;
+          }
+        }
+
+        if (state.qrScannerOpen) {
+          const routeId = getEffectiveRouteId();
+          const routeProds = state.producers.filter(p => p.routeId === routeId);
+          html += `
+            <div class="modal-backdrop">
+              <div class="modal-box">
+                <div style="background:var(--navy);color:#fff;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;">
+                  <strong>📷 Karekod (QR) Okut</strong>
+                  <button type="button" class="btn btn-danger btn-sm" data-action="close-qr-scanner">Kapat</button>
+                </div>
+                <div style="padding:16px;display:flex;flex-direction:column;gap:12px;">
+                  <div style="background:#0F172A;border-radius:14px;overflow:hidden;min-height:170px;display:flex;align-items:center;justify-content:center;color:#fff;text-align:center;padding:12px;">
+                    <video id="qr-video-el" playsinline muted style="width:100%;max-height:210px;object-fit:cover;display:${state.cameraError ? 'none' : 'block'};"></video>
+                    ${state.cameraError ? `<div style="font-size:12.5px;color:#FCD34D;font-weight:700;">${escHtml(state.cameraError)}</div>` : ''}
+                  </div>
+
+                  <form id="manual-qr-form" style="display:flex;gap:8px;">
+                    <input id="manual-qr-field" type="text" class="form-control" placeholder="Örn: ALAKUZU-MST-101" value="${escHtml(state.manualQrInput)}" />
+                    <button type="submit" class="btn btn-primary">Bul</button>
+                  </form>
+
+                  <div style="background:#FFFBEB;border:1.5px solid #F59E0B;border-radius:12px;padding:10px;">
+                    <div style="font-size:11px;font-weight:900;color:#92400E;margin-bottom:8px;text-transform:uppercase;">Hızlı Test: Tek Tıkla Karekod Okut</div>
+                    <div style="display:flex;flex-direction:column;gap:6px;max-height:160px;overflow-y:auto;">
+                      ${routeProds.map(p => `
+                        <button type="button" class="btn btn-outline btn-sm" style="justify-content:space-between;" data-action="sim-qr" data-code="${escHtml(p.code)}">
+                          <span><strong>${escHtml(p.name)}</strong> (${escHtml(p.code)})</span>
+                          <span class="badge badge-green">Okut →</span>
+                        </button>
+                      `).join('')}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+        }
+
+        return html;
+      }
+
+      // =========================================================================
+      // 16. ANA RENDER FONKSİYONU
+      // =========================================================================
+      function render() {
+        const root = document.getElementById('app');
+        if (!root) return;
+
+        let contentHtml = '';
+        if (!state.currentUser) {
+          contentHtml = renderLogin();
+        } else {
+          const u = state.currentUser;
+          const isAdmin = u.role === 'admin';
+          const isCollector = u.role === 'collector';
+          const isWarehouse = u.role === 'warehouse';
+          const stock = getDepotStock();
+
+          let roleBadge = '';
+          if (isAdmin) roleBadge = `<span class="badge badge-purple">ADMIN</span>`;
+          if (isCollector) roleBadge = `<span class="badge badge-amber">TOPLAYICI • ${escHtml(getRoute(u.assignedRouteId).plate)}</span>`;
+          if (isWarehouse) roleBadge = `<span class="badge badge-green">DEPOCU / ÜRETİM</span>`;
+
+          const tabs = [];
+          if (isAdmin) tabs.push({ id: 'admin', label: 'Yönetim & Kayıt' });
+          if (isAdmin || isCollector) tabs.push({ id: 'collector', label: 'Saha Süt Toplama' });
+          if (isAdmin || isWarehouse) tabs.push({ id: 'center', label: 'Merkez Kantar & Fark' });
+          if (isAdmin || isWarehouse) tabs.push({ id: 'yogurt', label: 'Süzme Yoğurt Üretim' });
+          if (isAdmin) tabs.push({ id: 'cost', label: 'Maliyet & Kâr Analizi' });
+          if (isAdmin || isCollector) tabs.push({ id: 'card', label: 'Dijital Müstahsil Kartı' });
+          if (isAdmin) tabs.push({ id: 'reports', label: 'Toplu Rapor' });
+
+          if (!tabs.some(t => t.id === state.activeTab) && tabs.length > 0) {
+            state.activeTab = tabs[0].id;
+          }
+
+          let tabBody = '';
+          if (state.activeTab === 'collector') tabBody = renderCollectorTab();
+          else if (state.activeTab === 'center') tabBody = renderCenterTab();
+          else if (state.activeTab === 'yogurt') tabBody = renderYogurtTab();
+          else if (state.activeTab === 'cost') tabBody = renderCostTab();
+          else if (state.activeTab === 'card') tabBody = renderCardTab();
+          else if (state.activeTab === 'admin') tabBody = renderAdminTab();
+          else if (state.activeTab === 'reports') tabBody = renderReportsTab();
+
+          contentHtml = `
+            <header class="topbar">
+              <div class="topbar-inner">
+                <div>
+                  <div class="brand-title">ALAKUZULAR GIDA ${roleBadge}</div>
+                  <div class="brand-sub">${escHtml(u.name)} • Bugün: <b>${TODAY_STR}</b></div>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                  ${(isAdmin || isWarehouse) ? `
+                    <span class="badge badge-amber" style="padding:6px 12px;font-size:12px;">
+                      Depo Çiğ Süt: ${fmtKg(stock.remaining)} kg
+                    </span>
+                  ` : ''}
+                  ${isAdmin ? `<button type="button" class="btn btn-outline btn-sm" data-action="reset-demo">Verileri Sıfırla</button>` : ''}
+                  <button type="button" class="btn btn-danger btn-sm" data-action="logout">Çıkış / Rol Değiştir</button>
+                </div>
+              </div>
+              <nav class="nav-bar">
+                <div class="nav-inner">
+                  ${tabs.map(t => `
+                    <button type="button" class="nav-btn ${state.activeTab === t.id ? 'active' : ''}" data-action="switch-tab" data-tab="${t.id}">
+                      ${escHtml(t.label)}
+                    </button>
+                  `).join('')}
+                </div>
+              </nav>
+            </header>
+
+            <main class="container" style="padding-top:18px;">
+              ${tabBody}
+            </main>
+          `;
+        }
+
+        const toastHtml = state.toast ? `
+          <div class="toast-box" style="background:${state.toast.type === 'error' ? '#DC2626' : '#059669'};">
+            ${escHtml(state.toast.msg)}
+          </div>
+        ` : '';
+
+        const flashHtml = state.flashOverlay ? `
+          <div class="save-flash">
+            <div style="font-size:48px;margin-bottom:8px;">✓</div>
+            <h2 style="font-size:32px;font-weight:900;">KAYDEDİLDİ!</h2>
+            <p style="font-size:22px;font-weight:800;margin-top:6px;">${escHtml(state.flashOverlay.name)}</p>
+            <div style="margin-top:14px;background:rgba(0,0,0,0.25);padding:12px 24px;border-radius:16px;font-size:28px;font-weight:900;color:#FCD34D;">
+              ${fmtKg(state.flashOverlay.amount)} KG
+            </div>
+          </div>
+        ` : '';
+
+        root.innerHTML = contentHtml + renderModals() + toastHtml + flashHtml;
+        bindEvents();
+      }
+
+      // =========================================================================
+      // 17. OLAY DİNLEYİCİLERİ (EVENT BINDINGS)
+      // =========================================================================
+      function processQrString(rawCode) {
+        const clean = String(rawCode || '').trim().toUpperCase();
+        if (!clean) return;
+        const found = state.producers.find(
+          p => (p.code && p.code.toUpperCase() === clean) || p.id.toUpperCase() === clean
+        );
+        if (!found) {
+          notify(`"${clean}" karekoduna ait müstahsil bulunamadı!`, 'error');
+          return;
+        }
+        if (state.currentUser.role === 'collector' && found.routeId !== state.currentUser.assignedRouteId) {
+          notify(`Bu müstahsil (${found.name}) sizin aracınıza tanımlı değil!`, 'error');
+          return;
+        }
+        stopCamera();
+        state.qrScannerOpen = false;
+        state.manualQrInput = '';
+        if (state.currentUser.role === 'admin') state.selectedRoute = found.routeId;
+        state.selectedProducerId = found.id;
+        state.collectorMode = 'entry';
+        state.kiloInput = '';
+        state.gramInput = '';
+        state.antibioticWarning = false;
+        state.editingCollectionId = null;
+        notify(`Karekod Okundu: ${found.name}`);
+      }
+
+      function startCamera() {
+        state.qrScannerOpen = true;
+        state.cameraError = '';
+        render();
+
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          state.cameraError = 'Tarayıcı kamera erişimi desteklemiyor. Aşağıdaki hızlı test butonlarını kullanabilirsiniz.';
+          render();
+          return;
+        }
+
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false })
+          .then(stream => {
+            cameraStream = stream;
+            const vid = document.getElementById('qr-video-el');
+            if (vid) {
+              vid.srcObject = stream;
+              vid.play().catch(() => {});
+            }
+            if ('BarcodeDetector' in window) {
+              try {
+                const detector = new window.BarcodeDetector({ formats: ['qr_code'] });
+                barcodeTimer = setInterval(async () => {
+                  const v = document.getElementById('qr-video-el');
+                  if (v && v.readyState >= 2) {
+                    try {
+                      const codes = await detector.detect(v);
+                      if (codes && codes.length > 0 && codes[0].rawValue) {
+                        processQrString(codes[0].rawValue);
+                      }
+                    } catch (e) {}
+                  }
+                }, 450);
+              } catch (e) {}
+            }
+          })
+          .catch(() => {
+            state.cameraError = 'Kamera izni verilmedi veya cihazda kamera yok. Aşağıdaki tek tıkla "Okut →" butonlarını kullanabilirsiniz.';
+            render();
+          });
+      }
+
+      function bindEvents() {
+        // Login Form
+        const loginForm = document.getElementById('login-form');
+        if (loginForm) {
+          loginForm.onsubmit = function (e) {
+            e.preventDefault();
+            const uVal = document.getElementById('login-user').value.trim().toLowerCase();
+            const pVal = document.getElementById('login-pass').value.trim();
+            const found = state.users.find(u => u.username.toLowerCase() === uVal && u.password === pVal);
+            if (!found) {
+              notify('Kullanıcı adı veya şifre hatalı!', 'error');
+              return;
+            }
+            loginAs(found);
+          };
+        }
+
+        function loginAs(u) {
+          state.currentUser = u;
+          state.selectedDate = TODAY_STR;
+          state.yogurtDate = TODAY_STR;
+          state.collectorMode = 'select';
+          if (u.role === 'collector' && u.assignedRouteId) {
+            state.selectedRoute = u.assignedRouteId;
+            state.activeTab = 'collector';
+          } else if (u.role === 'warehouse') {
+            state.activeTab = 'center';
+          } else {
+            state.activeTab = 'admin';
+          }
+          notify(`Hoş geldiniz, ${u.name}`);
+        }
+
+        // Data-action clicks
+        document.querySelectorAll('[data-action]').forEach(el => {
+          const action = el.getAttribute('data-action');
+          if (el.tagName === 'SELECT' || el.tagName === 'INPUT') return;
+
+          el.onclick = function () {
+            if (action === 'quick-login') {
+              const uid = el.getAttribute('data-uid');
+              const u = state.users.find(x => x.id === uid);
+              if (u) loginAs(u);
+            } else if (action === 'logout') {
+              stopCamera();
+              state.currentUser = null;
+              render();
+            } else if (action === 'switch-tab') {
+              state.activeTab = el.getAttribute('data-tab');
+              state.collectorMode = 'select';
+              render();
+            } else if (action === 'set-shift') {
+              state.selectedShift = el.getAttribute('data-shift');
+              render();
+            } else if (action === 'set-yog-shift') {
+              state.yogurtShift = el.getAttribute('data-shift');
+              render();
+            } else if (action === 'reset-today') {
+              state.selectedDate = TODAY_STR;
+              render();
+            } else if (action === 'reset-yogurt-today') {
+              state.yogurtDate = TODAY_STR;
+              render();
+            } else if (action === 'pick-producer') {
+              state.selectedProducerId = el.getAttribute('data-pid');
+              state.collectorMode = 'entry';
+              state.kiloInput = '';
+              state.gramInput = '';
+              state.antibioticWarning = false;
+              state.editingCollectionId = null;
+              render();
+            } else if (action === 'back-to-select') {
+              state.collectorMode = 'select';
+              state.editingCollectionId = null;
+              render();
+            } else if (action === 'quick-add') {
+              const delta = parseFloat(el.getAttribute('data-val')) || 0;
+              const kEl = document.getElementById('entry-kilo');
+              const gEl = document.getElementById('entry-gram');
+              const curK = parseFloat(kEl.value || '0');
+              const curG = parseFloat(gEl.value || '0');
+              let decG = 0;
+              if (gEl.value.trim() !== '') {
+                decG = curG >= 100 ? curG / 1000 : curG >= 10 ? curG / 100 : curG / 10;
+              }
+              const next = Math.round((curK + decG + delta) * 1000) / 1000;
+              const whole = Math.floor(next);
+              const remG = Math.round((next - whole) * 1000);
+              kEl.value = whole;
+              gEl.value = remG > 0 ? remG : '';
+              state.kiloInput = String(whole);
+              state.gramInput = remG > 0 ? String(remG) : '';
+            } else if (action === 'edit-col') {
+              const cid = el.getAttribute('data-cid');
+              const rec = state.collections.find(c => c.id === cid);
+              if (!rec) return;
+              if (state.currentUser.role !== 'admin' && rec.date !== TODAY_STR) {
+                notify('Geçmiş kayıtlar sadece Admin tarafından düzenlenebilir!', 'error');
+                return;
+              }
+              state.editingCollectionId = rec.id;
+              state.selectedProducerId = rec.producerId;
+              state.selectedShift = rec.shift;
+              const w = Math.floor(rec.amount);
+              const g = Math.round((rec.amount - w) * 1000);
+              state.kiloInput = String(w);
+              state.gramInput = g > 0 ? String(g) : '';
+              state.antibioticWarning = Boolean(rec.antibioticWarning);
+              state.collectorMode = 'entry';
+              render();
+            } else if (action === 'del-col') {
+              const cid = el.getAttribute('data-cid');
+              const rec = state.collections.find(c => c.id === cid);
+              if (!rec) return;
+              if (state.currentUser.role !== 'admin' && rec.date !== TODAY_STR) {
+                notify('Geçmiş kayıtlar sadece Admin tarafından silinebilir!', 'error');
+                return;
+              }
+              state.collections = state.collections.filter(c => c.id !== cid);
+              persistAll();
+              notify('Süt kaydı silindi.');
+            } else if (action === 'open-qr-label') {
+              state.qrLabelProducerId = el.getAttribute('data-pid');
+              render();
+            } else if (action === 'close-qr-label') {
+              state.qrLabelProducerId = null;
+              render();
+            } else if (action === 'open-qr-scanner') {
+              startCamera();
+            } else if (action === 'close-qr-scanner') {
+              stopCamera();
+              state.qrScannerOpen = false;
+              render();
+            } else if (action === 'sim-qr') {
+              processQrString(el.getAttribute('data-code'));
+            } else if (action === 'del-yog') {
+              const yid = el.getAttribute('data-yid');
+              state.yogurtBatches = state.yogurtBatches.filter(b => b.id !== yid);
+              persistAll();
+              notify('Yoğurt üretim kaydı silindi, süt depoya iade edildi.');
+            } else if (action === 'bulk-price') {
+              const val = parseFloat(document.getElementById('bulk-price-val').value);
+              if (isNaN(val) || val <= 0) {
+                notify('Geçerli bir fiyat giriniz!', 'error');
+                return;
+              }
+              state.producers = state.producers.map(p => ({ ...p, unitPrice: val }));
+              persistAll();
+              notify(`Tüm müstahsillerin birim fiyatı ${fmtMoney(val)}/kg yapıldı.`);
+            } else if (action === 'del-user') {
+              const uid = el.getAttribute('data-uid');
+              state.users = state.users.filter(u => u.id !== uid);
+              persistAll();
+              notify('Kullanıcı silindi.');
+            } else if (action === 'export-csv') {
+              exportReportCsv();
+            } else if (action === 'reset-demo') {
+              localStorage.clear();
+              window.location.reload();
+            }
+          };
+        });
+
+        // Collector search & filters
+        const searchEl = document.getElementById('collector-search-input');
+        if (searchEl) {
+          searchEl.oninput = function () {
+            state.collectorSearch = searchEl.value;
+            render();
+            const reFocus = document.getElementById('collector-search-input');
+            if (reFocus) {
+              reFocus.focus();
+              reFocus.setSelectionRange(reFocus.value.length, reFocus.value.length);
+            }
+          };
+        }
+
+        const colRouteSel = document.getElementById('col-route-select');
+        if (colRouteSel) colRouteSel.onchange = () => { state.selectedRoute = colRouteSel.value; render(); };
+
+        const colDateInp = document.getElementById('col-date-input');
+        if (colDateInp) colDateInp.onchange = () => { state.selectedDate = colDateInp.value; render(); };
+
+        // Milk Entry Submit
+        const milkForm = document.getElementById('milk-entry-form');
+        if (milkForm) {
+          milkForm.onsubmit = function (e) {
+            e.preventDefault();
+            const kVal = parseFloat(document.getElementById('entry-kilo').value || '0');
+            const gRaw = document.getElementById('entry-gram').value.trim();
+            const gVal = parseFloat(gRaw || '0');
+            const anti = document.getElementById('entry-antibiotic').checked;
+
+            let decG = 0;
+            if (gRaw !== '') {
+              decG = gVal >= 100 ? gVal / 1000 : gVal >= 10 ? gVal / 100 : gVal / 10;
+            }
+            const total = Math.round((kVal + decG) * 100) / 100;
+            if (total <= 0) {
+              notify('Lütfen geçerli bir kilo veya gram değeri giriniz!', 'error');
+              return;
+            }
+
+            const routeId = getEffectiveRouteId();
+            const prod = getProducer(state.selectedProducerId);
+
+            if (state.editingCollectionId) {
+              state.collections = state.collections.map(c =>
+                c.id === state.editingCollectionId
+                  ? { ...c, amount: total, antibioticWarning: anti, shift: state.selectedShift }
+                  : c
+              );
+              state.editingCollectionId = null;
+            } else {
+              state.collections.unshift({
+                id: 'col-' + Date.now(),
+                date: state.selectedDate,
+                shift: state.selectedShift,
+                routeId: routeId,
+                producerId: state.selectedProducerId,
+                amount: total,
+                antibioticWarning: anti
+              });
+            }
+
+            persistAll();
+            state.flashOverlay = { name: prod ? prod.name : 'Müstahsil', amount: total };
+            state.collectorMode = 'select';
+            state.kiloInput = '';
+            state.gramInput = '';
+            state.antibioticWarning = false;
+            render();
+
+            setTimeout(() => {
+              state.flashOverlay = null;
+              render();
+            }, 1000);
+          };
+        }
+
+        // Manual QR Form
+        const manualQrForm = document.getElementById('manual-qr-form');
+        if (manualQrForm) {
+          manualQrForm.onsubmit = function (e) {
+            e.preventDefault();
+            processQrString(document.getElementById('manual-qr-field').value);
+          };
+        }
+
+        // Center Weighing Controls
+        const cDate = document.getElementById('center-date-input');
+        if (cDate) cDate.onchange = () => { state.selectedDate = cDate.value; render(); };
+
+        const cRoute = document.getElementById('center-route-select');
+        if (cRoute) cRoute.onchange = () => { state.selectedRoute = cRoute.value; render(); };
+
+        const wForm = document.getElementById('weighing-form');
+        if (wForm) {
+          wForm.onsubmit = function (e) {
+            e.preventDefault();
+            const val = parseFloat(document.getElementById('center-weight-input').value);
+            const note = document.getElementById('center-note-input').value.trim();
+            if (isNaN(val) || val < 0) {
+              notify('Geçerli bir kantar tartımı giriniz!', 'error');
+              return;
+            }
+            const id = `w-${state.selectedDate}-${state.selectedShift}-${state.selectedRoute}`;
+            const rec = { id, date: state.selectedDate, shift: state.selectedShift, routeId: state.selectedRoute, centerWeight: val, note };
+            const exists = state.weighings.some(w => w.id === id);
+            state.weighings = exists ? state.weighings.map(w => w.id === id ? rec : w) : [rec, ...state.weighings];
+            persistAll();
+            notify('Merkez kantar tartımı kaydedildi. Depo çiğ süt stoğu güncellendi.');
+          };
+        }
+
+        // Yogurt Production Controls
+        const yDate = document.getElementById('yog-date-input');
+        if (yDate) yDate.onchange = () => { state.yogurtDate = yDate.value; render(); };
+
+        const yForm = document.getElementById('yogurt-form');
+        if (yForm) {
+          yForm.onsubmit = function (e) {
+            e.preventDefault();
+            const ferm = parseFloat(document.getElementById('yog-fermented').value);
+            const nCnt = parseInt(document.getElementById('yog-normal').value || '0', 10);
+            const sCnt = parseInt(document.getElementById('yog-sert').value || '0', 10);
+            const k2Cnt = parseInt(document.getElementById('yog-2kg').value || '0', 10);
+            const g900Cnt = parseInt(document.getElementById('yog-900g').value || '0', 10);
+            const note = document.getElementById('yog-note').value.trim();
+
+            const stock = getDepotStock();
+            const id = `yog-${state.yogurtDate}-${state.yogurtShift}`;
+            const existing = state.yogurtBatches.find(b => b.id === id);
+            const maxAllowed = stock.remaining + (existing ? Number(existing.fermentedMilkKg) : 0);
+
+            if (isNaN(ferm) || ferm <= 0) {
+              notify('Mayalanacak süt miktarını giriniz!', 'error');
+              return;
+            }
+            if (ferm > maxAllowed + 0.01) {
+              notify(`Depodaki mevcut çiğ sütten (${fmtKg(maxAllowed)} kg) fazla mayalama yapılamaz!`, 'error');
+              return;
+            }
+            const totYog = Math.round(((nCnt * 10) + (sCnt * 10) + (k2Cnt * 2) + (g900Cnt * 0.9)) * 100) / 100;
+            if (totYog <= 0) {
+              notify('En az bir süzme yoğurt çeşidi için adet giriniz!', 'error');
+              return;
+            }
+
+            const ratio = Math.round((ferm / totYog) * 100) / 100;
+            const rec = {
+              id, date: state.yogurtDate, shift: state.yogurtShift,
+              fermentedMilkKg: ferm, normalCount: nCnt, sertCount: sCnt,
+              ikiKgCount: k2Cnt, dokuzYuzGrCount: g900Cnt, note
+            };
+            state.yogurtBatches = existing
+              ? state.yogurtBatches.map(b => b.id === id ? rec : b)
+              : [rec, ...state.yogurtBatches];
+            persistAll();
+
+            if (ratio > STRAINED_LIMIT) {
+              notify(`UYARI: Süzme yoğurt oranı ${fmtRatio(ratio)} (3,20 üzerinde)! Kayıt uyarı ile işlendi.`, 'error');
+            } else {
+              notify(`Üretim kaydedildi! Çıkan Yoğurt: ${fmtKg(totYog)} kg • Oran: ${fmtRatio(ratio)}`);
+            }
+          };
+        }
+
+        // Cost & Tariff Controls
+        const costDateEl = document.getElementById('cost-analysis-date');
+        if (costDateEl) costDateEl.onchange = () => { state.costDate = costDateEl.value; render(); };
+
+        const trfDateEl = document.getElementById('trf-date');
+        if (trfDateEl) trfDateEl.onchange = () => { state.tariffFormDate = trfDateEl.value; render(); };
+
+        const trfForm = document.getElementById('tariff-form');
+        if (trfForm) {
+          trfForm.onsubmit = function (e) {
+            e.preventDefault();
+            const eff = document.getElementById('trf-date').value;
+            const rec = {
+              id: 'trf-' + eff,
+              effectiveFrom: eff,
+              euroRate: parseFloat(document.getElementById('trf-eur').value) || 38.0,
+              note: document.getElementById('trf-note').value.trim(),
+              dogalgaz: parseFloat(document.getElementById('trf-dogalgaz').value) || 0,
+              elektrik: parseFloat(document.getElementById('trf-elektrik').value) || 0,
+              mazot: parseFloat(document.getElementById('trf-mazot').value) || 0,
+              iscilik: parseFloat(document.getElementById('trf-iscilik').value) || 0,
+              yemek: parseFloat(document.getElementById('trf-yemek').value) || 0,
+              su: parseFloat(document.getElementById('trf-su').value) || 0,
+              kova10NormalEur: parseFloat(document.getElementById('trf-k10n-eur').value) || 0,
+              kova10SertEur: parseFloat(document.getElementById('trf-k10s-eur').value) || 0,
+              kova2Eur: parseFloat(document.getElementById('trf-k2-eur').value) || 0,
+              kova900Eur: parseFloat(document.getElementById('trf-k900-eur').value) || 0,
+              wholesale10Normal: parseFloat(document.getElementById('trf-w10n').value) || 0,
+              retail10Normal: parseFloat(document.getElementById('trf-r10n').value) || 0,
+              wholesale10Sert: parseFloat(document.getElementById('trf-w10s').value) || 0,
+              retail10Sert: parseFloat(document.getElementById('trf-r10s').value) || 0,
+              wholesale2Kg: parseFloat(document.getElementById('trf-w2').value) || 0,
+              retail2Kg: parseFloat(document.getElementById('trf-r2').value) || 0,
+              wholesale900Gr: parseFloat(document.getElementById('trf-w900').value) || 0,
+              retail900Gr: parseFloat(document.getElementById('trf-r900').value) || 0
+            };
+            const exists = state.tariffs.some(t => t.effectiveFrom === eff);
+            state.tariffs = exists
+              ? state.tariffs.map(t => t.effectiveFrom === eff ? rec : t)
+              : [...state.tariffs, rec];
+            state.costDate = eff;
+            persistAll();
+            notify(`${eff} tarihinden itibaren geçerli maliyet ve satış fiyatları kaydedildi.`);
+          };
+        }
+
+        // Card Controls
+        const cardProdSel = document.getElementById('card-prod-select');
+        if (cardProdSel) cardProdSel.onchange = () => { state.cardProducerId = cardProdSel.value; render(); };
+
+        const cardMonthInp = document.getElementById('card-month-input');
+        if (cardMonthInp) cardMonthInp.onchange = () => { state.cardMonth = cardMonthInp.value; render(); };
+
+        // Admin Producer Form (Duplicate Protection)
+        const npForm = document.getElementById('admin-producer-form');
+        if (npForm) {
+          npForm.onsubmit = function (e) {
+            e.preventDefault();
+            const cari = document.getElementById('np-cari').value.trim().toUpperCase();
+            const tc = document.getElementById('np-tc').value.replace(/\D/g, '');
+            const name = document.getElementById('np-name').value.trim();
+            const father = document.getElementById('np-father').value.trim();
+            const birth = document.getElementById('np-birth').value;
+            const farm = document.getElementById('np-farm').value.trim().toUpperCase();
+            const phone = document.getElementById('np-phone').value.trim();
+            const price = parseFloat(document.getElementById('np-price').value) || 18.0;
+            const city = document.getElementById('np-city').value.trim();
+            const dist = document.getElementById('np-dist').value.trim();
+            const vil = document.getElementById('np-vil').value.trim();
+            const routeId = document.getElementById('np-route').value;
+
+            if (tc.length !== 11) {
+              notify('T.C. Kimlik Numarası 11 haneli olmalıdır!', 'error');
+              return;
+            }
+            if (state.producers.some(p => p.cariKodu.toUpperCase() === cari)) {
+              notify(`MÜKERRER KAYIT: "${cari}" Cari Kodu zaten kayıtlı!`, 'error');
+              return;
+            }
+            if (state.producers.some(p => p.tc === tc)) {
+              notify(`MÜKERRER KAYIT: ${tc} T.C. Kimlik No zaten kayıtlı!`, 'error');
+              return;
+            }
+            if (farm && state.producers.some(p => p.farmNo && p.farmNo.toUpperCase() === farm)) {
+              notify(`MÜKERRER KAYIT: "${farm}" İşletme No zaten kayıtlı!`, 'error');
+              return;
+            }
+            if (father && state.producers.some(p => p.name.toLowerCase() === name.toLowerCase() && (p.fatherName || '').toLowerCase() === father.toLowerCase())) {
+              notify(`MÜKERRER KAYIT: ${name} (Baba: ${father}) kaydı zaten mevcut!`, 'error');
+              return;
+            }
+
+            const qrCode = 'ALAKUZU-MST-' + (101 + state.producers.length);
+            state.producers.push({
+              id: 'p-' + Date.now(),
+              code: qrCode,
+              cariKodu: cari,
+              tc, name, fatherName: father, birthDate: birth,
+              farmNo: farm, phone, city, district: dist, village: vil,
+              routeId, unitPrice: price
+            });
+            persistAll();
+            notify(`${name} başarıyla kaydedildi (${qrCode}).`);
+          };
+        }
+
+        // Inline producer updates
+        document.querySelectorAll('[data-action="change-prod-route"]').forEach(sel => {
+          sel.onchange = () => {
+            const pid = sel.getAttribute('data-pid');
+            state.producers = state.producers.map(p => p.id === pid ? { ...p, routeId: sel.value } : p);
+            persistAll();
+            notify('Müstahsil araç ataması güncellendi.');
+          };
+        });
+
+        document.querySelectorAll('[data-action="change-prod-price"]').forEach(inp => {
+          inp.onchange = () => {
+            const pid = inp.getAttribute('data-pid');
+            const val = parseFloat(inp.value);
+            if (!isNaN(val) && val > 0) {
+              state.producers = state.producers.map(p => p.id === pid ? { ...p, unitPrice: val } : p);
+              persistAll();
+              notify('Birim süt fiyatı güncellendi.');
+            }
+          };
+        });
+
+        // Admin User & Route Forms
+        const nuForm = document.getElementById('admin-user-form');
+        if (nuForm) {
+          nuForm.onsubmit = function (e) {
+            e.preventDefault();
+            const name = document.getElementById('nu-fullname').value.trim();
+            const username = document.getElementById('nu-username').value.trim().toLowerCase();
+            const password = document.getElementById('nu-pass').value.trim();
+            const role = document.getElementById('nu-role').value;
+            const assignedRouteId = role === 'collector' ? document.getElementById('nu-route').value : null;
+
+            if (state.users.some(u => u.username.toLowerCase() === username)) {
+              notify('Bu kullanıcı adı zaten kullanılıyor!', 'error');
+              return;
+            }
+            state.users.push({ id: 'u-' + Date.now(), name, username, password, role, assignedRouteId });
+            persistAll();
+            notify(`${name} kullanıcısı eklendi.`);
+          };
+        }
+
+        document.querySelectorAll('[data-action="change-user-route"]').forEach(sel => {
+          sel.onchange = () => {
+            const uid = sel.getAttribute('data-uid');
+            state.users = state.users.map(u => u.id === uid ? { ...u, assignedRouteId: sel.value } : u);
+            persistAll();
+            notify('Kullanıcı araç plakası güncellendi.');
+          };
+        });
+
+        const nrForm = document.getElementById('admin-route-form');
+        if (nrForm) {
+          nrForm.onsubmit = function (e) {
+            e.preventDefault();
+            const plate = document.getElementById('nr-plate').value.trim().toUpperCase();
+            const name = document.getElementById('nr-name').value.trim();
+            state.routes.push({ id: 'arac-' + Date.now(), plate, name });
+            persistAll();
+            notify(`${plate} plakalı araç eklendi.`);
+          };
+        }
+
+        // Report Filters
+        const rStart = document.getElementById('rep-start');
+        if (rStart) rStart.onchange = () => { state.repStart = rStart.value; render(); };
+
+        const rEnd = document.getElementById('rep-end');
+        if (rEnd) rEnd.onchange = () => { state.repEnd = rEnd.value; render(); };
+
+        const rRoute = document.getElementById('rep-route');
+        if (rRoute) rRoute.onchange = () => { state.repRoute = rRoute.value; render(); };
+
+        const rDist = document.getElementById('rep-dist');
+        if (rDist) rDist.onchange = () => { state.repDistrict = rDist.value; state.repVillage = 'ALL'; render(); };
+
+        const rVil = document.getElementById('rep-vil');
+        if (rVil) rVil.onchange = () => { state.repVillage = rVil.value; render(); };
+
+        const rSearch = document.getElementById('rep-search');
+        if (rSearch) {
+          rSearch.oninput = () => {
+            state.repSearch = rSearch.value;
+            render();
+            const el = document.getElementById('rep-search');
+            if (el) { el.focus(); el.setSelectionRange(el.value.length, el.value.length); }
+          };
+        }
+
+        const rSort = document.getElementById('rep-sort');
+        if (rSort) {
+          rSort.onchange = () => {
+            const parts = rSort.value.split('-');
+            state.repSortField = parts[0];
+            state.repSortDir = parts[1];
+            render();
+          };
+        }
+
+        const rOnly = document.getElementById('rep-only-milk');
+        if (rOnly) rOnly.onchange = () => { state.repOnlyMilk = rOnly.checked; render(); };
+      }
+
+      function exportReportCsv() {
+        const headers = ['Cari Kodu', 'T.C.', 'Ad Soyad', 'İlçe', 'Mahalle', 'Plaka', 'Sabah (Kg)', 'Akşam (Kg)', 'Toplam Süt (Kg)', 'Birim Fiyat (TL)', 'Toplam Hakediş (TL)'];
+        const lines = [headers.join(';')];
+        state.producers.forEach(p => {
+          const cols = state.collections.filter(c => c.producerId === p.id && (!state.repStart || c.date >= state.repStart) && (!state.repEnd || c.date <= state.repEnd));
+          const sabah = cols.filter(c => c.shift === 'Sabah').reduce((s, c) => s + c.amount, 0);
+          const aksam = cols.filter(c => c.shift === 'Akşam').reduce((s, c) => s + c.amount, 0);
+          const tot = Math.round((sabah + aksam) * 100) / 100;
+          const pay = Math.round(tot * (Number(p.unitPrice) || 18) * 100) / 100;
+          lines.push([
+            p.cariKodu, p.tc, `"${p.name}"`, p.district, p.village, getRoute(p.routeId).plate,
+            String(sabah).replace('.', ','), String(aksam).replace('.', ','),
+            String(tot).replace('.', ','), String(p.unitPrice).replace('.', ','), String(pay).replace('.', ',')
+          ].join(';'));
+        });
+
+        const blob = new Blob(['\uFEFF' + lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Alakuzular_Rapor_${state.repStart}_${state.repEnd}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+        notify('Excel (CSV) raporu indirildi.');
+      }
+
+      // İlk Başlatma
+      render();
+    })();
+  </script>
+</body>
+</html>
