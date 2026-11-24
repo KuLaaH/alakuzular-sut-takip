@@ -721,9 +721,11 @@
           <label>Giriş Şifresi *</label>
           <input type="text" id="uSifre" placeholder="Şifre belirleyin" />
         </div>
-        <div>
-          <label>Atanan Plaka (Boş ise Tüm Plakalar)</label>
-          <input type="text" id="uPlaka" placeholder="Örn: 42 ALK 01" />
+       <div>
+          <label>Atanan Plaka</label>
+          <select id="uPlaka">
+            <option value="">Tüm Plakalar (Kısıt Yok)</option>
+          </select>
         </div>
       </div>
 
@@ -1369,8 +1371,8 @@
       document.getElementById('uAdSoyad').value = u.ad_soyad || '';
       document.getElementById('uKullaniciAdi').value = u.kullanici_adi || '';
       document.getElementById('uSifre').value = u.sifre || '';
-      document.getElementById('uPlaka').value = u.atanan_plaka || '';
       document.getElementById('uAktif').checked = !!u.aktif;
+      
 
       const perms = Array.isArray(u.yetkiler) ? u.yetkiler : [];
       document.querySelectorAll('.u-perm').forEach(cb => {
@@ -1383,6 +1385,63 @@
       document.getElementById('uKullaniciAdi').value = '';
       document.getElementById('uSifre').value = '';
       document.getElementById('uPlaka').value = '';
+      document.getElementById('uAktif').checked = true;
+      document.querySelectorAll('.u-perm').forEach(cb => { cb.checked = cb.value === 'toplama'; });
+    }
+    modal.classList.remove('hidden');
+    document.getElementById('uAdSoyad').focus();
+  }
+  async function populateUserPlakaSelect(selectedPlaka = '') {
+    const sel = document.getElementById('uPlaka');
+    const plakaSet = new Set();
+
+    allMustahsiller.forEach(m => {
+      if (m.plaka && m.plaka.trim()) plakaSet.add(m.plaka.trim().toUpperCase());
+    });
+
+    allUsers.forEach(u => {
+      if (u.atanan_plaka && u.atanan_plaka.trim()) plakaSet.add(u.atanan_plaka.trim().toUpperCase());
+    });
+
+    const { data: kData } = await sbClient.from('merkez_kantar').select('plaka');
+    (kData || []).forEach(k => {
+      if (k.plaka && k.plaka.trim()) plakaSet.add(k.plaka.trim().toUpperCase());
+    });
+
+    if (selectedPlaka && selectedPlaka.trim()) {
+      plakaSet.add(selectedPlaka.trim().toUpperCase());
+    }
+
+    const sortedPlakalar = [...plakaSet].sort((a, b) => a.localeCompare(b, 'tr'));
+    sel.innerHTML =
+      `<option value="">Tüm Plakalar (Kısıt Yok)</option>` +
+      sortedPlakalar.map(p => `<option value="${p}">${p}</option>`).join('');
+
+    sel.value = selectedPlaka ? selectedPlaka.trim().toUpperCase() : '';
+  }
+
+  async function openUserModal(u = null) {
+    const modal = document.getElementById('userModal');
+    if (u) {
+      document.getElementById('userModalTitle').textContent = `Kullanıcı Düzenle: ${u.ad_soyad}`;
+      document.getElementById('editUserId').value = u.id;
+      document.getElementById('uAdSoyad').value = u.ad_soyad || '';
+      document.getElementById('uKullaniciAdi').value = u.kullanici_adi || '';
+      document.getElementById('uSifre').value = u.sifre || '';
+      await populateUserPlakaSelect(u.atanan_plaka || '');
+      document.getElementById('uAktif').checked = !!u.aktif;
+
+      const perms = Array.isArray(u.yetkiler) ? u.yetkiler : [];
+      document.querySelectorAll('.u-perm').forEach(cb => {
+        cb.checked = perms.includes(cb.value);
+      });
+    } else {
+      document.getElementById('userModalTitle').textContent = 'Yeni Kullanıcı Ekle';
+      document.getElementById('editUserId').value = '';
+      document.getElementById('uAdSoyad').value = '';
+      document.getElementById('uKullaniciAdi').value = '';
+      document.getElementById('uSifre').value = '';
+      await populateUserPlakaSelect('');
       document.getElementById('uAktif').checked = true;
       document.querySelectorAll('.u-perm').forEach(cb => { cb.checked = cb.value === 'toplama'; });
     }
