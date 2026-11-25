@@ -1142,23 +1142,37 @@
 
 
 
-  <!-- 3. GÜNLÜK MALİYET TARİFESİ & KÂR ANALİZİ -->
+  <!-- 3. TARİH ARALIKLI MALİYET TARİFESİ & KÂR ANALİZİ -->
 
   <div id="tab-maliyet" class="tab-panel hidden">
 
     <div class="card">
 
-      <h3>Günlük Maliyet, Gider & Kur Tarifesi Tanımlama</h3>
+      <h3>📅 Tarih Aralıklı Maliyet, Gider & Kur Dönemi Tanımlama</h3>
 
-      <p style="font-size:0.83rem;color:#475569;margin-bottom:12px;">Seçilen tarihten itibaren geçerli olacak günlük sabit giderleri, Euro kurunu ve satış fiyatlarını kaydedin. Farklı günlerde değişen giderleri ilgili tarihle girdiğinizde sistem her günü kendi tarifesinden hesaplar.</p>
+      <div class="info-banner">
+
+        <strong>Tarih Aralıklı Gider & Kur Dönemleri:</strong><br/>
+
+        Euro kuru, doğalgaz, elektrik, mazot, işçilik, yemek, su, kova maliyetleri ve satış fiyatlarını <strong>Başlangıç – Bitiş Tarihi</strong> vererek kaydedin. Böylece ayın ilk yarısındaki gider/kur oranları ile ayın ikinci yarısındaki değişen oranlar birbirini bozmadan kendi tarih aralığında hesaplanır.
+
+      </div>
 
       <div class="grid-4" style="margin-bottom:12px;">
 
         <div>
 
-          <label>Geçerlilik Tarihi</label>
+          <label>Başlangıç Tarihi *</label>
 
-          <input type="date" id="tarifeTarih" onchange="fillTarifeFormForDate(this.value)" />
+          <input type="date" id="tarifeBaslangic" />
+
+        </div>
+
+        <div>
+
+          <label>Bitiş Tarihi *</label>
+
+          <input type="date" id="tarifeBitis" />
 
         </div>
 
@@ -1169,6 +1183,20 @@
           <input type="number" step="0.0001" id="tarifeEuro" placeholder="Örn: 38.50" />
 
         </div>
+
+        <div>
+
+          <label>Dönem Açıklaması</label>
+
+          <input type="text" id="tarifeAciklama" placeholder="Örn: Kasım 2. yarı zamlı giderler" />
+
+        </div>
+
+      </div>
+
+
+
+      <div class="grid-3" style="margin-bottom:12px;">
 
         <div>
 
@@ -1186,10 +1214,6 @@
 
         </div>
 
-      </div>
-
-      <div class="grid-4" style="margin-bottom:12px;">
-
         <div>
 
           <label>Mazot (Günlük ₺)</label>
@@ -1197,6 +1221,12 @@
           <input type="number" step="0.01" id="tarifeMazot" value="0" />
 
         </div>
+
+      </div>
+
+
+
+      <div class="grid-3" style="margin-bottom:12px;">
 
         <div>
 
@@ -1304,7 +1334,7 @@
 
       </div>
 
-      <button class="btn btn-primary btn-lg" onclick="saveMaliyetTarifesi()">Günlük Maliyet Tarifesini Kaydet</button>
+      <button class="btn btn-primary btn-lg" onclick="saveMaliyetTarifesi()">Tarih Aralıklı Maliyet Dönemini Kaydet</button>
 
     </div>
 
@@ -1312,7 +1342,7 @@
 
     <div class="card">
 
-      <h3>Kayıtlı Günlük Maliyet & Gider Tarifeleri Geçmişi</h3>
+      <h3>Kayıtlı Maliyet & Gider Dönemleri Listesi</h3>
 
       <div style="overflow-x:auto;">
 
@@ -1322,7 +1352,9 @@
 
             <tr>
 
-              <th>Tarih</th>
+              <th>Başlangıç Tarihi</th>
+
+              <th>Bitiş Tarihi</th>
 
               <th>Euro Kuru</th>
 
@@ -1336,7 +1368,9 @@
 
               <th>Yemek + Su</th>
 
-              <th>Toplam Sabit Gider</th>
+              <th>Günlük Sabit Gider</th>
+
+              <th>Açıklama</th>
 
               <th>İşlem</th>
 
@@ -1467,8 +1501,6 @@
     </div>
 
 
-
-    <!-- YENİ DÖNEMLİK SÜT FİYAT LİSTESİ MODÜLÜ -->
 
     <div class="card">
 
@@ -2266,8 +2298,6 @@
 
 
 
-  // Yeni girişlerde: Önce o tarih ve gruba uyan Fiyat Dönemine bakar, yoksa müstahsil kartındaki varsayılan fiyatı alır
-
   function resolveActivePriceForNewEntry(mustahsilId, tarih) {
 
     const m = allMustahsiller.find(x => x.id === mustahsilId);
@@ -2275,8 +2305,6 @@
     const grup = (m?.grup || 'GENEL').trim().toUpperCase();
 
 
-
-    // Önce doğrudan gruba özel tanımlı dönemi ara (en son eklenen öncelikli)
 
     const grupDonem = allFiyatDonemleri.find(d =>
 
@@ -2291,8 +2319,6 @@
     if (grupDonem) return Number(grupDonem.birim_fiyat || 0);
 
 
-
-    // Yoksa "TUMU" (Tüm Müstahsiller) için tanımlı dönemi ara
 
     const genelDonem = allFiyatDonemleri.find(d =>
 
@@ -2313,8 +2339,6 @@
   }
 
 
-
-  // Kayıtlı bir süt satırının fiyatını okur: Satırda mühürlenmiş birim_fiyat varsa ONU kullanır (geçmiş bozulmaz!)
 
   function getSavedSutRowPrice(row) {
 
@@ -2444,7 +2468,7 @@
 
     const today = todayStr();
 
-    ['sutTarih', 'depoTarih', 'tarifeTarih', 'analizTarih', 'raporBitis', 'fdBaslangic', 'fdBitis'].forEach(id => {
+    ['sutTarih', 'depoTarih', 'tarifeBaslangic', 'tarifeBitis', 'analizTarih', 'raporBitis', 'fdBaslangic', 'fdBitis'].forEach(id => {
 
       document.getElementById(id).value = today;
 
@@ -3232,8 +3256,6 @@
 
 
 
-    // Kayıt anında o tarih için geçerli olan birim fiyatı bulup kaydın içine mühürlüyoruz
-
     const anlikBirimFiyat = resolveActivePriceForNewEntry(mustahsilId, tarih);
 
 
@@ -3738,7 +3760,7 @@
 
   // ==========================================
 
-  // GÜNLÜK MALİYET TARİFELERİ & KÂR ANALİZİ
+  // TARİH ARALIKLI MALİYET TARİFELERİ & KÂR ANALİZİ
 
   // ==========================================
 
@@ -3747,6 +3769,12 @@
     const t = getEffectiveTarife(tarih);
 
     if (!t) return;
+
+    document.getElementById('tarifeBaslangic').value = t.gecerlilik_tarihi || tarih;
+
+    document.getElementById('tarifeBitis').value = t.bitis_tarihi || t.gecerlilik_tarihi || tarih;
+
+    document.getElementById('tarifeAciklama').value = t.aciklama || '';
 
     document.getElementById('tarifeEuro').value = t.euro_kuru ?? '';
 
@@ -3796,15 +3824,29 @@
 
     if (!tbody) return;
 
+    if (!allTarifeler.length) {
+
+      tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;color:#64748b;">Henüz maliyet & gider dönemi kaydedilmemiş.</td></tr>`;
+
+      return;
+
+    }
+
+
+
     tbody.innerHTML = allTarifeler.map(t => {
 
       const yemekSu = Number(t.yemek || 0) + Number(t.su || 0);
 
       const topGider = Number(t.dogalgaz || 0) + Number(t.elektrik || 0) + Number(t.mazot || 0) + Number(t.iscilik || 0) + yemekSu;
 
+      const bitisStr = t.bitis_tarihi || 'Süresiz / Güncel';
+
       return `<tr>
 
         <td><strong>${t.gecerlilik_tarihi}</strong></td>
+
+        <td><strong>${bitisStr}</strong></td>
 
         <td>${Number(t.euro_kuru || 0).toFixed(2)} ₺</td>
 
@@ -3819,6 +3861,8 @@
         <td>${yemekSu.toFixed(2)} ₺</td>
 
         <td><strong>${topGider.toFixed(2)} ₺</strong></td>
+
+        <td>${t.aciklama || '-'}</td>
 
         <td style="white-space:nowrap;">
 
@@ -3838,11 +3882,9 @@
 
   function editTarifeRow(tarih) {
 
-    document.getElementById('tarifeTarih').value = tarih;
-
     fillTarifeFormForDate(tarih);
 
-    showToast(`${tarih} tarihli maliyet tarifesi forma yüklendi.`);
+    showToast(`${tarih} başlangıçlı maliyet dönemi forma yüklendi.`);
 
   }
 
@@ -3850,7 +3892,7 @@
 
   async function deleteTarifeRow(tarih) {
 
-    if (!confirm(`${tarih} tarihli maliyet tarifesini silmek istediğinize emin misiniz?`)) return;
+    if (!confirm(`${tarih} başlangıçlı maliyet dönemini silmek istediğinize emin misiniz?`)) return;
 
     const { error } = await sbClient.from('maliyet_tarifeleri').delete().eq('gecerlilik_tarihi', tarih);
 
@@ -3864,7 +3906,7 @@
 
     renderGunlukAnaliz();
 
-    showToast(`${tarih} tarihli tarife silindi.`);
+    showToast(`${tarih} başlangıçlı maliyet dönemi silindi.`);
 
   }
 
@@ -3872,15 +3914,23 @@
 
   async function saveMaliyetTarifesi() {
 
-    const tarih = document.getElementById('tarifeTarih').value;
+    const bas = document.getElementById('tarifeBaslangic').value;
 
-    if (!tarih) return showToast('Geçerlilik tarihi seçin.', true);
+    const bit = document.getElementById('tarifeBitis').value;
+
+    if (!bas || !bit) return showToast('Başlangıç ve bitiş tarihi seçin.', true);
+
+    if (bas > bit) return showToast('Başlangıç tarihi bitiş tarihinden büyük olamaz.', true);
 
 
 
     const payload = {
 
-      gecerlilik_tarihi: tarih,
+      gecerlilik_tarihi: bas,
+
+      bitis_tarihi: bit,
+
+      aciklama: document.getElementById('tarifeAciklama').value.trim() || null,
 
       euro_kuru: parseFloat(document.getElementById('tarifeEuro').value) || 0,
 
@@ -3932,7 +3982,7 @@
 
     const { error } = await sbClient.from('maliyet_tarifeleri').upsert([payload], { onConflict: 'gecerlilik_tarihi' });
 
-    if (error) return showToast('Tarife hatası: ' + error.message, true);
+    if (error) return showToast('Tarife kayıt hatası: ' + error.message, true);
 
 
 
@@ -3940,7 +3990,7 @@
 
     allTarifeler = tData || [];
 
-    showToast(`${tarih} tarihli maliyet tarifesi kaydedildi.`);
+    showToast(`${bas} - ${bit} arası maliyet & gider dönemi kaydedildi.`);
 
     renderTarifeHistoryTable();
 
@@ -3951,6 +4001,22 @@
 
 
   function getEffectiveTarife(tarih) {
+
+    // 1. Önce doğrudan başlangıç-bitiş aralığı içine düşen dönemi bul
+
+    const exactRange = allTarifeler.find(t =>
+
+      t.gecerlilik_tarihi <= tarih &&
+
+      (!t.bitis_tarihi || t.bitis_tarihi >= tarih)
+
+    );
+
+    if (exactRange) return exactRange;
+
+
+
+    // 2. Yoksa o tarihten önceki en yakın başlangıçlı tarifeyi getir
 
     return allTarifeler.find(t => t.gecerlilik_tarihi <= tarih) || allTarifeler[allTarifeler.length - 1] || null;
 
@@ -4020,11 +4086,19 @@
 
 
 
+    const donemAralikText = tarife
+
+      ? `${tarife.gecerlilik_tarihi}${tarife.bitis_tarihi ? ' / ' + tarife.bitis_tarihi : ' (Güncel)'}`
+
+      : '';
+
+
+
     document.getElementById('aktifTarifeBilgi').innerHTML = tarife
 
-      ? `Geçerli Tarife Başlangıcı: <strong>${tarife.gecerlilik_tarihi}</strong> | Euro Kuru: <strong>${Number(tarife.euro_kuru).toFixed(2)} ₺</strong> | Günlük Sabit Giderler: <strong>${sabitGider.toFixed(2)} ₺</strong>`
+      ? `Geçerli Maliyet Dönemi: <strong>${donemAralikText}</strong> | Euro Kuru: <strong>${Number(tarife.euro_kuru).toFixed(2)} ₺</strong> | Günlük Sabit Giderler: <strong>${sabitGider.toFixed(2)} ₺</strong>`
 
-      : `<span style="color:#b91c1c;">Bu tarih için tanımlı maliyet tarifesi bulunamadı; yukarıdan kaydedin.</span>`;
+      : `<span style="color:#b91c1c;">Bu tarih için tanımlı maliyet dönemi bulunamadı; yukarıdan kaydedin.</span>`;
 
 
 
