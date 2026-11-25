@@ -404,6 +404,8 @@
 
     .btn-success { background: var(--accent); color: #fff; }
 
+    .btn-warning { background: var(--warning); color: #fff; }
+
     .btn-danger { background: var(--danger); color: #fff; }
 
     .btn-outline { background: #fff; border: 1.5px solid var(--border); color: var(--text); }
@@ -465,6 +467,26 @@
       font-weight: 600;
 
       margin: 12px 0;
+
+    }
+
+    .info-banner {
+
+      background: #eff6ff;
+
+      border: 1px solid #bfdbfe;
+
+      color: #1e3a8a;
+
+      padding: 11px 14px;
+
+      border-radius: 8px;
+
+      font-size: 0.85rem;
+
+      margin-bottom: 14px;
+
+      line-height: 1.45;
 
     }
 
@@ -894,7 +916,7 @@
 
               <th>Durum</th>
 
-              <th class="finans-yetki">O Günkü Fiyat</th>
+              <th class="finans-yetki">Kayıt Birim Fiyatı</th>
 
               <th class="finans-yetki">Günlük Hakediş</th>
 
@@ -1390,7 +1412,7 @@
 
 
 
-  <!-- 4. MÜSTAHSİL, GRUP/PLAKA TANIMLARI, GÜNLÜK FİYAT & TOPLU RAPOR -->
+  <!-- 4. MÜSTAHSİL, GRUP/PLAKA TANIMLARI, DÖNEMLİK FİYAT & TOPLU RAPOR -->
 
   <div id="tab-yonetim" class="tab-panel hidden">
 
@@ -1406,7 +1428,7 @@
 
             <label>Yeni Grup Adı</label>
 
-            <input type="text" id="newGrupInput" placeholder="Örn: KÖY-3 veya BÜYÜK ÜRETİCİ" onkeydown="if(event.key==='Enter') addGrupDefinition()" />
+            <input type="text" id="newGrupInput" placeholder="Örn: LADİK SOĞUK veya BÜYÜK ÜRETİCİ" onkeydown="if(event.key==='Enter') addGrupDefinition()" />
 
           </div>
 
@@ -1446,6 +1468,114 @@
 
 
 
+    <!-- YENİ DÖNEMLİK SÜT FİYAT LİSTESİ MODÜLÜ -->
+
+    <div class="card">
+
+      <h3>📅 Tarih Aralıklı Süt Fiyat Dönemleri (Geçmiş Bozulmaz)</h3>
+
+      <div class="info-banner">
+
+        <strong>Nasıl Çalışır?</strong><br/>
+
+        1) Süt girişi yapıldığı anda, o tarihte geçerli olan birim fiyat süt kaydının içine <strong>kalıcı olarak mühürlenir</strong>; ileriye dönük tanımladığınız fiyatlar geçmiş kayıtlarınızı asla değiştirmez.<br/>
+
+        2) Aşağıdan <strong>Başlangıç – Bitiş Tarihi</strong> seçerek dönemlik fiyat listesi oluşturabilir, dilerseniz sadece o tarih aralığındaki mevcut süt kayıtlarını sonradan güncelleyebilirsiniz.
+
+      </div>
+
+      <div class="grid-4" style="align-items:end;margin-bottom:10px;">
+
+        <div>
+
+          <label>Başlangıç Tarihi</label>
+
+          <input type="date" id="fdBaslangic" />
+
+        </div>
+
+        <div>
+
+          <label>Bitiş Tarihi</label>
+
+          <input type="date" id="fdBitis" />
+
+        </div>
+
+        <div>
+
+          <label>Hedef Grup</label>
+
+          <select id="fdGrup"></select>
+
+        </div>
+
+        <div>
+
+          <label>Dönem Birim Fiyatı (₺/Kg)</label>
+
+          <input type="number" step="0.01" id="fdFiyat" placeholder="Örn: 17.50" />
+
+        </div>
+
+      </div>
+
+      <div class="grid-2" style="align-items:end;margin-bottom:14px;">
+
+        <div>
+
+          <label>Dönem Notu (İsteğe Bağlı)</label>
+
+          <input type="text" id="fdAciklama" placeholder="Örn: Kasım 2. yarı zamlı tarife" />
+
+        </div>
+
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+
+          <button type="button" class="btn btn-primary" style="flex:1;" onclick="saveFiyatDonemi(false)">Fiyat Dönemini Kaydet</button>
+
+          <button type="button" class="btn btn-warning" style="flex:1;" onclick="saveFiyatDonemi(true)">Kaydet & Bu Aralıktaki Sütleri Güncelle</button>
+
+        </div>
+
+      </div>
+
+
+
+      <div style="overflow-x:auto;">
+
+        <table>
+
+          <thead>
+
+            <tr>
+
+              <th>Başlangıç Tarihi</th>
+
+              <th>Bitiş Tarihi</th>
+
+              <th>Kapsam (Grup)</th>
+
+              <th>Birim Fiyat (₺/Kg)</th>
+
+              <th>Açıklama</th>
+
+              <th>İşlem</th>
+
+            </tr>
+
+          </thead>
+
+          <tbody id="fiyatDonemleriBody"></tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+
+
     <div class="card">
 
       <h3>Yeni Müstahsil Kartı Ekle</h3>
@@ -1476,7 +1606,7 @@
 
         </div>
 
-        <div><label>Başlangıç Süt Fiyatı (₺/Kg)</label><input type="number" step="0.01" id="mFiyat" value="16.50" /></div>
+        <div><label>Varsayılan Kart Fiyatı (₺/Kg)</label><input type="number" step="0.01" id="mFiyat" value="16.50" /></div>
 
       </div>
 
@@ -1488,43 +1618,7 @@
 
     <div class="card">
 
-      <h3>Günlük Süt Fiyatı Tanımlama & Müstahsil Listesi</h3>
-
-      <p style="font-size:0.83rem;color:#475569;margin-bottom:12px;">Seçilen tarihten itibaren geçerli olacak günlük süt alım fiyatını toplu veya tekil olarak girebilirsiniz. Sistem, her süt girişini kendi toplandığı tarihteki fiyatla çarpar.</p>
-
-      <div class="grid-4" style="align-items:end;margin-bottom:14px;">
-
-        <div>
-
-          <label>Fiyat Geçerlilik Tarihi</label>
-
-          <input type="date" id="fiyatGecerlilikTarih" onchange="renderMustahsilTable()" />
-
-        </div>
-
-        <div>
-
-          <label>Hedef Grup</label>
-
-          <select id="topluGrupSelect"></select>
-
-        </div>
-
-        <div>
-
-          <label>Yeni Birim Fiyat (₺/Kg)</label>
-
-          <input type="number" step="0.01" id="topluFiyatInput" placeholder="Örn: 17.25" />
-
-        </div>
-
-        <div>
-
-          <button class="btn btn-primary btn-lg" onclick="applyBulkPrice()">Seçili Tarih & Gruba Uygula</button>
-
-        </div>
-
-      </div>
+      <h3>Müstahsil Listesi & Varsayılan Kart Fiyatları</h3>
 
       <div style="overflow-x:auto;">
 
@@ -1544,7 +1638,7 @@
 
               <th>TC / İşletme No</th>
 
-              <th>Seçili Tarih Fiyatı (₺/Kg)</th>
+              <th>Varsayılan Fiyat (₺/Kg)</th>
 
               <th>İşlem</th>
 
@@ -1740,13 +1834,21 @@
 
       </div>
 
-      <div class="grid-2" style="align-items:center;">
+      <div class="grid-3" style="align-items:center;">
 
         <div>
 
           <label>Süt Miktarı (Kg)</label>
 
           <input type="number" step="0.1" id="esMiktar" class="input-xl" />
+
+        </div>
+
+        <div>
+
+          <label>Kayıt Birim Fiyatı (₺/Kg)</label>
+
+          <input type="number" step="0.01" id="esFiyat" class="input-xl" />
 
         </div>
 
@@ -1810,7 +1912,7 @@
 
         <div><label>Müstahsil Grubu</label><select id="emGrup"></select></div>
 
-        <div><label>Güncel Varsayılan Fiyat (₺/Kg)</label><input type="number" step="0.01" id="emFiyat" /></div>
+        <div><label>Varsayılan Kart Fiyatı (₺/Kg)</label><input type="number" step="0.01" id="emFiyat" /></div>
 
       </div>
 
@@ -2082,7 +2184,7 @@
 
   let allMustahsiller = [];
 
-  let allFiyatGecmisi = [];
+  let allFiyatDonemleri = [];
 
   let allTarifeler = [];
 
@@ -2146,7 +2248,7 @@
 
     t.style.display = 'block';
 
-    setTimeout(() => { t.style.display = 'none'; }, 3500);
+    setTimeout(() => { t.style.display = 'none'; }, 3800);
 
   }
 
@@ -2164,23 +2266,65 @@
 
 
 
-  // Seçili müstahsilin belirli bir tarihte geçerli birim fiyatını bulur
+  // Yeni girişlerde: Önce o tarih ve gruba uyan Fiyat Dönemine bakar, yoksa müstahsil kartındaki varsayılan fiyatı alır
 
-  function getMustahsilPriceOnDate(mustahsilId, tarih) {
-
-    const records = allFiyatGecmisi
-
-      .filter(f => f.mustahsil_id === mustahsilId && f.gecerlilik_tarihi <= tarih)
-
-      .sort((a, b) => b.gecerlilik_tarihi.localeCompare(a.gecerlilik_tarihi));
-
-    if (records.length) return Number(records[0].birim_fiyat || 0);
-
-
+  function resolveActivePriceForNewEntry(mustahsilId, tarih) {
 
     const m = allMustahsiller.find(x => x.id === mustahsilId);
 
+    const grup = (m?.grup || 'GENEL').trim().toUpperCase();
+
+
+
+    // Önce doğrudan gruba özel tanımlı dönemi ara (en son eklenen öncelikli)
+
+    const grupDonem = allFiyatDonemleri.find(d =>
+
+      d.baslangic_tarihi <= tarih &&
+
+      d.bitis_tarihi >= tarih &&
+
+      (d.grup || '').trim().toUpperCase() === grup
+
+    );
+
+    if (grupDonem) return Number(grupDonem.birim_fiyat || 0);
+
+
+
+    // Yoksa "TUMU" (Tüm Müstahsiller) için tanımlı dönemi ara
+
+    const genelDonem = allFiyatDonemleri.find(d =>
+
+      d.baslangic_tarihi <= tarih &&
+
+      d.bitis_tarihi >= tarih &&
+
+      (d.grup || '').trim().toUpperCase() === 'TUMU'
+
+    );
+
+    if (genelDonem) return Number(genelDonem.birim_fiyat || 0);
+
+
+
     return Number(m?.birim_fiyat || 0);
+
+  }
+
+
+
+  // Kayıtlı bir süt satırının fiyatını okur: Satırda mühürlenmiş birim_fiyat varsa ONU kullanır (geçmiş bozulmaz!)
+
+  function getSavedSutRowPrice(row) {
+
+    if (row && row.birim_fiyat !== null && row.birim_fiyat !== undefined && !isNaN(Number(row.birim_fiyat))) {
+
+      return Number(row.birim_fiyat);
+
+    }
+
+    return resolveActivePriceForNewEntry(row.mustahsil_id, row.tarih);
 
   }
 
@@ -2300,7 +2444,7 @@
 
     const today = todayStr();
 
-    ['sutTarih', 'depoTarih', 'tarifeTarih', 'analizTarih', 'raporBitis', 'fiyatGecerlilikTarih'].forEach(id => {
+    ['sutTarih', 'depoTarih', 'tarifeTarih', 'analizTarih', 'raporBitis', 'fdBaslangic', 'fdBitis'].forEach(id => {
 
       document.getElementById(id).value = today;
 
@@ -2422,7 +2566,13 @@
 
     }
 
-    if (tabId === 'yonetim') renderMustahsilTable();
+    if (tabId === 'yonetim') {
+
+      renderFiyatDonemleriTable();
+
+      renderMustahsilTable();
+
+    }
 
     if (tabId === 'kullanicilar') loadUsersList();
 
@@ -2696,19 +2846,19 @@
 
 
 
-    const topluSel = document.getElementById('topluGrupSelect');
+    const fdSel = document.getElementById('fdGrup');
 
-    if (topluSel) {
+    if (fdSel) {
 
-      const prev = topluSel.value;
+      const prev = fdSel.value;
 
-      topluSel.innerHTML =
+      fdSel.innerHTML =
 
-        `<option value="__ALL__">Tüm Müstahsiller</option>` +
+        `<option value="TUMU">Tüm Müstahsiller</option>` +
 
         gruplar.map(g => `<option value="${g}">${g}</option>`).join('');
 
-      if (prev && [...topluSel.options].some(o => o.value === prev)) topluSel.value = prev;
+      if (prev && [...fdSel.options].some(o => o.value === prev)) fdSel.value = prev;
 
     }
 
@@ -2736,11 +2886,11 @@
 
   async function refreshMasterData() {
 
-    const [{ data: mData }, { data: fData }, { data: tData }, { data: uData }, { data: sData }] = await Promise.all([
+    const [{ data: mData }, { data: fdData }, { data: tData }, { data: uData }, { data: sData }] = await Promise.all([
 
       sbClient.from('mustahsiller').select('*').order('cari_kodu', { ascending: true }),
 
-      sbClient.from('mustahsil_fiyat_gecmisi').select('*').order('gecerlilik_tarihi', { ascending: false }),
+      sbClient.from('fiyat_donemleri').select('*').order('created_at', { ascending: false }),
 
       sbClient.from('maliyet_tarifeleri').select('*').order('gecerlilik_tarihi', { ascending: false }),
 
@@ -2752,7 +2902,7 @@
 
     allMustahsiller = mData || [];
 
-    allFiyatGecmisi = fData || [];
+    allFiyatDonemleri = fdData || [];
 
     allTarifeler = tData || [];
 
@@ -2812,6 +2962,8 @@
 
     populateMustahsilSelect();
 
+    renderFiyatDonemleriTable();
+
     renderMustahsilTable();
 
     renderTarifeHistoryTable();
@@ -2835,6 +2987,206 @@
         }).join('')
 
       : '<option value="">Kayıtlı müstahsil bulunamadı</option>';
+
+  }
+
+
+
+  // ==========================================
+
+  // DÖNEMLİK SÜT FİYATI YÖNETİMİ
+
+  // ==========================================
+
+  function renderFiyatDonemleriTable() {
+
+    const tbody = document.getElementById('fiyatDonemleriBody');
+
+    if (!tbody) return;
+
+    if (!allFiyatDonemleri.length) {
+
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:#64748b;">Henüz tarih aralıklı fiyat dönemi eklenmemiş. Yeni süt girişlerinde müstahsil kartındaki varsayılan fiyat kullanılır.</td></tr>`;
+
+      return;
+
+    }
+
+
+
+    tbody.innerHTML = allFiyatDonemleri.map(d => {
+
+      const grpLabel = (d.grup || 'TUMU').toUpperCase() === 'TUMU' ? 'Tüm Müstahsiller' : d.grup.toUpperCase();
+
+      return `<tr>
+
+        <td><strong>${d.baslangic_tarihi}</strong></td>
+
+        <td><strong>${d.bitis_tarihi}</strong></td>
+
+        <td><span class="badge badge-blue">${grpLabel}</span></td>
+
+        <td><strong>${Number(d.birim_fiyat || 0).toFixed(2)} ₺</strong></td>
+
+        <td>${d.aciklama || '-'}</td>
+
+        <td style="white-space:nowrap;">
+
+          <button type="button" class="btn btn-warning btn-sm" onclick="applyDonemToExistingSut('${d.id}')">Bu Aralıktaki Sütlere Uygula</button>
+
+          <button type="button" class="btn btn-danger btn-sm" onclick="deleteFiyatDonemi('${d.id}')">Sil</button>
+
+        </td>
+
+      </tr>`;
+
+    }).join('');
+
+  }
+
+
+
+  async function saveFiyatDonemi(applyToExisting = false) {
+
+    const bas = document.getElementById('fdBaslangic').value;
+
+    const bit = document.getElementById('fdBitis').value;
+
+    const grup = (document.getElementById('fdGrup').value || 'TUMU').trim().toUpperCase();
+
+    const fiyat = parseFloat(document.getElementById('fdFiyat').value);
+
+    const aciklama = document.getElementById('fdAciklama').value.trim() || null;
+
+
+
+    if (!bas || !bit) return showToast('Başlangıç ve bitiş tarihi seçin.', true);
+
+    if (bas > bit) return showToast('Başlangıç tarihi bitiş tarihinden büyük olamaz.', true);
+
+    if (isNaN(fiyat) || fiyat < 0) return showToast('Geçerli bir birim fiyat girin.', true);
+
+
+
+    const { data: inserted, error } = await sbClient.from('fiyat_donemleri').insert([{
+
+      baslangic_tarihi: bas,
+
+      bitis_tarihi: bit,
+
+      grup,
+
+      birim_fiyat: fiyat,
+
+      aciklama
+
+    }]).select();
+
+
+
+    if (error) return showToast('Fiyat dönemi kayıt hatası: ' + error.message, true);
+
+
+
+    document.getElementById('fdFiyat').value = '';
+
+    document.getElementById('fdAciklama').value = '';
+
+    await refreshMasterData();
+
+
+
+    if (applyToExisting && inserted && inserted[0]) {
+
+      await applyDonemToExistingSut(inserted[0].id, true);
+
+    } else {
+
+      showToast(`${bas} - ${bit} arası fiyat dönemi (${fiyat.toFixed(2)} ₺) kaydedildi. Geçmiş süt kayıtları değiştirilmedi.`);
+
+    }
+
+  }
+
+
+
+  async function applyDonemToExistingSut(donemId, skipConfirm = false) {
+
+    const d = allFiyatDonemleri.find(x => x.id === donemId);
+
+    if (!d) return;
+
+
+
+    const grpUpper = (d.grup || 'TUMU').toUpperCase();
+
+    const grpText = grpUpper === 'TUMU' ? 'TÜM MÜSTAHSİLLER' : grpUpper;
+
+
+
+    if (!skipConfirm) {
+
+      const ok = confirm(`${d.baslangic_tarihi} ile ${d.bitis_tarihi} tarihleri arasında "${grpText}" için girilmiş mevcut süt kayıtlarının birim fiyatını ${Number(d.birim_fiyat).toFixed(2)} ₺ olarak güncellemek istiyor musunuz?\n\n(Bu tarih aralığı dışındaki hiçbir güne dokunulmaz.)`);
+
+      if (!ok) return;
+
+    }
+
+
+
+    let query = sbClient
+
+      .from('sut_girisleri')
+
+      .update({ birim_fiyat: Number(d.birim_fiyat) })
+
+      .gte('tarih', d.baslangic_tarihi)
+
+      .lte('tarih', d.bitis_tarihi);
+
+
+
+    if (grpUpper !== 'TUMU') {
+
+      const mIds = allMustahsiller
+
+        .filter(m => (m.grup || 'GENEL').trim().toUpperCase() === grpUpper)
+
+        .map(m => m.id);
+
+      if (!mIds.length) return showToast(`"${grpUpper}" grubunda müstahsil bulunamadı.`, true);
+
+      query = query.in('mustahsil_id', mIds);
+
+    }
+
+
+
+    const { error } = await query;
+
+    if (error) return showToast('Süt kayıtları güncellenemedi: ' + error.message, true);
+
+
+
+    showToast(`${d.baslangic_tarihi} - ${d.bitis_tarihi} aralığındaki süt kayıtları ${Number(d.birim_fiyat).toFixed(2)} ₺ olarak güncellendi.`);
+
+    loadSutGirisleri();
+
+  }
+
+
+
+  async function deleteFiyatDonemi(id) {
+
+    if (!confirm('Bu fiyat dönemini listeden silmek istediğinize emin misiniz? (Daha önce girilmiş süt kayıtlarının fiyatı bozulmaz.)')) return;
+
+    const { error } = await sbClient.from('fiyat_donemleri').delete().eq('id', id);
+
+    if (error) return showToast('Silme hatası: ' + error.message, true);
+
+    showToast('Fiyat dönemi silindi.');
+
+    await refreshMasterData();
 
   }
 
@@ -2880,6 +3232,12 @@
 
 
 
+    // Kayıt anında o tarih için geçerli olan birim fiyatı bulup kaydın içine mühürlüyoruz
+
+    const anlikBirimFiyat = resolveActivePriceForNewEntry(mustahsilId, tarih);
+
+
+
     const { error } = await sbClient.from('sut_girisleri').insert([{
 
       tarih,
@@ -2891,6 +3249,8 @@
       mustahsil_id: mustahsilId,
 
       miktar_kg: miktar,
+
+      birim_fiyat: anlikBirimFiyat,
 
       ayri_gugum: ayri,
 
@@ -2906,7 +3266,7 @@
 
     document.getElementById('sutAyriGugum').checked = false;
 
-    showToast(`Süt girişi kaydedildi (${kayitPlaka}).`);
+    showToast(`Süt girişi kaydedildi (${kayitPlaka} - ${anlikBirimFiyat.toFixed(2)} ₺/Kg).`);
 
     loadSutGirisleri();
 
@@ -2956,7 +3316,7 @@
 
       const kg = Number(r.miktar_kg || 0);
 
-      const fiyat = getMustahsilPriceOnDate(r.mustahsil_id, r.tarih);
+      const fiyat = getSavedSutRowPrice(r);
 
       const tutar = kg * fiyat;
 
@@ -3006,7 +3366,7 @@
 
       ${showFinans ? `
 
-        <div class="kpi-box"><div class="lbl">O Günkü Ort. Süt Fiyatı</div><div class="val">${ortFiyat.toFixed(2)} ₺/Kg</div></div>
+        <div class="kpi-box"><div class="lbl">Vardiya Ort. Süt Fiyatı</div><div class="val">${ortFiyat.toFixed(2)} ₺/Kg</div></div>
 
         <div class="kpi-box"><div class="lbl">Vardiya Süt Hakedişi</div><div class="val">${topTutar.toFixed(2)} ₺</div></div>
 
@@ -3033,6 +3393,8 @@
     document.getElementById('esVardiya').value = rec.vardiya;
 
     document.getElementById('esMiktar').value = Number(rec.miktar_kg || 0);
+
+    document.getElementById('esFiyat').value = getSavedSutRowPrice(rec).toFixed(2);
 
     document.getElementById('esAyriGugum').checked = !!rec.ayri_gugum;
 
@@ -3092,13 +3454,15 @@
 
     const miktar = parseFloat(document.getElementById('esMiktar').value);
 
+    const fiyat = parseFloat(document.getElementById('esFiyat').value);
+
     const ayri = document.getElementById('esAyriGugum').checked;
 
 
 
-    if (!tarih || !mustahsilId || !plaka || isNaN(miktar) || miktar <= 0) {
+    if (!tarih || !mustahsilId || !plaka || isNaN(miktar) || miktar <= 0 || isNaN(fiyat) || fiyat < 0) {
 
-      return showToast('Lütfen geçerli tarih, müstahsil, plaka ve süt miktarı girin.', true);
+      return showToast('Lütfen geçerli tarih, müstahsil, plaka, süt miktarı ve birim fiyat girin.', true);
 
     }
 
@@ -3115,6 +3479,8 @@
       plaka,
 
       miktar_kg: miktar,
+
+      birim_fiyat: fiyat,
 
       ayri_gugum: ayri
 
@@ -3616,7 +3982,7 @@
 
       const kg = Number(r.miktar_kg || 0);
 
-      const gunlukFiyat = getMustahsilPriceOnDate(r.mustahsil_id, r.tarih);
+      const gunlukFiyat = getSavedSutRowPrice(r);
 
       topSutKg += kg;
 
@@ -3740,7 +4106,7 @@
 
   // ==========================================
 
-  // MÜSTAHSİL EKLEME / DÜZENLEME / SİLME & GÜNLÜK FİYAT
+  // MÜSTAHSİL EKLEME / DÜZENLEME / SİLME
 
   // ==========================================
 
@@ -3768,7 +4134,7 @@
 
 
 
-    const { data: inserted, error } = await sbClient.from('mustahsiller').insert([{
+    const { error } = await sbClient.from('mustahsiller').insert([{
 
       cari_kodu: cari,
 
@@ -3790,29 +4156,11 @@
 
       qr_kod: 'ALK-' + cari
 
-    }]).select();
+    }]);
 
 
 
     if (error) return showToast('Mükerrer veya geçersiz kayıt: ' + error.message, true);
-
-
-
-    if (inserted && inserted[0]) {
-
-      const tarih = document.getElementById('fiyatGecerlilikTarih').value || todayStr();
-
-      await sbClient.from('mustahsil_fiyat_gecmisi').upsert([{
-
-        mustahsil_id: inserted[0].id,
-
-        gecerlilik_tarihi: tarih,
-
-        birim_fiyat: fiyat
-
-      }], { onConflict: 'mustahsil_id,gecerlilik_tarihi' });
-
-    }
 
 
 
@@ -3836,8 +4184,6 @@
 
     if (!tbody) return;
 
-    const seciliTarih = document.getElementById('fiyatGecerlilikTarih')?.value || todayStr();
-
 
 
     tbody.innerHTML = allMustahsiller.map(m => {
@@ -3846,7 +4192,7 @@
 
       const grp = (m.grup || 'GENEL').trim().toUpperCase();
 
-      const aktifFiyat = getMustahsilPriceOnDate(m.id, seciliTarih);
+      const kartFiyat = Number(m.birim_fiyat || 0);
 
 
 
@@ -3870,9 +4216,9 @@
 
         <td>
 
-          <input type="number" step="0.01" value="${aktifFiyat.toFixed(2)}" style="width:100px;padding:5px;"
+          <input type="number" step="0.01" value="${kartFiyat.toFixed(2)}" style="width:100px;padding:5px;"
 
-            onchange="updateSinglePrice('${m.id}', this.value)" /> ₺
+            onchange="updateSingleCardPrice('${m.id}', this.value)" /> ₺
 
         </td>
 
@@ -3900,8 +4246,6 @@
 
     populateGrupSelects();
 
-    const seciliTarih = document.getElementById('fiyatGecerlilikTarih')?.value || todayStr();
-
     document.getElementById('editMustahsilId').value = m.id;
 
     document.getElementById('mustahsilModalTitle').textContent = `Müstahsil Düzenle: ${m.ad_soyad}`;
@@ -3912,7 +4256,7 @@
 
     document.getElementById('emGrup').value = (m.grup || 'GENEL').trim().toUpperCase();
 
-    document.getElementById('emFiyat').value = getMustahsilPriceOnDate(m.id, seciliTarih).toFixed(2);
+    document.getElementById('emFiyat').value = Number(m.birim_fiyat || 0).toFixed(2);
 
     document.getElementById('emTc').value = m.tc_no || '';
 
@@ -3990,21 +4334,7 @@
 
 
 
-    const seciliTarih = document.getElementById('fiyatGecerlilikTarih')?.value || todayStr();
-
-    await sbClient.from('mustahsil_fiyat_gecmisi').upsert([{
-
-      mustahsil_id: id,
-
-      gecerlilik_tarihi: seciliTarih,
-
-      birim_fiyat: fiyat
-
-    }], { onConflict: 'mustahsil_id,gecerlilik_tarihi' });
-
-
-
-    showToast('Müstahsil bilgileri güncellendi.');
+    showToast('Müstahsil kartı güncellendi.');
 
     closeMustahsilModal();
 
@@ -4030,117 +4360,15 @@
 
 
 
-  async function updateSinglePrice(id, val) {
+  async function updateSingleCardPrice(id, val) {
 
     const fiyat = parseFloat(val) || 0;
 
-    const seciliTarih = document.getElementById('fiyatGecerlilikTarih')?.value || todayStr();
+    const { error } = await sbClient.from('mustahsiller').update({ birim_fiyat: fiyat }).eq('id', id);
 
+    if (error) return showToast('Kart fiyatı güncelleme hatası: ' + error.message, true);
 
-
-    const { error } = await sbClient.from('mustahsil_fiyat_gecmisi').upsert([{
-
-      mustahsil_id: id,
-
-      gecerlilik_tarihi: seciliTarih,
-
-      birim_fiyat: fiyat
-
-    }], { onConflict: 'mustahsil_id,gecerlilik_tarihi' });
-
-
-
-    if (error) return showToast('Fiyat kayıt hatası: ' + error.message, true);
-
-
-
-    if (seciliTarih >= todayStr()) {
-
-      await sbClient.from('mustahsiller').update({ birim_fiyat: fiyat }).eq('id', id);
-
-    }
-
-
-
-    showToast(`${seciliTarih} tarihli müstahsil fiyatı (${fiyat.toFixed(2)} ₺) kaydedildi.`);
-
-    await refreshMasterData();
-
-  }
-
-
-
-  async function applyBulkPrice() {
-
-    const val = parseFloat(document.getElementById('topluFiyatInput').value);
-
-    const seciliGrup = document.getElementById('topluGrupSelect').value;
-
-    const seciliTarih = document.getElementById('fiyatGecerlilikTarih')?.value || todayStr();
-
-
-
-    if (isNaN(val) || val < 0) return showToast('Geçerli fiyat girin.', true);
-
-    if (!seciliTarih) return showToast('Fiyat geçerlilik tarihi seçin.', true);
-
-
-
-    const hedefMustahsiller = allMustahsiller.filter(m => {
-
-      if (seciliGrup === '__ALL__') return true;
-
-      return (m.grup || 'GENEL').trim().toUpperCase() === seciliGrup;
-
-    });
-
-
-
-    if (!hedefMustahsiller.length) {
-
-      return showToast(`"${seciliGrup}" grubunda müstahsil bulunamadı.`, true);
-
-    }
-
-
-
-    const rows = hedefMustahsiller.map(m => ({
-
-      mustahsil_id: m.id,
-
-      gecerlilik_tarihi: seciliTarih,
-
-      birim_fiyat: val
-
-    }));
-
-
-
-    const { error } = await sbClient
-
-      .from('mustahsil_fiyat_gecmisi')
-
-      .upsert(rows, { onConflict: 'mustahsil_id,gecerlilik_tarihi' });
-
-
-
-    if (error) return showToast('Toplu günlük fiyat hatası: ' + error.message, true);
-
-
-
-    if (seciliTarih >= todayStr()) {
-
-      await sbClient.from('mustahsiller').update({ birim_fiyat: val }).in('id', hedefMustahsiller.map(m => m.id));
-
-    }
-
-
-
-    showToast(seciliGrup === '__ALL__'
-
-      ? `${seciliTarih} tarihinden itibaren tüm müstahsillerin fiyatı ${val.toFixed(2)} ₺ olarak ayarlandı.`
-
-      : `${seciliTarih} tarihinden itibaren "${seciliGrup}" grubunun fiyatı ${val.toFixed(2)} ₺ olarak ayarlandı.`);
+    showToast(`Varsayılan kart fiyatı (${fiyat.toFixed(2)} ₺) güncellendi. Geçmiş süt kayıtları değişmedi.`);
 
     await refreshMasterData();
 
@@ -4172,11 +4400,11 @@
 
       const kg = Number(r.miktar_kg || 0);
 
-      const gunlukFiyat = getMustahsilPriceOnDate(r.mustahsil_id, r.tarih);
+      const kayitliFiyat = getSavedSutRowPrice(r);
 
       kgMap[r.mustahsil_id] = (kgMap[r.mustahsil_id] || 0) + kg;
 
-      hakedisMap[r.mustahsil_id] = (hakedisMap[r.mustahsil_id] || 0) + (kg * gunlukFiyat);
+      hakedisMap[r.mustahsil_id] = (hakedisMap[r.mustahsil_id] || 0) + (kg * kayitliFiyat);
 
     });
 
@@ -4200,7 +4428,7 @@
 
       const hakedis = hakedisMap[m.id] || 0;
 
-      const ortFiyat = kg > 0 ? (hakedis / kg) : getMustahsilPriceOnDate(m.id, bit);
+      const ortFiyat = kg > 0 ? (hakedis / kg) : resolveActivePriceForNewEntry(m.id, bit);
 
       const grp = (m.grup || 'GENEL').trim().toUpperCase();
 
