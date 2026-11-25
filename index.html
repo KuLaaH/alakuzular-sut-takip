@@ -340,7 +340,6 @@
   </div>
 </header>
 
-<!-- GİRİŞ EKRANI -->
 <div id="loginView" class="login-wrap">
   <h2>Sisteme Giriş</h2>
   <p>Yetkili kullanıcı adı ve şifrenizle giriş yapın.</p>
@@ -356,11 +355,9 @@
   <div id="loginErrorBox" class="alert-danger hidden" style="font-size:0.84rem;font-weight:600;"></div>
 </div>
 
-<!-- ANA UYGULAMA EKRANI -->
 <div id="appView" class="container hidden">
   <div class="tabs" id="navTabs"></div>
 
-  <!-- 1. SAHA SÜT TOPLAMA -->
   <div id="tab-toplama" class="tab-panel hidden">
     <div class="card">
       <h3>Saha Günlük Süt Girişi</h3>
@@ -384,7 +381,7 @@
       </div>
 
       <div class="grid-3" style="align-items:end;">
-     <div>
+        <div>
           <label>Müstahsil Seçimi</label>
           <div style="display:flex;gap:8px;">
             <select id="sutMustahsil"></select>
@@ -428,7 +425,6 @@
     </div>
   </div>
 
-  <!-- 2. MERKEZ KANTAR & SÜZME YOĞURT ÜRETİM -->
   <div id="tab-depo" class="tab-panel hidden">
     <div class="card">
       <h3>Merkez Kantar Tartımı & Plaka Fark Kontrolü</h3>
@@ -530,7 +526,6 @@
     </div>
   </div>
 
-  <!-- 3. MALİYET TARİFESİ & KÂR ANALİZİ -->
   <div id="tab-maliyet" class="tab-panel hidden">
     <div class="card">
       <h3>Tarihten İtibaren Geçerli Maliyet Tarifesi Tanımlama</h3>
@@ -642,7 +637,6 @@
     </div>
   </div>
 
-  <!-- 4. MÜSTAHSİL, FİYAT & TOPLU RAPOR -->
   <div id="tab-yonetim" class="tab-panel hidden">
     <div class="card">
       <h3>Yeni Müstahsil Kartı Ekle</h3>
@@ -675,7 +669,7 @@
           <thead>
             <tr>
               <th>Cari Kod</th>
-              <th>QR Kodu</th>
+              <th>QR Kodu & Kapı Afişi</th>
               <th>Ad Soyad</th>
               <th>TC / İşletme No</th>
               <th>Plaka</th>
@@ -712,7 +706,6 @@
     </div>
   </div>
 
-  <!-- 5. DİNAMİK KULLANICI & BÖLÜM YETKİ YÖNETİMİ -->
   <div id="tab-kullanicilar" class="tab-panel hidden">
     <div class="card">
       <div class="card-header-flex">
@@ -739,7 +732,6 @@
   </div>
 </div>
 
-<!-- KULLANICI EKLE / DÜZENLE MODAL PENCERESİ -->
 <div id="userModal" class="modal-backdrop hidden" onclick="if(event.target===this) closeUserModal()">
   <div class="modal-dialog">
     <div class="modal-header">
@@ -791,7 +783,7 @@
     </div>
   </div>
 </div>
-<!-- QR KAMERA OKUYUCU PENCERESİ -->
+
 <div id="qrModal" class="modal-backdrop hidden" onclick="if(event.target===this) closeQrScanner()">
   <div class="modal-dialog" style="max-width:460px;">
     <div class="modal-header">
@@ -813,7 +805,7 @@
     </div>
   </div>
 </div>
-  <!-- MÜSTAHSİL KAPI QR AFİŞİ PENCERESİ -->
+
 <div id="qrPrintModal" class="modal-backdrop hidden" onclick="if(event.target===this) closeQrPrintModal()">
   <div class="modal-dialog" style="max-width:560px;">
     <div class="modal-header">
@@ -836,6 +828,7 @@
     </div>
   </div>
 </div>
+
 <div id="toast"></div>
 
 <script>
@@ -856,11 +849,17 @@
   let allMustahsiller = [];
   let allTarifeler = [];
   let allUsers = [];
+  let html5QrInstance = null;
+  let qrScanLocked = false;
 
   const todayStr = () => new Date().toISOString().split('T')[0];
 
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closeUserModal();
+    if (e.key === 'Escape') {
+      closeUserModal();
+      closeQrScanner();
+      closeQrPrintModal();
+    }
   });
 
   function hasPerm(permKey) {
@@ -920,6 +919,8 @@
   function logout() {
     currentUser = null;
     closeUserModal();
+    closeQrScanner();
+    closeQrPrintModal();
     document.getElementById('appView').classList.add('hidden');
     document.getElementById('loginView').classList.remove('hidden');
     document.getElementById('userBadge').classList.add('hidden');
@@ -1367,17 +1368,23 @@
   function renderMustahsilTable() {
     const tbody = document.getElementById('mustahsilTableBody');
     if (!tbody) return;
-    tbody.innerHTML = allMustahsiller.map(m => `<tr>
-      <td><strong>${m.cari_kodu}</strong></td>
-      <td><code>${m.qr_kod}</code></td>
-      <td>${m.ad_soyad}</td>
-      <td>${m.tc_no || '-'} / ${m.isletme_no || '-'}</td>
-      <td>${m.plaka}</td>
-      <td>
-        <input type="number" step="0.01" value="${Number(m.birim_fiyat).toFixed(2)}" style="width:100px;padding:5px;"
-          onchange="updateSinglePrice('${m.id}', this.value)" /> ₺
-      </td>
-    </tr>`).join('');
+    tbody.innerHTML = allMustahsiller.map(m => {
+      const qrVal = m.qr_kod || ('ALK-' + m.cari_kodu);
+      return `<tr>
+        <td><strong>${m.cari_kodu}</strong></td>
+        <td>
+          <code>${qrVal}</code>
+          <button type="button" class="btn btn-outline btn-sm" style="margin-left:6px;" onclick="openQrPrintModal('${m.id}')">🚪 QR Afiş</button>
+        </td>
+        <td>${m.ad_soyad}</td>
+        <td>${m.tc_no || '-'} / ${m.isletme_no || '-'}</td>
+        <td>${m.plaka}</td>
+        <td>
+          <input type="number" step="0.01" value="${Number(m.birim_fiyat).toFixed(2)}" style="width:100px;padding:5px;"
+            onchange="updateSinglePrice('${m.id}', this.value)" /> ₺
+        </td>
+      </tr>`;
+    }).join('');
   }
 
   async function updateSinglePrice(id, val) {
@@ -1421,9 +1428,6 @@
     }).join('');
   }
 
-  // ==========================================
-  // DİNAMİK KULLANICI & YETKİ YÖNETİMİ (MODAL)
-  // ==========================================
   async function loadUsersList() {
     const { data, error } = await sbClient.from('kullanicilar').select('*').order('created_at', { ascending: true });
     if (error) return showToast('Kullanıcı listesi hatası: ' + error.message, true);
@@ -1586,86 +1590,7 @@
     showToast('Kullanıcı silindi.');
     loadUsersList();
   }
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-      closeUserModal();
-      closeQrScanner();
-    }
-  });
-  // ==========================================
-  // QR İLE MÜSTAHSİL SEÇİMİ
-  // ==========================================
-  let html5QrInstance = null;
 
-  async function openQrScanner() {
-    document.getElementById('manualQrInput').value = '';
-    document.getElementById('qrModal').classList.remove('hidden');
-
-    if (typeof Html5Qrcode === 'undefined') {
-      return showToast('Kamera kütüphanesi yüklenemedi, alttaki kutudan kod girebilirsiniz.', true);
-    }
-
-    try {
-      html5QrInstance = new Html5Qrcode('qrReaderBox');
-      await html5QrInstance.start(
-        { facingMode: 'environment' },
-        { fps: 10, qrbox: { width: 240, height: 240 } },
-        (decodedText) => {
-          selectMustahsilByQr(decodedText);
-        },
-        () => {}
-      );
-    } catch (err) {
-      showToast('Kameraya erişilemedi; kod kutusunu kullanabilirsiniz.', true);
-    }
-  }
-
-  async function closeQrScanner() {
-    const modal = document.getElementById('qrModal');
-    if (modal) modal.classList.add('hidden');
-    if (html5QrInstance) {
-      try {
-        await html5QrInstance.stop();
-        html5QrInstance.clear();
-      } catch (e) {}
-      html5QrInstance = null;
-    }
-  }
-
-  function selectMustahsilByQr(rawCode) {
-    const code = (rawCode || '').trim().toUpperCase();
-    if (!code) return;
-
-    const found = allMustahsiller.find(m =>
-      (m.qr_kod || '').trim().toUpperCase() === code ||
-      (m.cari_kodu || '').trim().toUpperCase() === code ||
-      ('ALK-' + (m.cari_kodu || '').trim().toUpperCase()) === code
-    );
-
-    if (!found) {
-      return showToast(`"${code}" koduna ait müstahsil bulunamadı.`, true);
-    }
-
-    // Kullanıcıya plaka kısıtı varsa kontrol et, yoksa ilgili aracın plakasını otomatik seç
-    const plakaSel = document.getElementById('sutPlaka');
-    const foundPlaka = (found.plaka || '').trim().toUpperCase();
-    const hasOption = [...plakaSel.options].some(opt => opt.value === foundPlaka);
-
-    if (currentUser.atanan_plaka && !hasOption) {
-      return showToast(`Bu müstahsil (${found.ad_soyad}) sizin aracınıza (${foundPlaka}) tanımlı değil!`, true);
-    }
-
-    if (hasOption) {
-      plakaSel.value = foundPlaka;
-    }
-    filterMustahsilSelect();
-    loadSutGirisleri();
-
-    document.getElementById('sutMustahsil').value = found.id;
-    closeQrScanner();
-    showToast(`✅ ${found.cari_kodu} - ${found.ad_soyad} seçildi.`);
-    document.getElementById('sutMiktar').focus();
-  }
   function openQrPrintModal(mustahsilId) {
     const m = allMustahsiller.find(x => x.id === mustahsilId);
     if (!m) return showToast('Müstahsil bulunamadı.', true);
@@ -1685,11 +1610,6 @@
   function closeQrPrintModal() {
     document.getElementById('qrPrintModal').classList.add('hidden');
   }
-  // ==========================================
-  // QR İLE MÜSTAHSİL SEÇİMİ (GÜÇLÜ SÜRÜM)
-  // ==========================================
-  let html5QrInstance = null;
-  let qrScanLocked = false;
 
   async function openQrScanner() {
     qrScanLocked = false;
