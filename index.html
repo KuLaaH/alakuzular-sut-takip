@@ -506,6 +506,62 @@
 
 
 
+    .tag-list {
+
+      display: flex;
+
+      flex-wrap: wrap;
+
+      gap: 8px;
+
+      margin-top: 10px;
+
+    }
+
+    .tag-chip {
+
+      background: #f8fafc;
+
+      border: 1px solid #cbd5e1;
+
+      border-radius: 8px;
+
+      padding: 6px 10px;
+
+      display: inline-flex;
+
+      align-items: center;
+
+      gap: 8px;
+
+      font-size: 0.85rem;
+
+      font-weight: 700;
+
+      color: #0f172a;
+
+    }
+
+    .tag-chip button {
+
+      border: none;
+
+      background: transparent;
+
+      cursor: pointer;
+
+      font-size: 0.85rem;
+
+      padding: 2px 4px;
+
+      border-radius: 4px;
+
+    }
+
+    .tag-chip button:hover { background: #e2e8f0; }
+
+
+
     .modal-backdrop {
 
       position: fixed;
@@ -662,11 +718,29 @@
 
 <!--
 
-  NOT (Supabase SQL Editor):
-
-  mustahsiller tablosuna grup sütunu eklemek için çalıştırabilirsiniz:
+  NOT (Supabase SQL Editor - Bir Kez Çalıştırın):
 
   alter table public.mustahsiller add column if not exists grup text default 'GENEL';
+
+
+
+  create table if not exists public.sistem_tanimlari (
+
+    id uuid default gen_random_uuid() primary key,
+
+    tip text not null,
+
+    deger text not null,
+
+    created_at timestamptz default now(),
+
+    unique(tip, deger)
+
+  );
+
+  alter table public.sistem_tanimlari disable row level security;
+
+  grant select, insert, update, delete on table public.sistem_tanimlari to anon, authenticated;
 
 -->
 
@@ -731,6 +805,8 @@
   <div class="tabs" id="navTabs"></div>
 
 
+
+  <!-- 1. SAHA SÜT TOPLAMA -->
 
   <div id="tab-toplama" class="tab-panel hidden">
 
@@ -867,6 +943,8 @@
   </div>
 
 
+
+  <!-- 2. MERKEZ KANTAR & SÜZME YOĞURT -->
 
   <div id="tab-depo" class="tab-panel hidden">
 
@@ -1069,6 +1147,8 @@
   </div>
 
 
+
+  <!-- 3. MALİYET TARİFESİ & KÂR ANALİZİ -->
 
   <div id="tab-maliyet" class="tab-panel hidden">
 
@@ -1292,7 +1372,63 @@
 
 
 
+  <!-- 4. MÜSTAHSİL, GRUP/PLAKA TANIMLARI, FİYAT & TOPLU RAPOR -->
+
   <div id="tab-yonetim" class="tab-panel hidden">
+
+    <!-- GRUP & PLAKA YÖNETİM KARTI -->
+
+    <div class="grid-2">
+
+      <div class="card">
+
+        <h3>Müstahsil Grupları (Ekle / Düzenle / Sil)</h3>
+
+        <div style="display:flex;gap:8px;align-items:end;">
+
+          <div style="flex:1;">
+
+            <label>Yeni Grup Adı</label>
+
+            <input type="text" id="newGrupInput" placeholder="Örn: KÖY-3 veya BÜYÜK ÜRETİCİ" onkeydown="if(event.key==='Enter') addGrupDefinition()" />
+
+          </div>
+
+          <button type="button" class="btn btn-success" onclick="addGrupDefinition()">+ Grup Ekle</button>
+
+        </div>
+
+        <div id="grupListChips" class="tag-list"></div>
+
+      </div>
+
+
+
+      <div class="card">
+
+        <h3>Araç Plakaları (Ekle / Düzenle / Sil)</h3>
+
+        <div style="display:flex;gap:8px;align-items:end;">
+
+          <div style="flex:1;">
+
+            <label>Yeni Araç Plakası</label>
+
+            <input type="text" id="newPlakaInput" placeholder="Örn: 42 ALK 03" onkeydown="if(event.key==='Enter') addPlakaDefinition()" />
+
+          </div>
+
+          <button type="button" class="btn btn-primary" onclick="addPlakaDefinition()">+ Plaka Ekle</button>
+
+        </div>
+
+        <div id="plakaListChips" class="tag-list"></div>
+
+      </div>
+
+    </div>
+
+
 
     <div class="card">
 
@@ -1300,7 +1436,7 @@
 
       <div class="grid-4" style="margin-bottom:10px;">
 
-        <div><label>Cari Kodu *</label><input type="text" id="mCari" placeholder="Örn: MST-001" /></div>
+        <div><label>Cari Kodu *</label><input type="text" id="mCari" placeholder="Örn: MST-005" /></div>
 
         <div><label>Adı Soyadı *</label><input type="text" id="mAd" placeholder="Ad Soyad" /></div>
 
@@ -1320,17 +1456,7 @@
 
           <label>Müstahsil Grubu</label>
 
-          <select id="mGrup">
-
-            <option value="GENEL">GENEL</option>
-
-            <option value="KÖY-1">KÖY-1</option>
-
-            <option value="KÖY-2">KÖY-2</option>
-
-            <option value="ÖZEL">ÖZEL</option>
-
-          </select>
+          <select id="mGrup"></select>
 
         </div>
 
@@ -1389,6 +1515,8 @@
               <th>TC / İşletme No</th>
 
               <th>Birim Fiyat (₺/Kg)</th>
+
+              <th>İşlem</th>
 
             </tr>
 
@@ -1464,6 +1592,8 @@
 
 
 
+  <!-- 5. DİNAMİK KULLANICI & BÖLÜM YETKİ YÖNETİMİ -->
+
   <div id="tab-kullanicilar" class="tab-panel hidden">
 
     <div class="card">
@@ -1515,6 +1645,74 @@
 </div>
 
 
+
+<!-- MÜSTAHSİL DÜZENLEME MODALI -->
+
+<div id="mustahsilModal" class="modal-backdrop hidden" onclick="if(event.target===this) closeMustahsilModal()">
+
+  <div class="modal-dialog" style="max-width:640px;">
+
+    <div class="modal-header">
+
+      <h3 id="mustahsilModalTitle">Müstahsil Düzenle</h3>
+
+      <button type="button" class="modal-close" onclick="closeMustahsilModal()" title="Kapat">&times;</button>
+
+    </div>
+
+    <div class="modal-body">
+
+      <input type="hidden" id="editMustahsilId" />
+
+      <div class="grid-2" style="margin-bottom:12px;">
+
+        <div><label>Cari Kodu *</label><input type="text" id="emCari" /></div>
+
+        <div><label>Adı Soyadı *</label><input type="text" id="emAd" /></div>
+
+      </div>
+
+      <div class="grid-2" style="margin-bottom:12px;">
+
+        <div><label>Müstahsil Grubu</label><select id="emGrup"></select></div>
+
+        <div><label>Süt Birim Fiyatı (₺/Kg)</label><input type="number" step="0.01" id="emFiyat" /></div>
+
+      </div>
+
+      <div class="grid-2" style="margin-bottom:12px;">
+
+        <div><label>TC Kimlik No</label><input type="text" id="emTc" maxlength="11" /></div>
+
+        <div><label>İşletme No</label><input type="text" id="emIsletme" /></div>
+
+      </div>
+
+      <div class="grid-2">
+
+        <div><label>Baba Adı</label><input type="text" id="emBaba" /></div>
+
+        <div><label>Telefon</label><input type="text" id="emTel" /></div>
+
+      </div>
+
+    </div>
+
+    <div class="modal-footer">
+
+      <button type="button" class="btn btn-outline" onclick="closeMustahsilModal()">İptal</button>
+
+      <button type="button" class="btn btn-success" onclick="updateMustahsilRecord()">Güncelle</button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+
+<!-- KULLANICI EKLE / DÜZENLE MODALI -->
 
 <div id="userModal" class="modal-backdrop hidden" onclick="if(event.target===this) closeUserModal()">
 
@@ -1620,6 +1818,8 @@
 
 
 
+<!-- QR KAMERA OKUYUCU MODALI -->
+
 <div id="qrModal" class="modal-backdrop hidden" onclick="if(event.target===this) closeQrScanner()">
 
   <div class="modal-dialog" style="max-width:460px;">
@@ -1663,6 +1863,8 @@
 </div>
 
 
+
+<!-- KAPI QR AFİŞİ MODALI -->
 
 <div id="qrPrintModal" class="modal-backdrop hidden" onclick="if(event.target===this) closeQrPrintModal()">
 
@@ -1750,6 +1952,10 @@
 
   let allUsers = [];
 
+  let customGruplar = [];
+
+  let customPlakalar = [];
+
   let html5QrInstance = null;
 
   let qrScanLocked = false;
@@ -1765,6 +1971,8 @@
     if (e.key === 'Escape') {
 
       closeUserModal();
+
+      closeMustahsilModal();
 
       closeQrScanner();
 
@@ -1889,6 +2097,8 @@
     currentUser = null;
 
     closeUserModal();
+
+    closeMustahsilModal();
 
     closeQrScanner();
 
@@ -2048,17 +2258,269 @@
 
 
 
+  // ==========================================
+
+  // GRUP & PLAKA TANIM YÖNETİMİ (EKLE / DÜZENLE / SİL)
+
+  // ==========================================
+
+  function getAllGruplar() {
+
+    const base = ['GENEL'];
+
+    const fromDb = customGruplar.map(x => (x.deger || '').trim().toUpperCase()).filter(Boolean);
+
+    const fromMst = allMustahsiller.map(m => (m.grup || '').trim().toUpperCase()).filter(Boolean);
+
+    return [...new Set([...base, ...fromDb, ...fromMst])].sort((a, b) => a.localeCompare(b, 'tr'));
+
+  }
+
+
+
+  function getAllPlakalar() {
+
+    const fromDb = customPlakalar.map(x => (x.deger || '').trim().toUpperCase()).filter(Boolean);
+
+    const fromUsers = allUsers.map(u => (u.atanan_plaka || '').trim().toUpperCase()).filter(Boolean);
+
+    const fromMst = allMustahsiller.map(m => (m.plaka || '').trim().toUpperCase()).filter(Boolean);
+
+    const merged = [...new Set([...fromDb, ...fromUsers, ...fromMst])].sort((a, b) => a.localeCompare(b, 'tr'));
+
+    return merged.length ? merged : ['42 ALK 01', '42 ALK 02'];
+
+  }
+
+
+
+  function renderGrupAndPlakaChips() {
+
+    const gruplar = getAllGruplar();
+
+    const gBox = document.getElementById('grupListChips');
+
+    if (gBox) {
+
+      gBox.innerHTML = gruplar.map(g => `
+
+        <span class="tag-chip">
+
+          <span>${g}</span>
+
+          ${g !== 'GENEL' ? `
+
+            <button type="button" title="Düzenle" onclick="editGrupDefinition('${g}')">✏️</button>
+
+            <button type="button" title="Sil" onclick="deleteGrupDefinition('${g}')">🗑️</button>
+
+          ` : ''}
+
+        </span>
+
+      `).join('');
+
+    }
+
+
+
+    const plakalar = getAllPlakalar();
+
+    const pBox = document.getElementById('plakaListChips');
+
+    if (pBox) {
+
+      pBox.innerHTML = plakalar.map(p => `
+
+        <span class="tag-chip">
+
+          <span>🚛 ${p}</span>
+
+          <button type="button" title="Düzenle" onclick="editPlakaDefinition('${p}')">✏️</button>
+
+          <button type="button" title="Sil" onclick="deletePlakaDefinition('${p}')">🗑️</button>
+
+        </span>
+
+      `).join('');
+
+    }
+
+  }
+
+
+
+  async function addGrupDefinition() {
+
+    const input = document.getElementById('newGrupInput');
+
+    const val = (input.value || '').trim().toUpperCase();
+
+    if (!val) return showToast('Grup adı girin.', true);
+
+
+
+    const { error } = await sbClient.from('sistem_tanimlari').upsert([{ tip: 'GRUP', deger: val }], { onConflict: 'tip,deger' });
+
+    if (error) return showToast('Grup ekleme hatası: ' + error.message, true);
+
+
+
+    input.value = '';
+
+    showToast(`"${val}" grubu eklendi.`);
+
+    await refreshMasterData();
+
+  }
+
+
+
+  async function editGrupDefinition(oldVal) {
+
+    const newValRaw = prompt(`"${oldVal}" grubunun yeni adını girin:`, oldVal);
+
+    if (newValRaw === null) return;
+
+    const newVal = newValRaw.trim().toUpperCase();
+
+    if (!newVal || newVal === oldVal) return;
+
+
+
+    await sbClient.from('sistem_tanimlari').upsert([{ tip: 'GRUP', deger: newVal }], { onConflict: 'tip,deger' });
+
+    await sbClient.from('sistem_tanimlari').delete().eq('tip', 'GRUP').eq('deger', oldVal);
+
+    await sbClient.from('mustahsiller').update({ grup: newVal }).eq('grup', oldVal);
+
+
+
+    showToast(`Grup "${oldVal}" -> "${newVal}" olarak güncellendi.`);
+
+    await refreshMasterData();
+
+  }
+
+
+
+  async function deleteGrupDefinition(val) {
+
+    if (val === 'GENEL') return showToast('GENEL grubu silinemez.', true);
+
+    if (!confirm(`"${val}" grubunu silmek istediğinize emin misiniz? Bu gruptaki müstahsiller GENEL grubuna aktarılır.`)) return;
+
+
+
+    await sbClient.from('mustahsiller').update({ grup: 'GENEL' }).eq('grup', val);
+
+    const { error } = await sbClient.from('sistem_tanimlari').delete().eq('tip', 'GRUP').eq('deger', val);
+
+    if (error) return showToast('Grup silme hatası: ' + error.message, true);
+
+
+
+    showToast(`"${val}" grubu silindi.`);
+
+    await refreshMasterData();
+
+  }
+
+
+
+  async function addPlakaDefinition() {
+
+    const input = document.getElementById('newPlakaInput');
+
+    const val = (input.value || '').trim().toUpperCase();
+
+    if (!val) return showToast('Araç plakası girin.', true);
+
+
+
+    const { error } = await sbClient.from('sistem_tanimlari').upsert([{ tip: 'PLAKA', deger: val }], { onConflict: 'tip,deger' });
+
+    if (error) return showToast('Plaka ekleme hatası: ' + error.message, true);
+
+
+
+    input.value = '';
+
+    showToast(`"${val}" plakası eklendi.`);
+
+    await refreshMasterData();
+
+  }
+
+
+
+  async function editPlakaDefinition(oldVal) {
+
+    const newValRaw = prompt(`"${oldVal}" plakasının yeni halini girin:`, oldVal);
+
+    if (newValRaw === null) return;
+
+    const newVal = newValRaw.trim().toUpperCase();
+
+    if (!newVal || newVal === oldVal) return;
+
+
+
+    await sbClient.from('sistem_tanimlari').upsert([{ tip: 'PLAKA', deger: newVal }], { onConflict: 'tip,deger' });
+
+    await sbClient.from('sistem_tanimlari').delete().eq('tip', 'PLAKA').eq('deger', oldVal);
+
+    await sbClient.from('kullanicilar').update({ atanan_plaka: newVal }).eq('atanan_plaka', oldVal);
+
+
+
+    showToast(`Plaka "${oldVal}" -> "${newVal}" olarak güncellendi.`);
+
+    await refreshMasterData();
+
+  }
+
+
+
+  async function deletePlakaDefinition(val) {
+
+    if (!confirm(`"${val}" plakasını tanımlardan silmek istediğinize emin misiniz?`)) return;
+
+
+
+    const { error } = await sbClient.from('sistem_tanimlari').delete().eq('tip', 'PLAKA').eq('deger', val);
+
+    if (error) return showToast('Plaka silme hatası: ' + error.message, true);
+
+
+
+    showToast(`"${val}" plakası silindi.`);
+
+    await refreshMasterData();
+
+  }
+
+
+
   function populateGrupSelects() {
 
-    const defaultGruplar = ['GENEL', 'KÖY-1', 'KÖY-2', 'ÖZEL'];
+    const gruplar = getAllGruplar();
 
-    const dbGruplar = allMustahsiller
 
-      .map(m => (m.grup || '').trim().toUpperCase())
 
-      .filter(Boolean);
+    ['mGrup', 'emGrup'].forEach(id => {
 
-    const gruplar = [...new Set([...defaultGruplar, ...dbGruplar])].sort((a, b) => a.localeCompare(b, 'tr'));
+      const el = document.getElementById(id);
+
+      if (!el) return;
+
+      const prev = el.value;
+
+      el.innerHTML = gruplar.map(g => `<option value="${g}">${g}</option>`).join('');
+
+      if (prev && gruplar.includes(prev)) el.value = prev;
+
+    });
 
 
 
@@ -2102,13 +2564,15 @@
 
   async function refreshMasterData() {
 
-    const [{ data: mData }, { data: tData }, { data: uData }] = await Promise.all([
+    const [{ data: mData }, { data: tData }, { data: uData }, { data: sData }] = await Promise.all([
 
       sbClient.from('mustahsiller').select('*').order('cari_kodu', { ascending: true }),
 
       sbClient.from('maliyet_tarifeleri').select('*').order('gecerlilik_tarihi', { ascending: false }),
 
-      sbClient.from('kullanicilar').select('*')
+      sbClient.from('kullanicilar').select('*'),
+
+      sbClient.from('sistem_tanimlari').select('*')
 
     ]);
 
@@ -2118,17 +2582,13 @@
 
     allUsers = uData || [];
 
+    customGruplar = (sData || []).filter(x => x.tip === 'GRUP');
+
+    customPlakalar = (sData || []).filter(x => x.tip === 'PLAKA');
 
 
-    const allKnownPlakalar = [...new Set([
 
-      ...allUsers.map(u => (u.atanan_plaka || '').trim().toUpperCase()).filter(Boolean),
-
-      ...allMustahsiller.map(m => (m.plaka || '').trim().toUpperCase()).filter(Boolean)
-
-    ])].sort((a, b) => a.localeCompare(b, 'tr'));
-
-
+    const allKnownPlakalar = getAllPlakalar();
 
     const assignedPlakalar = currentUser.atanan_plaka
 
@@ -2150,13 +2610,11 @@
 
     } else {
 
-      const options = allKnownPlakalar.length ? allKnownPlakalar : ['42 ALK 01', '42 ALK 02'];
-
       sutPlakaSel.innerHTML =
 
         `<option value="">Tüm Araçlar</option>` +
 
-        options.map(p => `<option value="${p}">${p}</option>`).join('');
+        allKnownPlakalar.map(p => `<option value="${p}">${p}</option>`).join('');
 
       sutPlakaSel.value = '';
 
@@ -2168,11 +2626,11 @@
 
     const kp = document.getElementById('kantarPlaka');
 
-    kp.innerHTML = (allKnownPlakalar.length ? allKnownPlakalar : ['42 ALK 01', '42 ALK 02'])
-
-      .map(p => `<option value="${p}">${p}</option>`).join('');
+    kp.innerHTML = allKnownPlakalar.map(p => `<option value="${p}">${p}</option>`).join('');
 
 
+
+    renderGrupAndPlakaChips();
 
     populateGrupSelects();
 
@@ -2234,7 +2692,7 @@
 
     const seciliPlaka = document.getElementById('sutPlaka').value.trim().toUpperCase();
 
-    const kayitPlaka = userPlakalar[0] || seciliPlaka || '42 ALK 01';
+    const kayitPlaka = userPlakalar[0] || seciliPlaka || getAllPlakalar()[0] || '42 ALK 01';
 
 
 
@@ -2802,6 +3260,12 @@
 
 
 
+  // ==========================================
+
+  // MÜSTAHSİL EKLEME / DÜZENLEME / SİLME
+
+  // ==========================================
+
   async function saveMustahsil() {
 
     const cari = document.getElementById('mCari').value.trim();
@@ -2906,9 +3370,137 @@
 
         </td>
 
+        <td style="white-space:nowrap;">
+
+          <button type="button" class="btn btn-primary btn-sm" onclick="openMustahsilModal('${m.id}')">Düzenle</button>
+
+          <button type="button" class="btn btn-danger btn-sm" onclick="deleteMustahsil('${m.id}', '${m.ad_soyad.replace(/'/g, '')}')">Sil</button>
+
+        </td>
+
       </tr>`;
 
     }).join('');
+
+  }
+
+
+
+  function openMustahsilModal(id) {
+
+    const m = allMustahsiller.find(x => x.id === id);
+
+    if (!m) return;
+
+    populateGrupSelects();
+
+    document.getElementById('editMustahsilId').value = m.id;
+
+    document.getElementById('mustahsilModalTitle').textContent = `Müstahsil Düzenle: ${m.ad_soyad}`;
+
+    document.getElementById('emCari').value = m.cari_kodu || '';
+
+    document.getElementById('emAd').value = m.ad_soyad || '';
+
+    document.getElementById('emGrup').value = (m.grup || 'GENEL').trim().toUpperCase();
+
+    document.getElementById('emFiyat').value = Number(m.birim_fiyat || 0).toFixed(2);
+
+    document.getElementById('emTc').value = m.tc_no || '';
+
+    document.getElementById('emIsletme').value = m.isletme_no || '';
+
+    document.getElementById('emBaba').value = m.baba_adi || '';
+
+    document.getElementById('emTel').value = m.telefon || '';
+
+    document.getElementById('mustahsilModal').classList.remove('hidden');
+
+  }
+
+
+
+  function closeMustahsilModal() {
+
+    document.getElementById('mustahsilModal').classList.add('hidden');
+
+  }
+
+
+
+  async function updateMustahsilRecord() {
+
+    const id = document.getElementById('editMustahsilId').value;
+
+    const cari = document.getElementById('emCari').value.trim();
+
+    const ad = document.getElementById('emAd').value.trim();
+
+    const grup = (document.getElementById('emGrup').value || 'GENEL').trim().toUpperCase();
+
+    const fiyat = parseFloat(document.getElementById('emFiyat').value) || 0;
+
+    const tc = document.getElementById('emTc').value.trim() || null;
+
+    const isletme = document.getElementById('emIsletme').value.trim() || null;
+
+    const baba = document.getElementById('emBaba').value.trim();
+
+    const tel = document.getElementById('emTel').value.trim();
+
+
+
+    if (!cari || !ad) return showToast('Cari Kod ve Ad Soyad zorunludur.', true);
+
+
+
+    const { error } = await sbClient.from('mustahsiller').update({
+
+      cari_kodu: cari,
+
+      ad_soyad: ad,
+
+      grup: grup,
+
+      birim_fiyat: fiyat,
+
+      tc_no: tc,
+
+      isletme_no: isletme,
+
+      baba_adi: baba,
+
+      telefon: tel,
+
+      qr_kod: 'ALK-' + cari
+
+    }).eq('id', id);
+
+
+
+    if (error) return showToast('Güncelleme hatası: ' + error.message, true);
+
+    showToast('Müstahsil bilgileri güncellendi.');
+
+    closeMustahsilModal();
+
+    await refreshMasterData();
+
+  }
+
+
+
+  async function deleteMustahsil(id, ad) {
+
+    if (!confirm(`"${ad}" adlı müstahsili silmek istediğinize emin misiniz?`)) return;
+
+    const { error } = await sbClient.from('mustahsiller').delete().eq('id', id);
+
+    if (error) return showToast('Silme hatası (süt kaydı olabilir): ' + error.message, true);
+
+    showToast('Müstahsil silindi.');
+
+    await refreshMasterData();
 
   }
 
@@ -3062,6 +3654,12 @@
 
 
 
+  // ==========================================
+
+  // DİNAMİK KULLANICI & YETKİ YÖNETİMİ
+
+  // ==========================================
+
   async function loadUsersList() {
 
     const { data, error } = await sbClient.from('kullanicilar').select('*').order('created_at', { ascending: true });
@@ -3148,25 +3746,7 @@
 
     const sel = document.getElementById('uPlaka');
 
-    const plakaSet = new Set();
-
-
-
-    allUsers.forEach(u => {
-
-      if (u.atanan_plaka && u.atanan_plaka.trim()) plakaSet.add(u.atanan_plaka.trim().toUpperCase());
-
-    });
-
-
-
-    const { data: kData } = await sbClient.from('merkez_kantar').select('plaka');
-
-    (kData || []).forEach(k => {
-
-      if (k.plaka && k.plaka.trim()) plakaSet.add(k.plaka.trim().toUpperCase());
-
-    });
+    const plakaSet = new Set(getAllPlakalar());
 
 
 
