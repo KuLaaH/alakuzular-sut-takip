@@ -1685,6 +1685,114 @@
   function closeQrPrintModal() {
     document.getElementById('qrPrintModal').classList.add('hidden');
   }
+  // ==========================================
+  // QR İLE MÜSTAHSİL SEÇİMİ (GÜÇLÜ SÜRÜM)
+  // ==========================================
+  let html5QrInstance = null;
+  let qrScanLocked = false;
+
+  async function openQrScanner() {
+    qrScanLocked = false;
+    document.getElementById('manualQrInput').value = '';
+    document.getElementById('qrReaderBox').innerHTML = '';
+    document.getElementById('qrModal').classList.remove('hidden');
+    document.getElementById('manualQrInput').focus();
+
+    if (typeof Html5Qrcode === 'undefined') {
+      return showToast('QR kamera kütüphanesi yüklenemedi; alttan kod girebilirsiniz.', true);
+    }
+
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      return showToast('Bu tarayıcıda kamera erişimi desteklenmiyor; alttan kod girin.', true);
+    }
+
+    try {
+      const cameras = await Html5Qrcode.getCameras();
+      if (!cameras || !cameras.length) {
+        return showToast('Aktif kamera bulunamadı; alttaki kutudan kod girebilirsiniz.', true);
+      }
+
+      const backCam = cameras.find(c => /back|rear|environment|arka/i.test(c.label));
+      const cameraId = backCam ? backCam.id : cameras[0].id;
+
+      html5QrInstance = new Html5Qrcode('qrReaderBox');
+      await html5QrInstance.start(
+        cameraId,
+        { fps: 10, qrbox: { width: 220, height: 220 } },
+        (decodedText) => {
+          if (qrScanLocked) return;
+          qrScanLocked = true;
+          selectMustahsilByQr(decodedText);
+        },
+        () => {}
+      );
+    } catch (err) {
+      console.error('QR Kamera Hatası:', err);
+      showToast('Kamera başlatılamadı (' + (err?.name || err) + '). Kod kutusunu kullanabilirsiniz.', true);
+    }
+  }
+
+  async function closeQrScanner() {
+    qrScanLocked = false;
+    const modal = document.getElementById('qrModal');
+    if (modal) modal.classList.add('hidden');
+    if (html5QrInstance) {
+      try {
+        if (html5QrInstance.isScanning) {
+          await html5QrInstance.stop();
+        }
+        await html5QrInstance.clear();
+      } catch (e) {}
+      html5QrInstance = null;
+    }
+  }
+
+  function selectMustahsilByQr(rawCode) {
+    const code = (rawCode || '').trim().toUpperCase();
+    if (!code) return showToast('Lütfen bir QR veya cari kodu girin.', true);
+
+    if (!allMustahsiller.length) {
+      qrScanLocked = false;
+      return showToast('Müstahsil listesi henüz yüklenmedi.', true);
+    }
+
+    const found = allMustahsiller.find(m => {
+      const qr = (m.qr_kod || '').trim().toUpperCase();
+      const cari = (m.cari_kodu || '').trim().toUpperCase();
+      return qr === code || cari === code || ('ALK-' + cari) === code;
+    });
+
+    if (!found) {
+      qrScanLocked = false;
+      return showToast(`"${code}" koduna ait müstahsil bulunamadı.`, true);
+    }
+
+    const plakaSel = document.getElementById('sutPlaka');
+    const foundPlaka = (found.plaka || '').trim().toUpperCase();
+    const hasOption = [...plakaSel.options].some(opt => opt.value === foundPlaka);
+    const hasAllOption = [...plakaSel.options].some(opt => opt.value === '');
+
+    if (currentUser && currentUser.atanan_plaka && !hasOption) {
+      qrScanLocked = false;
+      return showToast(`Bu müstahsil (${found.ad_soyad}) sizin aracınıza (${foundPlaka}) tanımlı değil!`, true);
+    }
+
+    if (hasOption) {
+      plakaSel.value = foundPlaka;
+    } else if (hasAllOption) {
+      plakaSel.value = '';
+    }
+
+    filterMustahsilSelect();
+    loadSutGirisleri();
+
+    const mustahsilSel = document.getElementById('sutMustahsil');
+    mustahsilSel.value = found.id;
+
+    closeQrScanner();
+    showToast(`✅ ${found.cari_kodu} - ${found.ad_soyad} seçildi.`);
+    document.getElementById('sutMiktar').focus();
+  }
 </script>
 </body>
 </html>
