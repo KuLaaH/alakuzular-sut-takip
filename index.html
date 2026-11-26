@@ -535,6 +535,29 @@
       border-radius: 0 0 14px 14px;
     }
 
+    .mobile-sticky-qr-bar {
+      display: none;
+    }
+    @media (max-width: 768px) {
+      body { padding-bottom: 76px; }
+      .mobile-sticky-qr-bar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: rgba(255, 255, 255, 0.96);
+        backdrop-filter: blur(8px);
+        border-top: 1px solid var(--border);
+        padding: 10px 14px;
+        z-index: 8500;
+        display: flex;
+        gap: 10px;
+        box-shadow: 0 -4px 16px rgba(15, 23, 42, 0.12);
+      }
+      .mobile-sticky-qr-bar.hidden { display: none !important; }
+      #toast { bottom: 82px !important; }
+    }
+
     #toast {
       position: fixed;
       bottom: 20px;
@@ -717,6 +740,12 @@
           <tbody id="sutListBody"></tbody>
         </table>
       </div>
+    </div>
+
+    <!-- MOBİL SABİT ALT HIZLI QR ÇUBUĞU -->
+    <div id="mobileStickyQrBar" class="mobile-sticky-qr-bar">
+      <button type="button" class="btn btn-primary" style="flex:2;padding:13px;font-size:1rem;border-radius:10px;" onclick="openQrScanner()">📷 Hızlı QR Okut</button>
+      <button type="button" class="btn btn-outline" style="flex:1;padding:13px;font-size:0.9rem;border-radius:10px;" onclick="window.scrollTo({top:0,behavior:'smooth'})">⬆️ Üste Çık</button>
     </div>
   </div>
 
