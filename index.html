@@ -653,6 +653,3134 @@
           <input type="number" step="0.1" inputmode="decimal" id="sutMiktar" class="input-xl" placeholder="0.0" oninput="checkMustahsilAnomalyPreview()" />
         </div>
         <div>
+          <button class="btn btn-success btn-lg" style="padding:15px;font-size:1.08rem;" onclick="saveSutGirisi()">✅ Süt Kaydını Kaydet</button>
+        </div>
+      </div>
+
+      <!-- Anormal Süt Artışı Canlı Uyarı Alanı -->
+      <div id="anomalyPreviewBox"></div>
+    </div>
+
+    <!-- 2. HEMEN ALTINDA: LACİVERT TANK DOLULUK & VARDİYA ÖZET KARTI -->
+    <div class="navy-summary-card">
+      <div class="navy-top-row">
+        <div>
+          <div class="navy-title-lbl" id="navyCardTitle">BUGÜNKÜ TOPLAMA • SABAH VARDİYASI</div>
+          <div class="navy-date-sub" id="navyDateDisplay">-</div>
+        </div>
+        <div class="tr-plate-badge">
+          <div class="tr-plate-blue">TR</div>
+          <div class="tr-plate-text" id="navyPlateDisplay">42 ALK 01</div>
+        </div>
+      </div>
+
+      <div class="navy-metrics-grid">
+        <div>
+          <div class="navy-metric-lbl">TOPLANAN ÜRETİCİ</div>
+          <div class="navy-metric-val gold" id="navyProducerCount">0 / 0</div>
+        </div>
+        <div>
+          <div class="navy-metric-lbl">TOPLAM SÜT</div>
+          <div class="navy-metric-val white" id="navyTotalMilk">0,0 <span style="font-size:1rem;font-weight:700;">L</span></div>
+        </div>
+      </div>
+
+      <div id="navyTankList" class="tank-list-wrap"></div>
+    </div>
+
+    <!-- 3. VARDİYA, TARİH & ARAÇ PLAKASI AYARI -->
+    <div class="card" style="padding:14px;">
+      <div class="grid-3" style="gap:10px;">
+        <div>
+          <label>Tarih</label>
+          <input type="date" id="sutTarih" onchange="loadSutGirisleri()" />
+        </div>
+        <div>
+          <label>Vardiya</label>
+          <input type="hidden" id="sutVardiya" value="SABAH" />
+          <div class="vardiya-group">
+            <button type="button" id="btnVardiyaSABAH" class="vardiya-btn active" onclick="setSutVardiya('SABAH')">☀️ Sabah</button>
+            <button type="button" id="btnVardiyaAKSAM" class="vardiya-btn" onclick="setSutVardiya('AKSAM')">🌙 Akşam</button>
+          </div>
+        </div>
+        <div>
+          <label>Toplayıcı Araç Plakası</label>
+          <select id="sutPlaka" onchange="onSutPlakaChange()"></select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toplanan Süt Listesi -->
+    <div class="card">
+      <div class="card-header-flex">
+        <h3>Seçili Vardiya Toplanan Süt Listesi</h3>
+        <span style="font-size:0.82rem;color:#64748b;">Anormal artış olan kayıtlar kırmızı ile işaretlenir.</span>
+      </div>
+      <div id="sutOzetKpi" class="grid-3" style="margin-bottom:10px;"></div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Saat</th>
+              <th>Cari Kod</th>
+              <th>Müstahsil Adı</th>
+              <th>Grup</th>
+              <th>Plaka / Tank</th>
+              <th>Miktar (Kg)</th>
+              <th class="finans-yetki">Birim Fiyat</th>
+              <th class="finans-yetki">Hakediş</th>
+              <th>İşlem</th>
+            </tr>
+          </thead>
+          <tbody id="sutListBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- MOBİL SABİT ALT HIZLI QR ÇUBUĞU -->
+    <div id="mobileStickyQrBar" class="mobile-sticky-qr-bar">
+      <button type="button" class="btn btn-primary" style="flex:2;padding:13px;font-size:1rem;border-radius:10px;" onclick="openQrScanner()">📷 Hızlı QR Okut</button>
+      <button type="button" class="btn btn-outline" style="flex:1;padding:13px;font-size:0.9rem;border-radius:10px;" onclick="window.scrollTo({top:0,behavior:'smooth'})">⬆️ Üste Çık</button>
+    </div>
+  </div>
+
+  <!-- 2. MERKEZ KANTAR & SÜZME YOĞURT ÜRETİM -->
+  <div id="tab-depo" class="tab-panel hidden">
+    <div class="card">
+      <h3>Merkez Kantar Tartımı & Plaka Fark Kontrolü</h3>
+      <div class="grid-4" style="margin-bottom:12px;">
+        <div>
+          <label>Tarih</label>
+          <input type="date" id="depoTarih" onchange="loadDepoData()" />
+        </div>
+        <div>
+          <label>Vardiya</label>
+          <select id="depoVardiya" onchange="loadDepoData()">
+            <option value="SABAH">SABAH</option>
+            <option value="AKSAM">AKŞAM</option>
+          </select>
+        </div>
+        <div>
+          <label>Araç Plakası</label>
+          <select id="kantarPlaka"></select>
+        </div>
+        <div>
+          <label>Merkez Kantar Tartımı (Kg)</label>
+          <input type="number" step="0.1" id="kantarKg" placeholder="0.0" />
+        </div>
+      </div>
+      <div class="grid-2" style="align-items:end;">
+        <div>
+          <label>Açıklama / Fire Notu</label>
+          <input type="text" id="kantarNot" placeholder="Varsa fark açıklaması..." />
+        </div>
+        <div>
+          <button class="btn btn-primary btn-lg" onclick="saveKantar()">Kantar Tartımını Kaydet</button>
+        </div>
+      </div>
+      <div style="overflow-x:auto;margin-top:12px;">
+        <table>
+          <thead>
+            <tr>
+              <th>Plaka</th>
+              <th>Saha Toplamı (Kg)</th>
+              <th>Merkez Kantar (Kg)</th>
+              <th>Fark (Kg)</th>
+              <th>Not</th>
+            </tr>
+          </thead>
+          <tbody id="kantarListBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Süzme Yoğurt Üretim & Mayalama (3,20 Randıman Kontrolü)</h3>
+      <div class="grid-3" style="margin-bottom:12px;">
+        <div>
+          <label>Mayalanan Çiğ Süt (Kg)</label>
+          <input type="number" step="0.1" id="mayalananSut" oninput="calcRandimanPreview()" placeholder="Örn: 3200" />
+        </div>
+        <div>
+          <label>10 Kg Normal Süzme (Adet)</label>
+          <input type="number" id="adetNormal" oninput="calcRandimanPreview()" value="0" />
+        </div>
+        <div>
+          <label>10 Kg Sert Süzme (Adet)</label>
+          <input type="number" id="adetSert" oninput="calcRandimanPreview()" value="0" />
+        </div>
+      </div>
+      <div class="grid-3" style="margin-bottom:12px;">
+        <div>
+          <label>2 Kg Kase Süzme (Adet)</label>
+          <input type="number" id="adet2Kg" oninput="calcRandimanPreview()" value="0" />
+        </div>
+        <div>
+          <label>900 Gr Kase Süzme (Adet)</label>
+          <input type="number" id="adet900Gr" oninput="calcRandimanPreview()" value="0" />
+        </div>
+        <div style="display:flex;align-items:end;">
+          <button class="btn btn-success btn-lg" onclick="saveYogurtUretim()">Vardiya Üretimini Kaydet</button>
+        </div>
+      </div>
+
+      <div id="randimanAlertBox"></div>
+
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Vardiya</th>
+              <th>Mayalanan Süt</th>
+              <th>10Kg Normal</th>
+              <th>10Kg Sert</th>
+              <th>2Kg Kase</th>
+              <th>900g Kase</th>
+              <th>Toplam Yoğurt (Kg)</th>
+              <th>Süzme Oranı</th>
+            </tr>
+          </thead>
+          <tbody id="uretimListBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. TARİH ARALIKLI MALİYET TARİFESİ & KÂR ANALİZİ -->
+  <div id="tab-maliyet" class="tab-panel hidden">
+    <div class="card">
+      <div class="card-header-flex">
+        <h3>📅 Tarih Aralıklı Gider, Kur & Satış Fiyatı Tarifesi</h3>
+        <button type="button" id="btnCancelTarifeEdit" class="btn btn-outline btn-sm hidden" onclick="resetTarifeForm()">Düzenlemeyi İptal Et</button>
+      </div>
+      <div class="info-banner">
+        <strong>Nasıl Çalışır?</strong><br/>
+        • Ayın farklı dönemlerinde değişen <strong>Euro kuru, günlük sabit giderler, kova maliyetleri ve satış fiyatlarını</strong> Başlangıç – Bitiş tarihi vererek tanımlayabilirsiniz.<br/>
+        • Aşağıdaki <strong>Kayıtlı Maliyet & Gider Dönemleri</strong> tablosundan geçmiş veya güncel dönemleri inceleyebilir, <strong>Düzenle</strong> veya <strong>Sil</strong> yapabilirsiniz.
+      </div>
+      <input type="hidden" id="editTarifeId" />
+      <div class="grid-4" style="margin-bottom:12px;">
+        <div>
+          <label>Başlangıç Tarihi *</label>
+          <input type="date" id="tarifeBaslangic" />
+        </div>
+        <div>
+          <label>Bitiş Tarihi *</label>
+          <input type="date" id="tarifeBitis" />
+        </div>
+        <div>
+          <label>Euro Kuru (₺) *</label>
+          <input type="number" step="0.0001" id="tarifeEuro" placeholder="Örn: 38.50" />
+        </div>
+        <div>
+          <label>Dönem Açıklaması</label>
+          <input type="text" id="tarifeAciklama" placeholder="Örn: Kasım 2. yarı tarife" />
+        </div>
+      </div>
+
+      <div class="grid-3" style="margin-bottom:12px;">
+        <div>
+          <label>Doğalgaz (Günlük ₺)</label>
+          <input type="number" step="0.01" id="tarifeDogalgaz" value="0" />
+        </div>
+        <div>
+          <label>Elektrik (Günlük ₺)</label>
+          <input type="number" step="0.01" id="tarifeElektrik" value="0" />
+        </div>
+        <div>
+          <label>Mazot (Günlük ₺)</label>
+          <input type="number" step="0.01" id="tarifeMazot" value="0" />
+        </div>
+      </div>
+      <div class="grid-3" style="margin-bottom:12px;">
+        <div>
+          <label>İşçilik (Günlük ₺)</label>
+          <input type="number" step="0.01" id="tarifeIscilik" value="0" />
+        </div>
+        <div>
+          <label>Yemek (Günlük ₺)</label>
+          <input type="number" step="0.01" id="tarifeYemek" value="0" />
+        </div>
+        <div>
+          <label>Su (Günlük ₺)</label>
+          <input type="number" step="0.01" id="tarifeSu" value="0" />
+        </div>
+      </div>
+
+      <h4 style="font-size:0.92rem;color:#334155;margin:10px 0 8px;">Euro Endeksli Kova / Ambalaj Birim Maliyetleri (€ / Adet)</h4>
+      <div class="grid-4" style="margin-bottom:14px;">
+        <div><label>10 Kg Normal Kova (€)</label><input type="number" step="0.0001" id="kovaNormalEur" value="0" /></div>
+        <div><label>10 Kg Sert Kova (€)</label><input type="number" step="0.0001" id="kovaSertEur" value="0" /></div>
+        <div><label>2 Kg Kova (€)</label><input type="number" step="0.0001" id="kova2KgEur" value="0" /></div>
+        <div><label>900 Gr Kova (€)</label><input type="number" step="0.0001" id="kova900GrEur" value="0" /></div>
+      </div>
+
+      <h4 style="font-size:0.92rem;color:#334155;margin:10px 0 8px;">Toptan & Perakende Satış Fiyatları (₺ / Adet)</h4>
+      <div class="grid-4" style="margin-bottom:14px;">
+        <div>
+          <label>10 Kg Normal (Toptan / Perakende ₺)</label>
+          <div style="display:flex;gap:6px;">
+            <input type="number" step="0.01" id="toptanNormal" placeholder="Toptan" />
+            <input type="number" step="0.01" id="perakendeNormal" placeholder="Perakende" />
+          </div>
+        </div>
+        <div>
+          <label>10 Kg Sert (Toptan / Perakende ₺)</label>
+          <div style="display:flex;gap:6px;">
+            <input type="number" step="0.01" id="toptanSert" placeholder="Toptan" />
+            <input type="number" step="0.01" id="perakendeSert" placeholder="Perakende" />
+          </div>
+        </div>
+        <div>
+          <label>2 Kg Kase (Toptan / Perakende ₺)</label>
+          <div style="display:flex;gap:6px;">
+            <input type="number" step="0.01" id="toptan2Kg" placeholder="Toptan" />
+            <input type="number" step="0.01" id="perakende2Kg" placeholder="Perakende" />
+          </div>
+        </div>
+        <div>
+          <label>900 Gr Kase (Toptan / Perakende ₺)</label>
+          <div style="display:flex;gap:6px;">
+            <input type="number" step="0.01" id="toptan900Gr" placeholder="Toptan" />
+            <input type="number" step="0.01" id="perakende900Gr" placeholder="Perakende" />
+          </div>
+        </div>
+      </div>
+      <button class="btn btn-primary btn-lg" onclick="saveMaliyetTarifesi()">Maliyet & Gider Dönemini Kaydet</button>
+
+      <div style="overflow-x:auto;margin-top:16px;">
+        <table>
+          <thead>
+            <tr>
+              <th>Başlangıç</th>
+              <th>Bitiş</th>
+              <th>Euro Kuru</th>
+              <th>Günlük Sabit Gider</th>
+              <th>10Kg Normal Satış (T/P)</th>
+              <th>Açıklama</th>
+              <th>İşlem</th>
+            </tr>
+          </thead>
+          <tbody id="tarifeDonemleriBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Günlük Maliyet & Toptan / Perakende Kâr Oranı Analizi</h3>
+      <div class="grid-3" style="margin-bottom:12px;align-items:end;">
+        <div>
+          <label>Analiz Edilecek Tarih</label>
+          <input type="date" id="analizTarih" onchange="renderGunlukAnaliz()" />
+        </div>
+        <div id="aktifTarifeBilgi" style="grid-column:span 2;font-size:0.86rem;color:#334155;"></div>
+      </div>
+      <div id="analizKpiGrid" class="grid-4" style="margin-bottom:14px;"></div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Ürün Çeşidi</th>
+              <th>Saf Süt Maliyeti</th>
+              <th>Kova (₺)</th>
+              <th>İşletme Gider Payı</th>
+              <th>Toplam Adet Maliyeti</th>
+              <th>Toptan Fiyat / Kâr %</th>
+              <th>Perakende Fiyat / Kâr %</th>
+            </tr>
+          </thead>
+          <tbody id="karAnalizBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. MÜSTAHSİL, FİYAT DÖNEMLERİ, TANKLAR & TOPLU RAPOR -->
+  <div id="tab-yonetim" class="tab-panel hidden">
+    <div class="grid-2">
+      <div class="card">
+        <h3>Müstahsil Grupları (Ekle / Düzenle / Sil)</h3>
+        <div style="display:flex;gap:8px;align-items:end;">
+          <div style="flex:1;">
+            <label>Yeni Grup Adı</label>
+            <input type="text" id="newGrupInput" placeholder="Örn: LADİK SOĞUK" onkeydown="if(event.key==='Enter') addSistemTanim('GRUP')" />
+          </div>
+          <button type="button" class="btn btn-success" onclick="addSistemTanim('GRUP')">+ Grup Ekle</button>
+        </div>
+        <div id="grupChipList" class="chip-list"></div>
+      </div>
+
+      <div class="card">
+        <h3>Araç Plakaları & Tank Kapasiteleri (Ekle / Düzenle / Sil)</h3>
+        <div class="grid-3" style="align-items:end;gap:8px;">
+          <div>
+            <label>Araç Plakası</label>
+            <input type="text" id="newPlakaInput" placeholder="Örn: 42 ALK 03" />
+          </div>
+          <div>
+            <label>Tank Kapasiteleri (L)</label>
+            <input type="text" id="newPlakaTankInput" placeholder="Örn: 3000, 2500, 2500" value="3000, 2500, 2500" />
+          </div>
+          <div>
+            <button type="button" class="btn btn-primary" style="width:100%;" onclick="addPlakaWithTanks()">+ Plaka Ekle</button>
+          </div>
+        </div>
+        <div style="font-size:0.78rem;color:#64748b;margin-top:4px;">Tank kapasitelerini virgülle ayırarak yazın (Örn: 3000, 2500, 2500 = 3 Tanklı Araç).</div>
+        <div id="plakaChipList" class="chip-list"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>📅 Tarih Aralıklı Süt Fiyat Dönemleri (Geçmiş Bozulmaz)</h3>
+      <div class="info-banner">
+        <strong>Nasıl Çalışır?</strong><br/>
+        1) Süt girişi yapıldığı anda, o tarihte geçerli olan birim fiyat süt kaydının içine <strong>kalıcı olarak mühürlenir</strong>; ileriye dönük tanımladığınız fiyatlar geçmiş kayıtlarınızı asla değiştirmez.<br/>
+        2) Aşağıdan <strong>Başlangıç – Bitiş Tarihi</strong> seçerek dönemlik fiyat listesi oluşturabilir, dilerseniz sadece o tarih aralığındaki mevcut süt kayıtlarını sonradan güncelleyebilirsiniz.
+      </div>
+      <div class="grid-4" style="margin-bottom:10px;">
+        <div>
+          <label>Başlangıç Tarihi</label>
+          <input type="date" id="donemBaslangic" />
+        </div>
+        <div>
+          <label>Bitiş Tarihi</label>
+          <input type="date" id="donemBitis" />
+        </div>
+        <div>
+          <label>Hedef Grup</label>
+          <select id="donemGrupSelect"></select>
+        </div>
+        <div>
+          <label>Dönem Birim Fiyatı (₺/Kg)</label>
+          <input type="number" step="0.01" id="donemFiyatInput" placeholder="Örn: 17.25" />
+        </div>
+      </div>
+      <div class="grid-3" style="margin-bottom:12px;align-items:end;">
+        <div>
+          <label>Dönem Notu (İsteğe Bağlı)</label>
+          <input type="text" id="donemAciklamaInput" placeholder="Örn: Kasım 2. yarı zamlı tarife" />
+        </div>
+        <div>
+          <button type="button" class="btn btn-primary btn-lg" onclick="saveFiyatDonemi(false)">Fiyat Dönemini Kaydet</button>
+        </div>
+        <div>
+          <button type="button" class="btn btn-warning btn-lg" onclick="saveFiyatDonemi(true)">Kaydet & Bu Aralıktaki Sütleri Güncelle</button>
+        </div>
+      </div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Başlangıç Tarihi</th>
+              <th>Bitiş Tarihi</th>
+              <th>Kapsam (Grup)</th>
+              <th>Birim Fiyat (₺/Kg)</th>
+              <th>Açıklama</th>
+              <th>İşlem</th>
+            </tr>
+          </thead>
+          <tbody id="fiyatDonemleriBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Yeni Müstahsil Kartı Ekle</h3>
+      <div class="grid-4" style="margin-bottom:10px;">
+        <div><label>Cari Kodu *</label><input type="text" id="mCari" placeholder="Örn: MST-005" /></div>
+        <div><label>Adı Soyadı *</label><input type="text" id="mAd" placeholder="Ad Soyad" /></div>
+        <div><label>TC Kimlik No</label><input type="text" id="mTc" maxlength="11" placeholder="11 haneli TC" /></div>
+        <div><label>İşletme No</label><input type="text" id="mIsletme" placeholder="TR42..." /></div>
+      </div>
+      <div class="grid-4" style="margin-bottom:12px;">
+        <div><label>Baba Adı</label><input type="text" id="mBaba" /></div>
+        <div><label>Telefon</label><input type="text" id="mTel" placeholder="05xx..." /></div>
+        <div><label>Müstahsil Grubu</label><select id="mGrup"></select></div>
+        <div><label>Varsayılan Kart Fiyatı (₺/Kg)</label><input type="number" step="0.01" id="mFiyat" value="16.50" /></div>
+      </div>
+      <button class="btn btn-success" onclick="saveMustahsil()">Müstahsil Kaydet & QR Oluştur</button>
+    </div>
+
+    <div class="card">
+      <h3>Müstahsil Listesi & Varsayılan Kart Fiyatları</h3>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Cari Kod</th>
+              <th>QR Kodu & Kapı Afişi</th>
+              <th>Ad Soyad</th>
+              <th>Grup</th>
+              <th>TC / İşletme No</th>
+              <th>Varsayılan Fiyat (₺/Kg)</th>
+              <th>İşlem</th>
+            </tr>
+          </thead>
+          <tbody id="mustahsilTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Geriye Dönük Aylık / Tarih Aralıklı Müstahsil Hakediş & Toplu Rapor</h3>
+      <div class="grid-4" style="margin-bottom:12px;align-items:end;">
+        <div><label>Başlangıç Tarihi</label><input type="date" id="raporBaslangic" /></div>
+        <div><label>Bitiş Tarihi</label><input type="date" id="raporBitis" /></div>
+        <div><label>Grup Filtresi</label><select id="raporGrupFiltre"></select></div>
+        <div><button class="btn btn-primary btn-lg" onclick="loadTopluRapor()">Raporu Getir</button></div>
+      </div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Cari Kod</th>
+              <th>Müstahsil</th>
+              <th>Grup</th>
+              <th>Toplam Süt (Kg)</th>
+              <th>Ort. Birim Fiyat (₺)</th>
+              <th>Toplam Hakediş (₺)</th>
+            </tr>
+          </thead>
+          <tbody id="topluRaporBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. DİNAMİK KULLANICI & BÖLÜM YETKİ YÖNETİMİ -->
+  <div id="tab-kullanicilar" class="tab-panel hidden">
+    <div class="card">
+      <div class="card-header-flex">
+        <h3>Kayıtlı Kullanıcılar & Açık Modül Yetkileri</h3>
+        <button type="button" class="btn btn-success" onclick="openUserModal()">+ Yeni Kullanıcı Ekle</button>
+      </div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Ad Soyad</th>
+              <th>Kullanıcı Adı</th>
+              <th>Şifre</th>
+              <th>Atanan Araç Plakası</th>
+              <th>Açık Bölümler & Yetkiler</th>
+              <th>Durum</th>
+              <th>İşlem</th>
+            </tr>
+          </thead>
+          <tbody id="usersTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MÜSTAHSİL DÜZENLEME MODALI -->
+<div id="editMustahsilModal" class="modal-backdrop hidden" onclick="if(event.target===this) closeEditMustahsilModal()">
+  <div class="modal-dialog" style="max-width:560px;">
+    <div class="modal-header">
+      <h3>Müstahsil Kartını Düzenle</h3>
+      <button type="button" class="modal-close" onclick="closeEditMustahsilModal()" title="Kapat">&times;</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="editMstId" />
+      <div class="grid-2" style="margin-bottom:12px;">
+        <div><label>Cari Kodu *</label><input type="text" id="editMCari" /></div>
+        <div><label>Adı Soyadı *</label><input type="text" id="editMAd" /></div>
+      </div>
+      <div class="grid-2" style="margin-bottom:12px;">
+        <div><label>Müstahsil Grubu</label><select id="editMGrup"></select></div>
+        <div><label>Varsayılan Kart Fiyatı (₺/Kg)</label><input type="number" step="0.01" id="editMFiyat" /></div>
+      </div>
+      <div class="grid-2" style="margin-bottom:12px;">
+        <div><label>TC Kimlik No</label><input type="text" id="editMTc" maxlength="11" /></div>
+        <div><label>İşletme No</label><input type="text" id="editMIsletme" /></div>
+      </div>
+      <div class="grid-2">
+        <div><label>Baba Adı</label><input type="text" id="editMBaba" /></div>
+        <div><label>Telefon</label><input type="text" id="editMTel" /></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-outline" onclick="closeEditMustahsilModal()">İptal</button>
+      <button type="button" class="btn btn-success" onclick="updateMustahsilCard()">Değişiklikleri Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<!-- SÜT GİRİŞ KAYDI DÜZENLEME MODALI -->
+<div id="editSutModal" class="modal-backdrop hidden" onclick="if(event.target===this) closeEditSutModal()">
+  <div class="modal-dialog" style="max-width:540px;">
+    <div class="modal-header">
+      <h3>Süt Giriş Kaydını Düzenle</h3>
+      <button type="button" class="modal-close" onclick="closeEditSutModal()" title="Kapat">&times;</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="editSutId" />
+      <div class="grid-2" style="margin-bottom:12px;">
+        <div><label>Tarih *</label><input type="date" id="editSutTarih" /></div>
+        <div>
+          <label>Vardiya *</label>
+          <select id="editSutVardiya">
+            <option value="SABAH">SABAH</option>
+            <option value="AKSAM">AKŞAM</option>
+          </select>
+        </div>
+      </div>
+      <div style="margin-bottom:12px;">
+        <label>Müstahsil *</label>
+        <select id="editSutMustahsil"></select>
+      </div>
+      <div class="grid-3" style="margin-bottom:12px;">
+        <div><label>Süt Miktarı (Kg) *</label><input type="number" step="0.1" id="editSutMiktar" /></div>
+        <div><label>Birim Fiyat (₺/Kg)</label><input type="number" step="0.01" id="editSutFiyat" /></div>
+        <div><label>Toplayıcı Plaka</label><select id="editSutPlaka"></select></div>
+      </div>
+      <div style="margin-bottom:12px;">
+        <label>Tank No</label>
+        <select id="editSutTank">
+          <option value="1">Tank 1</option>
+          <option value="2">Tank 2</option>
+          <option value="3">Tank 3</option>
+          <option value="4">Tank 4</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-outline" onclick="closeEditSutModal()">İptal</button>
+      <button type="button" class="btn btn-success" onclick="updateSutGirisi()">Kaydı Güncelle</button>
+    </div>
+  </div>
+</div>
+
+<!-- KULLANICI EKLE / DÜZENLE MODAL PENCERESİ -->
+<div id="userModal" class="modal-backdrop hidden" onclick="if(event.target===this) closeUserModal()">
+  <div class="modal-dialog">
+    <div class="modal-header">
+      <h3 id="userModalTitle">Yeni Kullanıcı Ekle</h3>
+      <button type="button" class="modal-close" onclick="closeUserModal()" title="Kapat">&times;</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="editUserId" />
+      <div class="grid-2" style="margin-bottom:12px;">
+        <div>
+          <label>Ad Soyad / Ünvan *</label>
+          <input type="text" id="uAdSoyad" placeholder="Örn: Ahmet Yılmaz" />
+        </div>
+        <div>
+          <label>Kullanıcı Adı *</label>
+          <input type="text" id="uKullaniciAdi" placeholder="Örn: ahmet42" />
+        </div>
+      </div>
+      <div class="grid-2" style="margin-bottom:14px;">
+        <div>
+          <label>Giriş Şifresi *</label>
+          <input type="text" id="uSifre" placeholder="Şifre belirleyin" />
+        </div>
+        <div>
+          <label>Atanan Plaka</label>
+          <select id="uPlaka">
+            <option value="">Tüm Plakalar (Kısıt Yok)</option>
+          </select>
+        </div>
+      </div>
+
+      <label>Bu Kullanıcıya Açılacak Bölümler ve Özel Yetkiler:</label>
+      <div class="perm-grid">
+        <label class="perm-item"><input type="checkbox" class="u-perm" value="toplama" checked /> Saha Süt Toplama</label>
+        <label class="perm-item"><input type="checkbox" class="u-perm" value="depo" /> Merkez Kantar & Süzme Yoğurt</label>
+        <label class="perm-item"><input type="checkbox" class="u-perm" value="maliyet" /> Maliyet Tarifesi & Kâr Analizi</label>
+        <label class="perm-item"><input type="checkbox" class="u-perm" value="yonetim" /> Müstahsiller & Toplu Rapor</label>
+        <label class="perm-item"><input type="checkbox" class="u-perm" value="kullanicilar" /> Kullanıcı & Yetki Yönetimi</label>
+        <label class="perm-item"><input type="checkbox" class="u-perm" value="gecmis_tarih" /> Geçmiş Tarih & Fiyat Görme Yetkisi</label>
+      </div>
+
+      <label style="display:flex;align-items:center;gap:8px;margin:0;cursor:pointer;">
+        <input type="checkbox" id="uAktif" checked style="width:18px;height:18px;" /> Hesap Aktif (Giriş Yapabilir)
+      </label>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-outline" onclick="closeUserModal()">İptal</button>
+      <button type="button" class="btn btn-success" onclick="saveDynamicUser()">Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<!-- QR KAMERA OKUYUCU -->
+<div id="qrModal" class="modal-backdrop hidden" onclick="if(event.target===this) closeQrScanner()">
+  <div class="modal-dialog" style="max-width:460px;">
+    <div class="modal-header">
+      <h3>📷 Müstahsil QR Kodu Okut</h3>
+      <button type="button" class="modal-close" onclick="closeQrScanner()" title="Kapat">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div id="qrReaderBox" style="width:100%;border-radius:10px;overflow:hidden;background:#0f172a;"></div>
+      <div style="margin-top:12px;">
+        <label>Veya QR / Cari Kodu Manuel Girin:</label>
+        <div style="display:flex;gap:8px;">
+          <input type="text" id="manualQrInput" placeholder="Örn: ALK-MST-001 veya MST-001" onkeydown="if(event.key==='Enter') selectMustahsilByQr(this.value)" />
+          <button type="button" class="btn btn-success" onclick="selectMustahsilByQr(document.getElementById('manualQrInput').value)">Seç</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-outline" onclick="closeQrScanner()">Kapat</button>
+    </div>
+  </div>
+</div>
+
+<!-- MÜSTAHSİL KAPI QR AFİŞİ -->
+<div id="qrPrintModal" class="modal-backdrop hidden" onclick="if(event.target===this) closeQrPrintModal()">
+  <div class="modal-dialog" style="max-width:560px;">
+    <div class="modal-header">
+      <h3>🚪 Müstahsil Kapı QR Afişi</h3>
+      <button type="button" class="modal-close" onclick="closeQrPrintModal()" title="Kapat">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div id="qrPrintArea" style="border:3px solid #0f4c81;border-radius:14px;padding:22px;text-align:center;background:#fff;">
+        <div style="font-size:0.9rem;font-weight:800;color:#0f4c81;letter-spacing:0.6px;">ALAKUZULAR GIDA | SÜT TOPLAMA NOKTASI</div>
+        <div id="printQrAd" style="font-size:1.85rem;font-weight:900;color:#0f172a;margin:8px 0 4px;"></div>
+        <div id="printQrMeta" style="font-size:1rem;font-weight:600;color:#334155;margin-bottom:16px;"></div>
+        <div id="qrCodeCanvasBox" style="display:flex;justify-content:center;align-items:center;min-height:290px;"></div>
+        <div id="printQrCodeText" style="margin-top:14px;font-family:monospace;font-size:1.35rem;font-weight:900;color:#0f172a;letter-spacing:1px;"></div>
+        <div style="margin-top:8px;font-size:0.82rem;color:#64748b;">Süt teslimi sırasında telefon kamerası ile QR kodu okutunuz.</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-outline" onclick="closeQrPrintModal()">Kapat</button>
+      <button type="button" class="btn btn-primary" onclick="window.print()">🖨️ Büyük Afiş Yazdır</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+  const SUPABASE_PROJECT_URL = "https://snlvqfcbgovpykmmspph.supabase.co";
+  const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_BQ_BNqstu9zltJq8qMYMXw_8rIVJggf";
+  const sbClient = window.supabase.createClient(SUPABASE_PROJECT_URL, SUPABASE_PUBLISHABLE_KEY);
+
+  const OFFLINE_QUEUE_KEY = 'alakuzular_offline_sut_queue_v1';
+  const MASTER_CACHE_KEY = 'alakuzular_master_cache_v1';
+
+  const MODULE_LABELS = {
+    toplama: "Saha Süt Toplama",
+    depo: "Kantar & Yoğurt Üretim",
+    maliyet: "Maliyet & Kâr Analizi",
+    yonetim: "Müstahsiller & Rapor",
+    kullanicilar: "Kullanıcı Yönetimi",
+    gecmis_tarih: "Geçmiş Tarih & Fiyat"
+  };
+
+  let currentUser = null;
+  let allMustahsiller = [];
+  let allTarifeler = [];
+  let allUsers = [];
+  let allTanimlar = [];
+  let allFiyatDonemleri = [];
+  let allSutHistoryCache = [];
+  let lastSyncTimeStr = '';
+  let html5QrInstance = null;
+  let qrScanLocked = false;
+
+  const todayStr = () => new Date().toISOString().split('T')[0];
+
+  function nowTimeStr() {
+    const d = new Date();
+    return d.toTimeString().slice(0, 5); // HH:MM
+  }
+
+  function formatTurkishDate(isoDate) {
+    if (!isoDate) return '-';
+    const d = new Date(isoDate + 'T12:00:00');
+    return d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', weekday: 'long' });
+  }
+
+  // ==========================================
+  // ÇEVRİMİÇİ / ÇEVRİMDIŞI YÖNETİMİ
+  // ==========================================
+  function getOfflineQueue() {
+    try {
+      return JSON.parse(localStorage.getItem(OFFLINE_QUEUE_KEY) || '[]');
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function setOfflineQueue(list) {
+    localStorage.setItem(OFFLINE_QUEUE_KEY, JSON.stringify(list));
+    updateNetworkAndSyncUI();
+  }
+
+  function updateNetworkAndSyncUI() {
+    const isOnline = navigator.onLine;
+    const queue = getOfflineQueue();
+
+    const headerBadge = document.getElementById('headerNetBadge');
+    const routePill = document.getElementById('routeNetPill');
+    const syncPill = document.getElementById('routeSyncPill');
+    const syncBtn = document.getElementById('btnSyncOffline');
+    const countSpan = document.getElementById('offlinePendingCount');
+
+    if (headerBadge) {
+      headerBadge.innerHTML = isOnline
+        ? '<span class="dot-live"></span> Çevrimiçi'
+        : '<span class="dot-offline"></span> Çevrimdışı Mod';
+    }
+    if (routePill) {
+      routePill.className = 'net-pill ' + (isOnline ? 'net-online' : 'net-offline');
+      routePill.textContent = isOnline ? '📶 Çevrimiçi' : '📴 Çevrimdışı (Cihaza Kaydedilir)';
+    }
+    if (countSpan) countSpan.textContent = queue.length;
+
+    if (queue.length > 0) {
+      if (syncPill) syncPill.textContent = `⏳ ${queue.length} kayıt senkronizasyon bekliyor`;
+      if (syncBtn && isOnline) syncBtn.classList.remove('hidden');
+      else if (syncBtn) syncBtn.classList.add('hidden');
+    } else {
+      if (syncBtn) syncBtn.classList.add('hidden');
+      if (syncPill) {
+        syncPill.textContent = lastSyncTimeStr
+          ? `☁️ Tüm veriler gönderildi • ${lastSyncTimeStr}`
+          : '☁️ Tüm veriler gönderildi';
+      }
+    }
+  }
+
+  async function syncOfflineQueue() {
+    if (!navigator.onLine) {
+      updateNetworkAndSyncUI();
+      return;
+    }
+    const queue = getOfflineQueue();
+    if (!queue.length) {
+      updateNetworkAndSyncUI();
+      return;
+    }
+
+    const remaining = [];
+    let syncedCount = 0;
+
+    for (const item of queue) {
+      const payload = { ...item };
+      delete payload._local_id;
+      const { error } = await sbClient.from('sut_girisleri').insert([payload]);
+      if (error) {
+        remaining.push(item);
+      } else {
+        syncedCount++;
+      }
+    }
+
+    setOfflineQueue(remaining);
+    if (syncedCount > 0) {
+      lastSyncTimeStr = nowTimeStr();
+      updateNetworkAndSyncUI();
+      showToast(`☁️ İnternet bağlandı: ${syncedCount} çevrimdışı süt kaydı aktarıldı.`);
+      if (currentUser) loadSutGirisleri();
+    }
+  }
+
+  window.addEventListener('online', () => {
+    updateNetworkAndSyncUI();
+    syncOfflineQueue();
+  });
+  window.addEventListener('offline', () => {
+    updateNetworkAndSyncUI();
+    showToast('📴 İnternet kesildi. Süt kayıtları cihaza alınacak, bağlanınca otomatik aktarılacak.', true);
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeUserModal();
+      closeQrScanner();
+      closeQrPrintModal();
+      closeEditMustahsilModal();
+      closeEditSutModal();
+    }
+  });
+
+  function hasPerm(permKey) {
+    if (!currentUser) return false;
+    const list = Array.isArray(currentUser.yetkiler) ? currentUser.yetkiler : [];
+    return list.includes(permKey);
+  }
+
+  function showToast(msg, isErr = false) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.style.background = isErr ? '#b91c1c' : '#0f172a';
+    t.style.display = 'block';
+    setTimeout(() => { t.style.display = 'none'; }, 3800);
+  }
+
+  function showLoginError(msg) {
+    const box = document.getElementById('loginErrorBox');
+    box.textContent = msg;
+    box.classList.remove('hidden');
+  }
+
+  function setSutVardiya(vardiya) {
+    document.getElementById('sutVardiya').value = vardiya;
+    document.getElementById('btnVardiyaSABAH').classList.toggle('active', vardiya === 'SABAH');
+    document.getElementById('btnVardiyaAKSAM').classList.toggle('active', vardiya === 'AKSAM');
+    loadSutGirisleri();
+  }
+
+  async function login() {
+    document.getElementById('loginErrorBox').classList.add('hidden');
+    const u = document.getElementById('loginUser').value.trim();
+    const p = document.getElementById('loginPass').value.trim();
+    if (!u || !p) return showLoginError('Lütfen kullanıcı adı ve şifre girin.');
+
+    const { data, error } = await sbClient
+      .from('kullanicilar')
+      .select('*')
+      .eq('kullanici_adi', u)
+      .eq('sifre', p)
+      .eq('aktif', true);
+
+    if (error) return showLoginError('Bağlantı/Veritabanı Hatası: ' + error.message);
+    if (!data || !data.length) return showLoginError('Kullanıcı adı veya şifre hatalı ya da hesap pasif.');
+
+    const user = data[0];
+    if (!Array.isArray(user.yetkiler) || user.yetkiler.length === 0) {
+      if (user.rol === 'ADMIN') user.yetkiler = ['toplama', 'depo', 'maliyet', 'yonetim', 'kullanicilar', 'gecmis_tarih'];
+      else if (user.rol === 'DEPOCU') user.yetkiler = ['depo'];
+      else user.yetkiler = ['toplama'];
+    }
+
+    currentUser = user;
+    initApp();
+  }
+
+  function logout() {
+    currentUser = null;
+    closeUserModal();
+    closeQrScanner();
+    closeQrPrintModal();
+    closeEditMustahsilModal();
+    closeEditSutModal();
+    document.getElementById('appView').classList.add('hidden');
+    document.getElementById('loginView').classList.remove('hidden');
+    document.getElementById('userBadge').classList.add('hidden');
+    document.getElementById('logoutBtn').classList.add('hidden');
+  }
+
+  async function initApp() {
+    document.getElementById('loginView').classList.add('hidden');
+    document.getElementById('appView').classList.remove('hidden');
+
+    const ub = document.getElementById('userBadge');
+    ub.textContent = `${currentUser.ad_soyad}${currentUser.atanan_plaka ? ' (' + currentUser.atanan_plaka + ')' : ''}`;
+    ub.classList.remove('hidden');
+    document.getElementById('logoutBtn').classList.remove('hidden');
+
+    const today = todayStr();
+    ['sutTarih', 'depoTarih', 'tarifeBaslangic', 'tarifeBitis', 'analizTarih', 'raporBitis', 'donemBaslangic', 'donemBitis'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = today;
+    });
+    document.getElementById('raporBaslangic').value = today.slice(0, 8) + '01';
+    setSutVardiya('SABAH');
+
+    const canSeeHistoryAndPrice = hasPerm('gecmis_tarih') || hasPerm('maliyet');
+    if (!canSeeHistoryAndPrice) {
+      document.getElementById('sutTarih').setAttribute('readonly', true);
+      document.getElementById('depoTarih').setAttribute('readonly', true);
+      document.querySelectorAll('.finans-yetki').forEach(el => el.classList.add('hidden'));
+    } else {
+      document.getElementById('sutTarih').removeAttribute('readonly');
+      document.getElementById('depoTarih').removeAttribute('readonly');
+      document.querySelectorAll('.finans-yetki').forEach(el => el.classList.remove('hidden'));
+    }
+
+    updateNetworkAndSyncUI();
+    buildTabs();
+    await refreshMasterData();
+    await syncOfflineQueue();
+  }
+
+  function buildTabs() {
+    const nav = document.getElementById('navTabs');
+    nav.innerHTML = '';
+    const candidateTabs = [
+      { id: 'toplama', label: 'Saha Süt Toplama' },
+      { id: 'depo', label: 'Merkez Kantar & Süzme Yoğurt' },
+      { id: 'maliyet', label: 'Maliyet Tarifesi & Kâr Analizi' },
+      { id: 'yonetim', label: 'Müstahsiller & Toplu Rapor' },
+      { id: 'kullanicilar', label: 'Kullanıcı & Yetki Yönetimi' }
+    ];
+
+    const allowedTabs = candidateTabs.filter(t => hasPerm(t.id));
+    allowedTabs.forEach((t, idx) => {
+      const btn = document.createElement('button');
+      btn.className = 'tab-btn' + (idx === 0 ? ' active' : '');
+      btn.textContent = t.label;
+      btn.onclick = () => switchTab(t.id, btn);
+      nav.appendChild(btn);
+    });
+
+    if (allowedTabs.length) {
+      switchTab(allowedTabs[0].id, nav.firstChild);
+    } else {
+      showToast('Hesabınıza tanımlı açık bölüm bulunmuyor. Yönetici ile görüşün.', true);
+    }
+  }
+
+  function switchTab(tabId, btnEl) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.add('hidden'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + tabId).classList.remove('hidden');
+    if (btnEl) btnEl.classList.add('active');
+
+    if (tabId === 'toplama') loadSutGirisleri();
+    if (tabId === 'depo') loadDepoData();
+    if (tabId === 'maliyet') { renderTarifeDonemleriTable(); renderGunlukAnaliz(); }
+    if (tabId === 'yonetim') { renderTanimlarUI(); renderFiyatDonemleriTable(); renderMustahsilTable(); }
+    if (tabId === 'kullanicilar') loadUsersList();
+  }
+
+  // ==========================================
+  // TANK YAPISI PARSE & YARDIMCILAR
+  // ==========================================
+  function parsePlakaRecord(rawVal) {
+    // Örn: "42 ALK 01|3000,2500,2500" -> { plaka: "42 ALK 01", tanks: [3000, 2500, 2500] }
+    const str = (rawVal || '').trim();
+    const [pPart, tPart] = str.split('|');
+    const plaka = (pPart || '').trim().toUpperCase();
+    let tanks = [3000, 2500, 2500];
+    if (tPart) {
+      const parsed = tPart.split(',').map(x => parseFloat(x.trim())).filter(x => !isNaN(x) && x > 0);
+      if (parsed.length) tanks = parsed;
+    }
+    return { plaka, tanks };
+  }
+
+  function getTanksForPlaka(plakaStr) {
+    const clean = (plakaStr || '').trim().toUpperCase();
+    const rec = allTanimlar.find(t => t.tip === 'PLAKA' && parsePlakaRecord(t.deger).plaka === clean);
+    if (rec) return parsePlakaRecord(rec.deger).tanks;
+    return [3000, 2500, 2500];
+  }
+
+  function getDistinctGruplar() {
+    const set = new Set(['GENEL']);
+    allTanimlar.filter(t => t.tip === 'GRUP').forEach(t => {
+      if (t.deger && t.deger.trim()) set.add(t.deger.trim().toUpperCase());
+    });
+    allMustahsiller.forEach(m => {
+      if (m.grup && m.grup.trim()) set.add(m.grup.trim().toUpperCase());
+    });
+    return [...set].sort((a, b) => a.localeCompare(b, 'tr'));
+  }
+
+  function getDistinctPlakalar() {
+    const set = new Set();
+    allTanimlar.filter(t => t.tip === 'PLAKA').forEach(t => {
+      const { plaka } = parsePlakaRecord(t.deger);
+      if (plaka) set.add(plaka);
+    });
+    allUsers.forEach(u => {
+      if (u.atanan_plaka && u.atanan_plaka.trim()) {
+        u.atanan_plaka.split(',').forEach(p => { if (p.trim()) set.add(p.trim().toUpperCase()); });
+      }
+    });
+    if (!set.size) {
+      set.add('42 ALK 01');
+      set.add('42 ALK 02');
+    }
+    return [...set].sort((a, b) => a.localeCompare(b, 'tr'));
+  }
+
+  function getEffectiveMustahsilPrice(mustahsilId, tarih) {
+    const m = allMustahsiller.find(x => x.id === mustahsilId);
+    const grup = (m?.grup || 'GENEL').trim().toUpperCase();
+
+    const matching = allFiyatDonemleri.filter(d =>
+      d.baslangic_tarihi <= tarih &&
+      d.bitis_tarihi >= tarih &&
+      (d.grup === 'TUMU' || d.grup === grup)
+    );
+
+    if (matching.length) {
+      const groupSpecific = matching.find(d => d.grup === grup);
+      if (groupSpecific) return Number(groupSpecific.birim_fiyat || 0);
+      return Number(matching[0].birim_fiyat || 0);
+    }
+    return Number(m?.birim_fiyat || 0);
+  }
+
+  async function refreshMasterData() {
+    if (navigator.onLine) {
+      try {
+        const [
+          { data: mData },
+          { data: tData },
+          { data: uData },
+          { data: tanimData },
+          { data: donemData },
+          { data: histSutData }
+        ] = await Promise.all([
+          sbClient.from('mustahsiller').select('*').order('cari_kodu', { ascending: true }),
+          sbClient.from('maliyet_tarifeleri').select('*').order('gecerlilik_tarihi', { ascending: false }),
+          sbClient.from('kullanicilar').select('*'),
+          sbClient.from('sistem_tanimlari').select('*').order('deger', { ascending: true }),
+          sbClient.from('fiyat_donemleri').select('*').order('baslangic_tarihi', { ascending: false }),
+          sbClient.from('sut_girisleri').select('mustahsil_id, miktar_kg, tarih').order('tarih', { ascending: false }).limit(800)
+        ]);
+
+        allMustahsiller = mData || [];
+        allTarifeler = tData || [];
+        allUsers = uData || [];
+        allTanimlar = tanimData || [];
+        allFiyatDonemleri = donemData || [];
+        allSutHistoryCache = histSutData || [];
+
+        localStorage.setItem(MASTER_CACHE_KEY, JSON.stringify({
+          allMustahsiller, allTarifeler, allUsers, allTanimlar, allFiyatDonemleri, allSutHistoryCache
+        }));
+        lastSyncTimeStr = nowTimeStr();
+      } catch (e) {
+        loadMasterFromCache();
+      }
+    } else {
+      loadMasterFromCache();
+    }
+
+    const allKnownPlakalar = getDistinctPlakalar();
+    const assignedPlakalar = currentUser.atanan_plaka
+      ? currentUser.atanan_plaka.split(',').map(p => p.trim().toUpperCase()).filter(Boolean)
+      : [];
+
+    const sutPlakaSel = document.getElementById('sutPlaka');
+    if (assignedPlakalar.length) {
+      sutPlakaSel.innerHTML = assignedPlakalar.map(p => `<option value="${p}">${p}</option>`).join('');
+      sutPlakaSel.value = assignedPlakalar[0];
+      sutPlakaSel.disabled = assignedPlakalar.length === 1;
+    } else {
+      sutPlakaSel.innerHTML = allKnownPlakalar.map(p => `<option value="${p}">${p}</option>`).join('');
+      sutPlakaSel.value = allKnownPlakalar[0] || '42 ALK 01';
+      sutPlakaSel.disabled = false;
+    }
+
+    const kp = document.getElementById('kantarPlaka');
+    kp.innerHTML = allKnownPlakalar.map(p => `<option value="${p}">${p}</option>`).join('');
+
+    const editSutPlaka = document.getElementById('editSutPlaka');
+    if (editSutPlaka) {
+      editSutPlaka.innerHTML = allKnownPlakalar.map(p => `<option value="${p}">${p}</option>`).join('');
+    }
+
+    renderTanimlarUI();
+    renderFiyatDonemleriTable();
+    renderTarifeDonemleriTable();
+    populateMustahsilSelect();
+    renderMustahsilTable();
+    renderTankSelectorButtons();
+    updateNetworkAndSyncUI();
+  }
+
+  function loadMasterFromCache() {
+    try {
+      const c = JSON.parse(localStorage.getItem(MASTER_CACHE_KEY) || '{}');
+      allMustahsiller = c.allMustahsiller || [];
+      allTarifeler = c.allTarifeler || [];
+      allUsers = c.allUsers || [];
+      allTanimlar = c.allTanimlar || [];
+      allFiyatDonemleri = c.allFiyatDonemleri || [];
+      allSutHistoryCache = c.allSutHistoryCache || [];
+    } catch (e) {}
+  }
+
+  function onSutPlakaChange() {
+    document.getElementById('sutTankNo').value = '1';
+    renderTankSelectorButtons();
+    loadSutGirisleri();
+  }
+
+  function selectSutTank(tankNo) {
+    document.getElementById('sutTankNo').value = String(tankNo);
+    renderTankSelectorButtons();
+    loadSutGirisleri();
+  }
+
+  function renderTankSelectorButtons() {
+    const plaka = document.getElementById('sutPlaka').value;
+    const tanks = getTanksForPlaka(plaka);
+    const activeTank = parseInt(document.getElementById('sutTankNo').value) || 1;
+    const box = document.getElementById('tankSelectorPills');
+    if (!box) return;
+
+    box.innerHTML = tanks.map((cap, idx) => {
+      const tNo = idx + 1;
+      return `<button type="button" class="tank-pill-btn ${tNo === activeTank ? 'active' : ''}" onclick="selectSutTank(${tNo})">
+        🛢️ Tank ${tNo} <span style="font-size:0.75rem;opacity:0.85;">(${cap.toLocaleString('tr-TR')} L)</span>
+      </button>`;
+    }).join('');
+  }
+
+  // ==========================================
+  // ANORMAL SÜT ARTIŞI KONTROLÜ
+  // ==========================================
+  function evaluateMilkAnomaly(mustahsilId, yeniMiktar) {
+    if (!mustahsilId || isNaN(yeniMiktar) || yeniMiktar <= 0) return null;
+
+    const prevRecords = allSutHistoryCache.filter(r => r.mustahsil_id === mustahsilId && Number(r.miktar_kg) > 0);
+    if (!prevRecords.length) return null;
+
+    const recent = prevRecords.slice(0, 10);
+    const sum = recent.reduce((acc, r) => acc + Number(r.miktar_kg), 0);
+    const avg = sum / recent.length;
+
+    // Ortalama miktarın %45 veya en az 25 Kg üzerine çıkarsa anormal artış uyarısı ver
+    if (avg > 0 && yeniMiktar > avg * 1.45 && (yeniMiktar - avg) >= 15) {
+      const oran = (((yeniMiktar - avg) / avg) * 100).toFixed(0);
+      return {
+        isAnomaly: true,
+        avg: avg.toFixed(1),
+        oran
+      };
+    }
+    return { isAnomaly: false, avg: avg.toFixed(1) };
+  }
+
+  function checkMustahsilAnomalyPreview() {
+    const mustahsilId = document.getElementById('sutMustahsil').value;
+    const miktar = parseFloat(document.getElementById('sutMiktar').value);
+    const box = document.getElementById('anomalyPreviewBox');
+    if (!box) return;
+
+    const res = evaluateMilkAnomaly(mustahsilId, miktar);
+    if (res && res.isAnomaly) {
+      box.innerHTML = `<div class="alert-danger">🚨 ANORMAL SÜT ARTIŞI UYARISI: Bu müstahsilin önceki ortalaması <strong>${res.avg} Kg</strong> iken <strong>${miktar.toFixed(1)} Kg</strong> (%${res.oran} artış) giriyorsunuz! Lütfen girilen süt miktarını kontrol edin.</div>`;
+    } else {
+      box.innerHTML = '';
+    }
+  }
+
+  // ==========================================
+  // GRUP & PLAKA (TANKLI) TANIMLARI
+  // ==========================================
+  function renderTanimlarUI() {
+    const gruplar = getDistinctGruplar();
+    const plakalar = getDistinctPlakalar();
+
+    const grupBox = document.getElementById('grupChipList');
+    if (grupBox) {
+      grupBox.innerHTML = gruplar.map(g => {
+        const dbRec = allTanimlar.find(t => t.tip === 'GRUP' && t.deger.toUpperCase() === g);
+        return `<div class="chip-item">
+          <span>${g}</span>
+          ${dbRec ? `
+            <button type="button" class="chip-btn" title="Düzenle" onclick="editSistemTanim('${dbRec.id}', 'GRUP', '${dbRec.deger}')">✏️</button>
+            <button type="button" class="chip-btn" title="Sil" onclick="deleteSistemTanim('${dbRec.id}', 'GRUP', '${dbRec.deger}')">🗑️</button>
+          ` : ''}
+        </div>`;
+      }).join('');
+    }
+
+    const plakaBox = document.getElementById('plakaChipList');
+    if (plakaBox) {
+      plakaBox.innerHTML = plakalar.map(p => {
+        const dbRec = allTanimlar.find(t => t.tip === 'PLAKA' && parsePlakaRecord(t.deger).plaka === p);
+        const tanks = getTanksForPlaka(p);
+        return `<div class="chip-item">
+          <span>🚛 ${p} <small style="color:#0f4c81;">(${tanks.length} Tank: ${tanks.join('/')}L)</small></span>
+          ${dbRec ? `
+            <button type="button" class="chip-btn" title="Tankları Düzenle" onclick="editPlakaTanks('${dbRec.id}', '${dbRec.deger}')">✏️</button>
+            <button type="button" class="chip-btn" title="Sil" onclick="deleteSistemTanim('${dbRec.id}', 'PLAKA', '${p}')">🗑️</button>
+          ` : ''}
+        </div>`;
+      }).join('');
+    }
+
+    const mGrup = document.getElementById('mGrup');
+    if (mGrup) mGrup.innerHTML = gruplar.map(g => `<option value="${g}">${g}</option>`).join('');
+
+    const donemGrup = document.getElementById('donemGrupSelect');
+    if (donemGrup) {
+      donemGrup.innerHTML = `<option value="TUMU">Tüm Müstahsiller</option>` +
+        gruplar.map(g => `<option value="${g}">${g} Grubu</option>`).join('');
+    }
+
+    const raporGrup = document.getElementById('raporGrupFiltre');
+    if (raporGrup) {
+      raporGrup.innerHTML = `<option value="">Tüm Gruplar</option>` +
+        gruplar.map(g => `<option value="${g}">${g}</option>`).join('');
+    }
+
+    const sutGrup = document.getElementById('sutGrupFiltre');
+    if (sutGrup) {
+      const cur = sutGrup.value;
+      sutGrup.innerHTML = `<option value="">Tüm Gruplar</option>` +
+        gruplar.map(g => `<option value="${g}">${g}</option>`).join('');
+      sutGrup.value = cur;
+    }
+  }
+
+  async function addSistemTanim(tip) {
+    const input = document.getElementById('newGrupInput');
+    const val = (input.value || '').trim().toUpperCase();
+    if (!val) return showToast('Lütfen bir grup adı girin.', true);
+
+    const { error } = await sbClient.from('sistem_tanimlari').insert([{ tip, deger: val }]);
+    if (error) return showToast('Grup ekleme hatası: ' + error.message, true);
+
+    input.value = '';
+    showToast(`"${val}" grubu eklendi.`);
+    await refreshMasterData();
+  }
+
+  async function addPlakaWithTanks() {
+    const plaka = (document.getElementById('newPlakaInput').value || '').trim().toUpperCase();
+    const tankStr = (document.getElementById('newPlakaTankInput').value || '').trim();
+    if (!plaka) return showToast('Lütfen araç plakası girin.', true);
+
+    const tanks = tankStr.split(',').map(x => parseFloat(x.trim())).filter(x => !isNaN(x) && x > 0);
+    if (!tanks.length) return showToast('En az 1 geçerli tank kapasitesi (Litre) girin. Örn: 3000, 2500', true);
+
+    const storedVal = `${plaka}|${tanks.join(',')}`;
+    const { error } = await sbClient.from('sistem_tanimlari').insert([{ tip: 'PLAKA', deger: storedVal }]);
+    if (error) return showToast('Plaka ekleme hatası: ' + error.message, true);
+
+    document.getElementById('newPlakaInput').value = '';
+    showToast(`"${plaka}" (${tanks.length} tanklı) eklendi.`);
+    await refreshMasterData();
+  }
+
+  async function editSistemTanim(id, tip, oldVal) {
+    const yeni = prompt('Yeni grup adını girin:', oldVal);
+    if (!yeni || !yeni.trim()) return;
+    const clean = yeni.trim().toUpperCase();
+    if (clean === oldVal) return;
+
+    const { error } = await sbClient.from('sistem_tanimlari').update({ deger: clean }).eq('id', id);
+    if (error) return showToast('Güncelleme hatası: ' + error.message, true);
+
+    await sbClient.from('mustahsiller').update({ grup: clean }).eq('grup', oldVal);
+    showToast(`Grup "${clean}" olarak güncellendi.`);
+    await refreshMasterData();
+  }
+
+  async function editPlakaTanks(id, rawVal) {
+    const { plaka, tanks } = parsePlakaRecord(rawVal);
+    const yeniPlaka = prompt('Araç Plakası:', plaka);
+    if (!yeniPlaka || !yeniPlaka.trim()) return;
+    const yeniTanks = prompt('Tank Kapasiteleri (virgülle ayırın, örn: 3000, 2500, 2500):', tanks.join(', '));
+    if (!yeniTanks) return;
+
+    const parsedTanks = yeniTanks.split(',').map(x => parseFloat(x.trim())).filter(x => !isNaN(x) && x > 0);
+    if (!parsedTanks.length) return showToast('Geçerli tank kapasitesi girin.', true);
+
+    const storedVal = `${yeniPlaka.trim().toUpperCase()}|${parsedTanks.join(',')}`;
+    const { error } = await sbClient.from('sistem_tanimlari').update({ deger: storedVal }).eq('id', id);
+    if (error) return showToast('Güncelleme hatası: ' + error.message, true);
+
+    showToast('Plaka ve tank kapasiteleri güncellendi.');
+    await refreshMasterData();
+  }
+
+  async function deleteSistemTanim(id, tip, val) {
+    if (!confirm(`"${val}" kaydını silmek istediğinize emin misiniz?`)) return;
+    const { error } = await sbClient.from('sistem_tanimlari').delete().eq('id', id);
+    if (error) return showToast('Silme hatası: ' + error.message, true);
+    showToast(`"${val}" silindi.`);
+    await refreshMasterData();
+  }
+
+  // ==========================================
+  // TARİH ARALIKLI FİYAT DÖNEMLERİ
+  // ==========================================
+  async function saveFiyatDonemi(alsoUpdatePastMilk) {
+    const bas = document.getElementById('donemBaslangic').value;
+    const bit = document.getElementById('donemBitis').value;
+    const grup = document.getElementById('donemGrupSelect').value || 'TUMU';
+    const fiyat = parseFloat(document.getElementById('donemFiyatInput').value);
+    const aciklama = document.getElementById('donemAciklamaInput').value.trim();
+
+    if (!bas || !bit) return showToast('Başlangıç ve bitiş tarihini seçin.', true);
+    if (bas > bit) return showToast('Başlangıç tarihi bitiş tarihinden büyük olamaz.', true);
+    if (isNaN(fiyat) || fiyat <= 0) return showToast('Geçerli bir birim fiyat girin.', true);
+
+    const { error } = await sbClient.from('fiyat_donemleri').insert([{
+      baslangic_tarihi: bas,
+      bitis_tarihi: bit,
+      grup,
+      birim_fiyat: fiyat,
+      aciklama
+    }]);
+    if (error) return showToast('Fiyat dönemi kayıt hatası: ' + error.message, true);
+
+    if (alsoUpdatePastMilk) {
+      const targetIds = allMustahsiller
+        .filter(m => grup === 'TUMU' || (m.grup || 'GENEL').toUpperCase() === grup)
+        .map(m => m.id);
+
+      if (targetIds.length) {
+        const { error: upErr } = await sbClient
+          .from('sut_girisleri')
+          .update({ birim_fiyat: fiyat })
+          .gte('tarih', bas)
+          .lte('tarih', bit)
+          .in('mustahsil_id', targetIds);
+        if (upErr) return showToast('Süt kayıtları güncellenemedi: ' + upErr.message, true);
+      }
+      showToast(`Fiyat dönemi kaydedildi ve ${bas} - ${bit} arası sütler güncellendi.`);
+    } else {
+      showToast(`Fiyat dönemi kaydedildi. ${bas} - ${bit} arası yeni sütler bu fiyattan işlenecek.`);
+    }
+
+    document.getElementById('donemFiyatInput').value = '';
+    document.getElementById('donemAciklamaInput').value = '';
+    await refreshMasterData();
+    loadSutGirisleri();
+  }
+
+  function renderFiyatDonemleriTable() {
+    const tbody = document.getElementById('fiyatDonemleriBody');
+    if (!tbody) return;
+    if (!allFiyatDonemleri.length) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#64748b;">Henüz tarih aralıklı fiyat dönemi eklenmemiş.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = allFiyatDonemleri.map(d => `<tr>
+      <td><strong>${d.baslangic_tarihi}</strong></td>
+      <td><strong>${d.bitis_tarihi}</strong></td>
+      <td><span class="badge ${d.grup === 'TUMU' ? 'badge-blue' : 'badge-amber'}">${d.grup === 'TUMU' ? 'Tüm Müstahsiller' : d.grup}</span></td>
+      <td><strong>${Number(d.birim_fiyat).toFixed(2)} ₺</strong></td>
+      <td>${d.aciklama || '-'}</td>
+      <td><button type="button" class="btn btn-danger btn-sm" onclick="deleteFiyatDonemi('${d.id}')">Sil</button></td>
+    </tr>`).join('');
+  }
+
+  async function deleteFiyatDonemi(id) {
+    if (!confirm('Bu fiyat dönemini listeden silmek istediğinize emin misiniz?')) return;
+    const { error } = await sbClient.from('fiyat_donemleri').delete().eq('id', id);
+    if (error) return showToast('Silme hatası: ' + error.message, true);
+    showToast('Fiyat dönemi silindi.');
+    await refreshMasterData();
+  }
+
+  // ==========================================
+  // SAHA SÜT TOPLAMA (SAAT, TANK, ANOMALİ & OFFLINE)
+  // ==========================================
+  function populateMustahsilSelect() {
+    const sel = document.getElementById('sutMustahsil');
+    const grupFiltre = (document.getElementById('sutGrupFiltre')?.value || '').trim().toUpperCase();
+    const arama = (document.getElementById('sutMustahsilAra')?.value || '').trim().toLocaleLowerCase('tr');
+
+    const filtered = allMustahsiller.filter(m => {
+      const gOk = !grupFiltre || (m.grup || 'GENEL').toUpperCase() === grupFiltre;
+      const aOk = !arama ||
+        (m.ad_soyad || '').toLocaleLowerCase('tr').includes(arama) ||
+        (m.cari_kodu || '').toLocaleLowerCase('tr').includes(arama);
+      return gOk && aOk;
+    });
+
+    sel.innerHTML = filtered.length
+      ? filtered.map(m => `<option value="${m.id}">${m.cari_kodu} - ${m.ad_soyad} [${m.grup || 'GENEL'}]</option>`).join('')
+      : '<option value="">Eşleşen müstahsil bulunamadı</option>';
+  }
+
+  async function saveSutGirisi() {
+    const mustahsilId = document.getElementById('sutMustahsil').value;
+    const miktar = parseFloat(document.getElementById('sutMiktar').value);
+    const tarih = document.getElementById('sutTarih').value;
+    const vardiya = document.getElementById('sutVardiya').value;
+    const tankNo = parseInt(document.getElementById('sutTankNo').value) || 1;
+
+    if (!mustahsilId || isNaN(miktar) || miktar <= 0) {
+      return showToast('Geçerli müstahsil ve süt miktarı girin.', true);
+    }
+
+    const userPlakalar = currentUser?.atanan_plaka
+      ? currentUser.atanan_plaka.split(',').map(p => p.trim().toUpperCase()).filter(Boolean)
+      : [];
+    const seciliPlaka = document.getElementById('sutPlaka').value.trim().toUpperCase();
+    const kayitPlaka = userPlakalar[0] || seciliPlaka || '42 ALK 01';
+    const gecerliFiyat = getEffectiveMustahsilPrice(mustahsilId, tarih);
+    const toplamaSaati = nowTimeStr();
+
+    // Tank kapasite uyarısı kontrolü (opsiyonel bilgi)
+    const anomaly = evaluateMilkAnomaly(mustahsilId, miktar);
+
+    const payload = {
+      tarih,
+      vardiya,
+      plaka: kayitPlaka,
+      mustahsil_id: mustahsilId,
+      miktar_kg: miktar,
+      birim_fiyat: gecerliFiyat,
+      ayri_gugum: false,
+      toplayici_kullanici: currentUser.kullanici_adi,
+      tank_no: tankNo,
+      toplama_saati: toplamaSaati
+    };
+
+    if (!navigator.onLine) {
+      const queue = getOfflineQueue();
+      queue.push({ ...payload, _local_id: 'OFF-' + Date.now() });
+      setOfflineQueue(queue);
+
+      allSutHistoryCache.unshift({ mustahsil_id: mustahsilId, miktar_kg: miktar, tarih });
+      document.getElementById('sutMiktar').value = '';
+      document.getElementById('anomalyPreviewBox').innerHTML = '';
+      showToast(`📴 Çevrimdışı kaydedildi (${toplamaSaati} • Tank ${tankNo}). İnternet gelince aktarılacak.`);
+      loadSutGirisleri();
+      return;
+    }
+
+    const { error } = await sbClient.from('sut_girisleri').insert([payload]);
+    if (error) {
+      // Bağlantı anlık koptuysa çevrimdışı kuyruğa al
+      const queue = getOfflineQueue();
+      queue.push({ ...payload, _local_id: 'OFF-' + Date.now() });
+      setOfflineQueue(queue);
+      showToast('Bağlantı kesildi; kayıt çevrimdışı hafızaya alındı.', true);
+      loadSutGirisleri();
+      return;
+    }
+
+    allSutHistoryCache.unshift({ mustahsil_id: mustahsilId, miktar_kg: miktar, tarih });
+    lastSyncTimeStr = toplamaSaati;
+    updateNetworkAndSyncUI();
+
+    document.getElementById('sutMiktar').value = '';
+    document.getElementById('anomalyPreviewBox').innerHTML = '';
+
+    if (anomaly && anomaly.isAnomaly) {
+      showToast(`⚠️ Kaydedildi ANCAK ANORMAL ARTIŞ VAR! (${miktar} Kg / Ort: ${anomaly.avg} Kg)`, true);
+    } else {
+      showToast(`✅ Süt kaydedildi (${toplamaSaati} • ${kayitPlaka} • Tank ${tankNo}).`);
+    }
+    loadSutGirisleri();
+  }
+
+  async function loadSutGirisleri() {
+    const tarih = document.getElementById('sutTarih').value;
+    const vardiya = document.getElementById('sutVardiya').value;
+    const plakaFilter = document.getElementById('sutPlaka').value.trim().toUpperCase();
+
+    // Lacivert Üst Kart Başlık & Plaka Güncelleme
+    const titleEl = document.getElementById('navyCardTitle');
+    const dateEl = document.getElementById('navyDateDisplay');
+    const plateEl = document.getElementById('navyPlateDisplay');
+    if (titleEl) titleEl.textContent = `TOPLAMA ÖZETİ • ${vardiya === 'SABAH' ? 'SABAH VARDİYASI' : 'AKŞAM VARDİYASI'}`;
+    if (dateEl) dateEl.textContent = formatTurkishDate(tarih);
+    if (plateEl) plateEl.textContent = plakaFilter || 'TÜM ARAÇLAR';
+
+    let dbRows = [];
+    if (navigator.onLine) {
+      let query = sbClient.from('sut_girisleri').select('*').eq('tarih', tarih).eq('vardiya', vardiya).order('created_at', { ascending: false });
+      if (plakaFilter) query = query.eq('plaka', plakaFilter);
+      const { data, error } = await query;
+      if (!error && data) {
+        dbRows = data;
+        localStorage.setItem(`alakuzular_sut_view_${tarih}_${vardiya}_${plakaFilter}`, JSON.stringify(dbRows));
+      }
+    } else {
+      try {
+        dbRows = JSON.parse(localStorage.getItem(`alakuzular_sut_view_${tarih}_${vardiya}_${plakaFilter}`) || '[]');
+      } catch (e) {}
+    }
+
+    // Çevrimdışı bekleyen kayıtları da listede ve tanklarda göster
+    const offlineRows = getOfflineQueue()
+      .filter(q => q.tarih === tarih && q.vardiya === vardiya && (!plakaFilter || q.plaka === plakaFilter))
+      .map(q => ({ ...q, _isOffline: true }));
+
+    const rows = [...offlineRows, ...dbRows];
+
+    // Tank Doluluk Hesaplama
+    const tanks = getTanksForPlaka(plakaFilter);
+    const tankTotals = tanks.map(() => 0);
+    const distinctProducers = new Set();
+
+    rows.forEach(r => {
+      if (r.mustahsil_id) distinctProducers.add(r.mustahsil_id);
+      const tIdx = Math.max(0, Math.min(tanks.length - 1, (parseInt(r.tank_no) || 1) - 1));
+      tankTotals[tIdx] += Number(r.miktar_kg || 0);
+    });
+
+    const activeTankNo = parseInt(document.getElementById('sutTankNo').value) || 1;
+    const navyTankBox = document.getElementById('navyTankList');
+    if (navyTankBox) {
+      navyTankBox.innerHTML = tanks.map((cap, idx) => {
+        const tNo = idx + 1;
+        const filled = tankTotals[idx] || 0;
+        const pct = cap > 0 ? Math.min(100, Math.round((filled / cap) * 100)) : 0;
+        const overCap = filled > cap;
+        return `<div class="tank-row-item ${tNo === activeTankNo ? 'selected-tank' : ''}" onclick="selectSutTank(${tNo})">
+          <div class="tank-row-head">
+            <span>Tank ${tNo} ${tNo === activeTankNo ? '• (Aktif Seçili)' : ''}</span>
+            <span>${filled.toLocaleString('tr-TR', { maximumFractionDigits: 1 })} / ${cap.toLocaleString('tr-TR')} L • %${pct}</span>
+          </div>
+          <div class="tank-bar-bg">
+            <div class="tank-bar-fill ${overCap ? 'full-danger' : ''}" style="width:${pct}%"></div>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    const showFinans = hasPerm('gecmis_tarih') || hasPerm('maliyet');
+    let topKg = 0, topTutar = 0;
+    const tbody = document.getElementById('sutListBody');
+
+    tbody.innerHTML = rows.map(r => {
+      const m = allMustahsiller.find(x => x.id === r.mustahsil_id) || {};
+      const kg = Number(r.miktar_kg || 0);
+      const fiyat = (r.birim_fiyat !== null && r.birim_fiyat !== undefined)
+        ? Number(r.birim_fiyat)
+        : getEffectiveMustahsilPrice(r.mustahsil_id, r.tarih);
+      const tutar = kg * fiyat;
+      topKg += kg;
+      topTutar += tutar;
+
+      const saatText = r.toplama_saati || (r.created_at ? new Date(r.created_at).toTimeString().slice(0, 5) : '-');
+      const tankLabel = `Tank ${r.tank_no || 1}`;
+      const anomaly = evaluateMilkAnomaly(r.mustahsil_id, kg);
+      const isAnomaly = anomaly && anomaly.isAnomaly;
+
+      return `<tr class="${isAnomaly ? 'anomaly-row' : ''}">
+        <td><strong>${saatText}</strong></td>
+        <td>${m.cari_kodu || '-'}</td>
+        <td>
+          <strong>${m.ad_soyad || '-'}</strong>
+          ${r._isOffline ? ' <span class="badge badge-red">📴 Bekliyor</span>' : ''}
+          ${isAnomaly ? `<div style="color:#dc2626;font-size:0.76rem;font-weight:800;">⚠️ Anormal Artış (Ort: ${anomaly.avg} Kg)</div>` : ''}
+        </td>
+        <td><span class="badge badge-blue">${m.grup || 'GENEL'}</span></td>
+        <td>${r.plaka} • <span class="badge badge-navy">${tankLabel}</span></td>
+        <td><strong style="${isAnomaly ? 'color:#dc2626;font-size:0.96rem;' : ''}">${kg.toFixed(1)} Kg</strong></td>
+
+        ${showFinans ? `<td>${fiyat.toFixed(2)} ₺</td><td><strong>${tutar.toFixed(2)} ₺</strong></td>` : ''}
+        <td style="white-space:nowrap;">
+          ${r._isOffline
+            ? `<button type="button" class="btn btn-danger btn-sm" onclick="deleteOfflineItem('${r._local_id}')">Sil</button>`
+            : `<button type="button" class="btn btn-primary btn-sm" onclick="openEditSutModal('${r.id}')">Düzenle</button>
+               <button type="button" class="btn btn-danger btn-sm" onclick="deleteSutGirisi('${r.id}')">Sil</button>`
+          }
+        </td>
+      </tr>`;
+    }).join('');
+
+    // Lacivert Kart Sayaçları
+    const prodEl = document.getElementById('navyProducerCount');
+    const milkEl = document.getElementById('navyTotalMilk');
+    if (prodEl) prodEl.textContent = `${distinctProducers.size} / ${allMustahsiller.length}`;
+    if (milkEl) milkEl.innerHTML = `${topKg.toLocaleString('tr-TR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} <span style="font-size:1rem;font-weight:700;">L</span>`;
+
+    const ortFiyat = topKg > 0 ? (topTutar / topKg) : 0;
+    document.getElementById('sutOzetKpi').innerHTML = `
+      <div class="kpi-box"><div class="lbl">Vardiya Toplanan Süt</div><div class="val">${topKg.toFixed(1)} Kg</div></div>
+      ${showFinans ? `
+        <div class="kpi-box"><div class="lbl">Ağırlıklı Ort. Süt Fiyatı</div><div class="val">${ortFiyat.toFixed(2)} ₺/Kg</div></div>
+        <div class="kpi-box"><div class="lbl">Vardiya Süt Hakedişi</div><div class="val">${topTutar.toFixed(2)} ₺</div></div>
+      ` : ''}
+    `;
+  }
+
+  function deleteOfflineItem(localId) {
+    if (!confirm('Bekleyen bu çevrimdışı kaydı silmek istediğinize emin misiniz?')) return;
+    const next = getOfflineQueue().filter(x => x._local_id !== localId);
+    setOfflineQueue(next);
+    loadSutGirisleri();
+  }
+
+  async function openEditSutModal(sutId) {
+    const { data, error } = await sbClient.from('sut_girisleri').select('*').eq('id', sutId).single();
+    if (error || !data) return showToast('Kayıt bilgisi alınamadı.', true);
+
+    document.getElementById('editSutId').value = data.id;
+    document.getElementById('editSutTarih').value = data.tarih;
+    document.getElementById('editSutVardiya').value = data.vardiya;
+    document.getElementById('editSutMiktar').value = Number(data.miktar_kg);
+    document.getElementById('editSutFiyat').value = Number(data.birim_fiyat || 0).toFixed(2);
+    document.getElementById('editSutTank').value = String(data.tank_no || 1);
+
+    const mstSel = document.getElementById('editSutMustahsil');
+    mstSel.innerHTML = allMustahsiller.map(m =>
+      `<option value="${m.id}">${m.cari_kodu} - ${m.ad_soyad} [${m.grup || 'GENEL'}]</option>`
+    ).join('');
+    mstSel.value = data.mustahsil_id;
+
+    const plakaSel = document.getElementById('editSutPlaka');
+    if (data.plaka && ![...plakaSel.options].some(o => o.value === data.plaka)) {
+      plakaSel.innerHTML += `<option value="${data.plaka}">${data.plaka}</option>`;
+    }
+    plakaSel.value = data.plaka;
+
+    document.getElementById('editSutModal').classList.remove('hidden');
+  }
+
+  function closeEditSutModal() {
+    document.getElementById('editSutModal').classList.add('hidden');
+  }
+
+  async function updateSutGirisi() {
+    const id = document.getElementById('editSutId').value;
+    const tarih = document.getElementById('editSutTarih').value;
+    const vardiya = document.getElementById('editSutVardiya').value;
+    const mustahsilId = document.getElementById('editSutMustahsil').value;
+    const miktar = parseFloat(document.getElementById('editSutMiktar').value);
+    const fiyat = parseFloat(document.getElementById('editSutFiyat').value);
+    const plaka = document.getElementById('editSutPlaka').value;
+    const tankNo = parseInt(document.getElementById('editSutTank').value) || 1;
+
+    if (!mustahsilId || isNaN(miktar) || miktar <= 0) {
+      return showToast('Geçerli müstahsil ve süt miktarı girin.', true);
+    }
+
+    const { error } = await sbClient.from('sut_girisleri').update({
+      tarih,
+      vardiya,
+      mustahsil_id: mustahsilId,
+      miktar_kg: miktar,
+      birim_fiyat: isNaN(fiyat) ? 0 : fiyat,
+      plaka,
+      tank_no: tankNo
+    }).eq('id', id);
+
+    if (error) return showToast('Süt kaydı güncelleme hatası: ' + error.message, true);
+
+    closeEditSutModal();
+    showToast('Süt giriş kaydı güncellendi.');
+    loadSutGirisleri();
+  }
+
+  async function deleteSutGirisi(id) {
+    if (!confirm('Bu süt giriş kaydını silmek istediğinize emin misiniz?')) return;
+    const { error } = await sbClient.from('sut_girisleri').delete().eq('id', id);
+    if (error) return showToast('Silme hatası: ' + error.message, true);
+    showToast('Süt giriş kaydı silindi.');
+    loadSutGirisleri();
+  }
+
+  // ==========================================
+  // MERKEZ KANTAR & SÜZME YOĞURT
+  // ==========================================
+  async function saveKantar() {
+    const tarih = document.getElementById('depoTarih').value;
+    const vardiya = document.getElementById('depoVardiya').value;
+    const plaka = document.getElementById('kantarPlaka').value;
+    const kantarKg = parseFloat(document.getElementById('kantarKg').value);
+    const not = document.getElementById('kantarNot').value;
+
+    if (isNaN(kantarKg) || kantarKg <= 0) return showToast('Geçerli kantar tartımı girin.', true);
+    const { error } = await sbClient.from('merkez_kantar').upsert([{
+      tarih, vardiya, plaka, kantar_kg: kantarKg,
+      aciklama_notu: not, depocu_kullanici: currentUser.kullanici_adi
+    }], { onConflict: 'tarih,vardiya,plaka' });
+
+    if (error) return showToast('Kantar kayıt hatası: ' + error.message, true);
+    document.getElementById('kantarKg').value = '';
+    showToast('Kantar tartımı kaydedildi.');
+    loadDepoData();
+  }
+
+  function calcRandimanPreview() {
+    const sut = parseFloat(document.getElementById('mayalananSut').value) || 0;
+    const n = parseInt(document.getElementById('adetNormal').value) || 0;
+    const s = parseInt(document.getElementById('adetSert').value) || 0;
+    const k2 = parseInt(document.getElementById('adet2Kg').value) || 0;
+    const k9 = parseInt(document.getElementById('adet900Gr').value) || 0;
+
+    const toplamYogurtKg = (n * 10) + (s * 10) + (k2 * 2) + (k9 * 0.9);
+    const box = document.getElementById('randimanAlertBox');
+    if (sut <= 0 || toplamYogurtKg <= 0) {
+      box.innerHTML = '';
+      return;
+    }
+    const oran = sut / toplamYogurtKg;
+    if (oran > 3.20) {
+      box.innerHTML = `<div class="alert-danger">⚠️ DİKKAT: SÜZME YOĞURT ORANI 3,20 ÜZERİNDE! (${oran.toFixed(2)} Kg süt / 1 Kg yoğurt — Toplam Çıkan: ${toplamYogurtKg.toFixed(1)} Kg)</div>`;
+    } else {
+      box.innerHTML = `<div class="alert-ok">✅ Süzme Yoğurt Oranı Normal: ${oran.toFixed(2)} (Toplam Çıkan Yoğurt: ${toplamYogurtKg.toFixed(1)} Kg)</div>`;
+    }
+  }
+
+  async function saveYogurtUretim() {
+    const tarih = document.getElementById('depoTarih').value;
+    const vardiya = document.getElementById('depoVardiya').value;
+    const sut = parseFloat(document.getElementById('mayalananSut').value);
+    const n = parseInt(document.getElementById('adetNormal').value) || 0;
+    const s = parseInt(document.getElementById('adetSert').value) || 0;
+    const k2 = parseInt(document.getElementById('adet2Kg').value) || 0;
+    const k9 = parseInt(document.getElementById('adet900Gr').value) || 0;
+
+    if (isNaN(sut) || sut <= 0) return showToast('Mayalanan süt miktarını girin.', true);
+    const { error } = await sbClient.from('yogurt_uretim').upsert([{
+      tarih, vardiya, mayalanan_sut_kg: sut,
+      normal_10kg_adet: n, sert_10kg_adet: s,
+      kase_2kg_adet: k2, kase_900g_adet: k9,
+      depocu_kullanici: currentUser.kullanici_adi
+    }], { onConflict: 'tarih,vardiya' });
+
+    if (error) return showToast('Üretim kayıt hatası: ' + error.message, true);
+    showToast('Vardiya süzme yoğurt üretimi kaydedildi.');
+    loadDepoData();
+  }
+
+  async function loadDepoData() {
+    const tarih = document.getElementById('depoTarih').value;
+    const vardiya = document.getElementById('depoVardiya').value;
+
+    const [{ data: sutRows }, { data: kantarRows }, { data: uretimRows }] = await Promise.all([
+      sbClient.from('sut_girisleri').select('*').eq('tarih', tarih).eq('vardiya', vardiya),
+      sbClient.from('merkez_kantar').select('*').eq('tarih', tarih).eq('vardiya', vardiya),
+      sbClient.from('yogurt_uretim').select('*').eq('tarih', tarih).order('vardiya', { ascending: true })
+    ]);
+
+    const sahaByPlaka = {};
+    (sutRows || []).forEach(r => { sahaByPlaka[r.plaka] = (sahaByPlaka[r.plaka] || 0) + Number(r.miktar_kg); });
+
+    const allPlakalar = [...new Set([...Object.keys(sahaByPlaka), ...(kantarRows || []).map(k => k.plaka)])];
+    document.getElementById('kantarListBody').innerHTML = allPlakalar.map(p => {
+      const saha = sahaByPlaka[p] || 0;
+      const kRec = (kantarRows || []).find(k => k.plaka === p);
+      const kantar = kRec ? Number(kRec.kantar_kg) : 0;
+      const fark = kRec ? (kantar - saha) : 0;
+      return `<tr>
+        <td><strong>${p}</strong></td>
+        <td>${saha.toFixed(1)} Kg</td>
+        <td>${kRec ? kantar.toFixed(1) + ' Kg' : '-'}</td>
+        <td>${kRec ? `<span class="badge ${fark < -5 ? 'badge-red' : 'badge-green'}">${fark.toFixed(1)} Kg</span>` : '-'}</td>
+        <td>${kRec?.aciklama_notu || ''}</td>
+      </tr>`;
+    }).join('');
+
+    document.getElementById('uretimListBody').innerHTML = (uretimRows || []).map(u => {
+      const topKg = (u.normal_10kg_adet * 10) + (u.sert_10kg_adet * 10) + (u.kase_2kg_adet * 2) + (u.kase_900g_adet * 0.9);
+      const oran = topKg > 0 ? (Number(u.mayalanan_sut_kg) / topKg) : 0;
+      return `<tr>
+        <td><strong>${u.vardiya}</strong></td>
+        <td>${Number(u.mayalanan_sut_kg).toFixed(1)} Kg</td>
+        <td>${u.normal_10kg_adet}</td>
+        <td>${u.sert_10kg_adet}</td>
+        <td>${u.kase_2kg_adet}</td>
+        <td>${u.kase_900g_adet}</td>
+        <td><strong>${topKg.toFixed(1)} Kg</strong></td>
+        <td><span class="badge ${oran > 3.20 ? 'badge-red' : 'badge-green'}">${oran.toFixed(2)} ${oran > 3.20 ? '⚠️ YÜKSEK' : ''}</span></td>
+      </tr>`;
+    }).join('');
+  }
+
+  // ==========================================
+  // TARİH ARALIKLI MALİYET & GİDER DÖNEMLERİ
+  // ==========================================
+  async function saveMaliyetTarifesi() {
+    const editId = document.getElementById('editTarifeId').value.trim();
+    const bas = document.getElementById('tarifeBaslangic').value;
+    const bit = document.getElementById('tarifeBitis').value;
+    if (!bas || !bit) return showToast('Başlangıç ve bitiş tarihini seçin.', true);
+    if (bas > bit) return showToast('Başlangıç tarihi bitiş tarihinden büyük olamaz.', true);
+
+    const payload = {
+      gecerlilik_tarihi: bas,
+      bitis_tarihi: bit,
+      aciklama: document.getElementById('tarifeAciklama').value.trim(),
+      euro_kuru: parseFloat(document.getElementById('tarifeEuro').value) || 0,
+      dogalgaz: parseFloat(document.getElementById('tarifeDogalgaz').value) || 0,
+      elektrik: parseFloat(document.getElementById('tarifeElektrik').value) || 0,
+      mazot: parseFloat(document.getElementById('tarifeMazot').value) || 0,
+      iscilik: parseFloat(document.getElementById('tarifeIscilik').value) || 0,
+      yemek: parseFloat(document.getElementById('tarifeYemek').value) || 0,
+      su: parseFloat(document.getElementById('tarifeSu').value) || 0,
+      kova_10kg_normal_eur: parseFloat(document.getElementById('kovaNormalEur').value) || 0,
+      kova_10kg_sert_eur: parseFloat(document.getElementById('kovaSertEur').value) || 0,
+      kova_2kg_eur: parseFloat(document.getElementById('kova2KgEur').value) || 0,
+      kova_900g_eur: parseFloat(document.getElementById('kova900GrEur').value) || 0,
+      toptan_fiyatlar: {
+        normal: parseFloat(document.getElementById('toptanNormal').value) || 0,
+        sert: parseFloat(document.getElementById('toptanSert').value) || 0,
+        iki_kg: parseFloat(document.getElementById('toptan2Kg').value) || 0,
+        dokuz_yuz_g: parseFloat(document.getElementById('toptan900Gr').value) || 0
+      },
+      perakende_fiyatlar: {
+        normal: parseFloat(document.getElementById('perakendeNormal').value) || 0,
+        sert: parseFloat(document.getElementById('perakendeSert').value) || 0,
+        iki_kg: parseFloat(document.getElementById('perakende2Kg').value) || 0,
+        dokuz_yuz_g: parseFloat(document.getElementById('perakende900Gr').value) || 0
+      }
+    };
+
+    let res;
+    if (editId) {
+      res = await sbClient.from('maliyet_tarifeleri').update(payload).eq('id', editId);
+    } else {
+      res = await sbClient.from('maliyet_tarifeleri').upsert([payload], { onConflict: 'gecerlilik_tarihi' });
+    }
+    if (res.error) return showToast('Tarife hatası: ' + res.error.message, true);
+
+    resetTarifeForm();
+    showToast(editId ? 'Maliyet dönemi güncellendi.' : 'Maliyet & gider dönemi kaydedildi.');
+    await refreshMasterData();
+    renderGunlukAnaliz();
+  }
+
+  function editTarifeDonemi(id) {
+    const t = allTarifeler.find(x => x.id === id);
+    if (!t) return;
+    document.getElementById('editTarifeId').value = t.id;
+    document.getElementById('tarifeBaslangic').value = t.gecerlilik_tarihi;
+    document.getElementById('tarifeBitis').value = t.bitis_tarihi || t.gecerlilik_tarihi;
+    document.getElementById('tarifeAciklama').value = t.aciklama || '';
+    document.getElementById('tarifeEuro').value = t.euro_kuru || 0;
+    document.getElementById('tarifeDogalgaz').value = t.dogalgaz || 0;
+    document.getElementById('tarifeElektrik').value = t.elektrik || 0;
+    document.getElementById('tarifeMazot').value = t.mazot || 0;
+    document.getElementById('tarifeIscilik').value = t.iscilik || 0;
+    document.getElementById('tarifeYemek').value = t.yemek || 0;
+    document.getElementById('tarifeSu').value = t.su || 0;
+    document.getElementById('kovaNormalEur').value = t.kova_10kg_normal_eur || 0;
+    document.getElementById('kovaSertEur').value = t.kova_10kg_sert_eur || 0;
+    document.getElementById('kova2KgEur').value = t.kova_2kg_eur || 0;
+    document.getElementById('kova900GrEur').value = t.kova_900g_eur || 0;
+    document.getElementById('toptanNormal').value = t.toptan_fiyatlar?.normal || '';
+    document.getElementById('perakendeNormal').value = t.perakende_fiyatlar?.normal || '';
+    document.getElementById('toptanSert').value = t.toptan_fiyatlar?.sert || '';
+    document.getElementById('perakendeSert').value = t.perakende_fiyatlar?.sert || '';
+    document.getElementById('toptan2Kg').value = t.toptan_fiyatlar?.iki_kg || '';
+    document.getElementById('perakende2Kg').value = t.perakende_fiyatlar?.iki_kg || '';
+    document.getElementById('toptan900Gr').value = t.toptan_fiyatlar?.dokuz_yuz_g || '';
+    document.getElementById('perakende900Gr').value = t.perakende_fiyatlar?.dokuz_yuz_g || '';
+
+    document.getElementById('btnCancelTarifeEdit').classList.remove('hidden');
+    document.getElementById('tarifeBaslangic').focus();
+  }
+
+  function resetTarifeForm() {
+    document.getElementById('editTarifeId').value = '';
+    document.getElementById('tarifeAciklama').value = '';
+    document.getElementById('btnCancelTarifeEdit').classList.add('hidden');
+  }
+
+  async function deleteTarifeDonemi(id) {
+    if (!confirm('Bu maliyet & gider dönemini silmek istediğinize emin misiniz?')) return;
+    const { error } = await sbClient.from('maliyet_tarifeleri').delete().eq('id', id);
+    if (error) return showToast('Silme hatası: ' + error.message, true);
+    showToast('Maliyet dönemi silindi.');
+    await refreshMasterData();
+    renderGunlukAnaliz();
+  }
+
+  function renderTarifeDonemleriTable() {
+    const tbody = document.getElementById('tarifeDonemleriBody');
+    if (!tbody) return;
+    if (!allTarifeler.length) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#64748b;">Henüz maliyet tarifesi eklenmemiş.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = allTarifeler.map(t => {
+      const sabit = Number(t.dogalgaz) + Number(t.elektrik) + Number(t.mazot) + Number(t.iscilik) + Number(t.yemek) + Number(t.su);
+      return `<tr>
+        <td><strong>${t.gecerlilik_tarihi}</strong></td>
+        <td><strong>${t.bitis_tarihi || 'Devam Ediyor'}</strong></td>
+        <td>${Number(t.euro_kuru).toFixed(2)} ₺</td>
+        <td><strong>${sabit.toFixed(2)} ₺ / gün</strong></td>
+        <td>${Number(t.toptan_fiyatlar?.normal || 0).toFixed(2)} ₺ / ${Number(t.perakende_fiyatlar?.normal || 0).toFixed(2)} ₺</td>
+        <td>${t.aciklama || '-'}</td>
+        <td style="white-space:nowrap;">
+          <button type="button" class="btn btn-primary btn-sm" onclick="editTarifeDonemi('${t.id}')">Düzenle</button>
+          <button type="button" class="btn btn-danger btn-sm" onclick="deleteTarifeDonemi('${t.id}')">Sil</button>
+        </td>
+      </tr>`;
+    }).join('');
+  }
+
+  function getEffectiveTarife(tarih) {
+    const inRange = allTarifeler.find(t =>
+      t.gecerlilik_tarihi <= tarih && (!t.bitis_tarihi || t.bitis_tarihi >= tarih)
+    );
+    if (inRange) return inRange;
+    return allTarifeler.find(t => t.gecerlilik_tarihi <= tarih) || allTarifeler[allTarifeler.length - 1] || null;
+  }
+
+  async function renderGunlukAnaliz() {
+    const tarih = document.getElementById('analizTarih').value;
+    const tarife = getEffectiveTarife(tarih);
+
+    const [{ data: sutRows }, { data: uretimRows }] = await Promise.all([
+      sbClient.from('sut_girisleri').select('*').eq('tarih', tarih),
+      sbClient.from('yogurt_uretim').select('*').eq('tarih', tarih)
+    ]);
+
+    let topSutKg = 0, topSutTutar = 0;
+    (sutRows || []).forEach(r => {
+      const kg = Number(r.miktar_kg || 0);
+      const fiyat = (r.birim_fiyat !== null && r.birim_fiyat !== undefined)
+        ? Number(r.birim_fiyat)
+        : getEffectiveMustahsilPrice(r.mustahsil_id, r.tarih);
+      topSutKg += kg;
+      topSutTutar += kg * fiyat;
+    });
+    const ortSutFiyat = topSutKg > 0 ? (topSutTutar / topSutKg) : 0;
+
+    let mayalananTop = 0, cikanYogurtTop = 0;
+    (uretimRows || []).forEach(u => {
+      mayalananTop += Number(u.mayalanan_sut_kg || 0);
+      cikanYogurtTop += (u.normal_10kg_adet * 10) + (u.sert_10kg_adet * 10) + (u.kase_2kg_adet * 2) + (u.kase_900g_adet * 0.9);
+    });
+    const suzmeOrani = cikanYogurtTop > 0 ? (mayalananTop / cikanYogurtTop) : 3.20;
+
+    const sabitGider = tarife
+      ? Number(tarife.dogalgaz) + Number(tarife.elektrik) + Number(tarife.mazot) + Number(tarife.iscilik) + Number(tarife.yemek) + Number(tarife.su)
+      : 0;
+    const kgBasiSabitGider = cikanYogurtTop > 0 ? (sabitGider / cikanYogurtTop) : 0;
+    const saf1KgYogurtSutMaliyeti = ortSutFiyat * suzmeOrani;
+
+    document.getElementById('aktifTarifeBilgi').innerHTML = tarife
+      ? `Geçerli Dönem: <strong>${tarife.gecerlilik_tarihi} - ${tarife.bitis_tarihi || 'Açık'}</strong> | Euro Kuru: <strong>${Number(tarife.euro_kuru).toFixed(2)} ₺</strong> | Günlük Sabit Gider: <strong>${sabitGider.toFixed(2)} ₺</strong>`
+      : `<span style="color:#b91c1c;">Bu tarih için tanımlı maliyet dönemi bulunamadı; yukarıdan kaydedin.</span>`;
+
+    document.getElementById('analizKpiGrid').innerHTML = `
+      <div class="kpi-box"><div class="lbl">Gelen Süt Ort. Fiyatı</div><div class="val">${ortSutFiyat.toFixed(2)} ₺/Kg</div></div>
+      <div class="kpi-box"><div class="lbl">Günlük Süzme Oranı</div><div class="val" style="color:${suzmeOrani > 3.20 ? '#dc2626' : '#059669'}">${suzmeOrani.toFixed(2)}</div></div>
+      <div class="kpi-box"><div class="lbl">1 Kg Yoğurt Saf Süt Maliyeti</div><div class="val">${saf1KgYogurtSutMaliyeti.toFixed(2)} ₺</div></div>
+      <div class="kpi-box"><div class="lbl">Günlük Müstahsil Süt Borcu</div><div class="val">${topSutTutar.toFixed(2)} ₺</div></div>
+    `;
+
+    const eur = tarife ? Number(tarife.euro_kuru) : 0;
+    const urunler = [
+      { ad: '10 Kg Normal Süzme', kg: 10, kovaEur: tarife?.kova_10kg_normal_eur || 0, toptan: tarife?.toptan_fiyatlar?.normal || 0, perakende: tarife?.perakende_fiyatlar?.normal || 0 },
+      { ad: '10 Kg Sert Süzme', kg: 10, kovaEur: tarife?.kova_10kg_sert_eur || 0, toptan: tarife?.toptan_fiyatlar?.sert || 0, perakende: tarife?.perakende_fiyatlar?.sert || 0 },
+      { ad: '2 Kg Kase Süzme', kg: 2, kovaEur: tarife?.kova_2kg_eur || 0, toptan: tarife?.toptan_fiyatlar?.iki_kg || 0, perakende: tarife?.perakende_fiyatlar?.iki_kg || 0 },
+      { ad: '900 Gr Kase Süzme', kg: 0.9, kovaEur: tarife?.kova_900g_eur || 0, toptan: tarife?.toptan_fiyatlar?.dokuz_yuz_g || 0, perakende: tarife?.perakende_fiyatlar?.dokuz_yuz_g || 0 }
+    ];
+
+    document.getElementById('karAnalizBody').innerHTML = urunler.map(u => {
+      const sutMal = saf1KgYogurtSutMaliyeti * u.kg;
+      const kovaTl = Number(u.kovaEur) * eur;
+      const giderPayi = kgBasiSabitGider * u.kg;
+      const toplamMal = sutMal + kovaTl + giderPayi;
+
+      const tFiyat = Number(u.toptan);
+      const pFiyat = Number(u.perakende);
+      const tKarOran = toplamMal > 0 && tFiyat > 0 ? (((tFiyat - toplamMal) / toplamMal) * 100) : 0;
+      const pKarOran = toplamMal > 0 && pFiyat > 0 ? (((pFiyat - toplamMal) / toplamMal) * 100) : 0;
+
+      return `<tr>
+        <td><strong>${u.ad}</strong></td>
+        <td>${sutMal.toFixed(2)} ₺</td>
+        <td>${kovaTl.toFixed(2)} ₺</td>
+        <td>${giderPayi.toFixed(2)} ₺</td>
+        <td><strong>${toplamMal.toFixed(2)} ₺</strong></td>
+        <td>${tFiyat.toFixed(2)} ₺ <span class="badge ${tKarOran >= 0 ? 'badge-green' : 'badge-red'}">%${tKarOran.toFixed(1)}</span></td>
+        <td>${pFiyat.toFixed(2)} ₺ <span class="badge ${pKarOran >= 0 ? 'badge-green' : 'badge-red'}">%${pKarOran.toFixed(1)}</span></td>
+      </tr>`;
+    }).join('');
+  }
+
+  // ==========================================
+  // MÜSTAHSİL CRUD & TOPLU RAPOR
+  // ==========================================
+  async function saveMustahsil() {
+    const cari = document.getElementById('mCari').value.trim();
+    const ad = document.getElementById('mAd').value.trim();
+    const tc = document.getElementById('mTc').value.trim() || null;
+    const isletme = document.getElementById('mIsletme').value.trim() || null;
+    const baba = document.getElementById('mBaba').value.trim();
+    const tel = document.getElementById('mTel').value.trim();
+    const grup = (document.getElementById('mGrup').value || 'GENEL').trim().toUpperCase();
+    const fiyat = parseFloat(document.getElementById('mFiyat').value) || 0;
+
+    if (!cari || !ad) return showToast('Cari Kod ve Ad Soyad zorunludur.', true);
+
+    const { error } = await sbClient.from('mustahsiller').insert([{
+      cari_kodu: cari,
+      ad_soyad: ad,
+      tc_no: tc,
+      isletme_no: isletme,
+      baba_adi: baba,
+      telefon: tel,
+      grup,
+      plaka: '',
+      birim_fiyat: fiyat,
+      qr_kod: 'ALK-' + cari
+    }]);
+    if (error) return showToast('Mükerrer veya geçersiz kayıt: ' + error.message, true);
+
+    ['mCari', 'mAd', 'mTc', 'mIsletme', 'mBaba', 'mTel'].forEach(id => {
+      document.getElementById(id).value = '';
+    });
+    showToast('Müstahsil kaydedildi ve QR kodu oluşturuldu.');
+    await refreshMasterData();
+  }
+
+  function renderMustahsilTable() {
+    const tbody = document.getElementById('mustahsilTableBody');
+    if (!tbody) return;
+    tbody.innerHTML = allMustahsiller.map(m => {
+      const qrVal = m.qr_kod || ('ALK-' + m.cari_kodu);
+      const grupAdi = (m.grup || 'GENEL').toUpperCase();
+      return `<tr>
+        <td><strong>${m.cari_kodu}</strong></td>
+        <td>
+          <code>${qrVal}</code>
+          <button type="button" class="btn btn-outline btn-sm" style="margin-left:6px;" onclick="openQrPrintModal('${m.id}')">🚪 QR Afiş</button>
+        </td>
+        <td>${m.ad_soyad}</td>
+        <td><span class="badge badge-blue">${grupAdi}</span></td>
+        <td>${m.tc_no || '-'} / ${m.isletme_no || '-'}</td>
+        <td>
+          <input type="number" step="0.01" value="${Number(m.birim_fiyat).toFixed(2)}" style="width:95px;padding:5px;"
+            onchange="updateSinglePrice('${m.id}', this.value)" /> ₺
+        </td>
+        <td style="white-space:nowrap;">
+          <button type="button" class="btn btn-primary btn-sm" onclick="openEditMustahsilModal('${m.id}')">Düzenle</button>
+          <button type="button" class="btn btn-danger btn-sm" onclick="deleteMustahsil('${m.id}', '${m.ad_soyad.replace(/'/g, '')}')">Sil</button>
+        </td>
+      </tr>`;
+    }).join('');
+  }
+
+  async function updateSinglePrice(id, val) {
+    const { error } = await sbClient.from('mustahsiller').update({ birim_fiyat: parseFloat(val) || 0 }).eq('id', id);
+    if (error) return showToast('Kart fiyatı güncelleme hatası: ' + error.message, true);
+    showToast('Müstahsil varsayılan kart fiyatı güncellendi (geçmiş kayıtlar korunur).');
+    await refreshMasterData();
+  }
+
+  function openEditMustahsilModal(id) {
+    const m = allMustahsiller.find(x => x.id === id);
+    if (!m) return;
+    document.getElementById('editMstId').value = m.id;
+    document.getElementById('editMCari').value = m.cari_kodu || '';
+    document.getElementById('editMAd').value = m.ad_soyad || '';
+    document.getElementById('editMFiyat').value = Number(m.birim_fiyat || 0).toFixed(2);
+    document.getElementById('editMTc').value = m.tc_no || '';
+    document.getElementById('editMIsletme').value = m.isletme_no || '';
+    document.getElementById('editMBaba').value = m.baba_adi || '';
+    document.getElementById('editMTel').value = m.telefon || '';
+
+    const gruplar = getDistinctGruplar();
+    const sel = document.getElementById('editMGrup');
+    sel.innerHTML = gruplar.map(g => `<option value="${g}">${g}</option>`).join('');
+    sel.value = (m.grup || 'GENEL').toUpperCase();
+
+    document.getElementById('editMustahsilModal').classList.remove('hidden');
+  }
+
+  function closeEditMustahsilModal() {
+    document.getElementById('editMustahsilModal').classList.add('hidden');
+  }
+
+  async function updateMustahsilCard() {
+    const id = document.getElementById('editMstId').value;
+    const cari = document.getElementById('editMCari').value.trim();
+    const ad = document.getElementById('editMAd').value.trim();
+    const grup = (document.getElementById('editMGrup').value || 'GENEL').trim().toUpperCase();
+    const fiyat = parseFloat(document.getElementById('editMFiyat').value) || 0;
+    const tc = document.getElementById('editMTc').value.trim() || null;
+    const isletme = document.getElementById('editMIsletme').value.trim() || null;
+    const baba = document.getElementById('editMBaba').value.trim();
+    const tel = document.getElementById('editMTel').value.trim();
+
+    if (!cari || !ad) return showToast('Cari Kod ve Ad Soyad zorunludur.', true);
+
+    const { error } = await sbClient.from('mustahsiller').update({
+      cari_kodu: cari,
+      ad_soyad: ad,
+      grup,
+      birim_fiyat: fiyat,
+      tc_no: tc,
+      isletme_no: isletme,
+      baba_adi: baba,
+      telefon: tel,
+      qr_kod: 'ALK-' + cari
+    }).eq('id', id);
+
+    if (error) return showToast('Müstahsil güncelleme hatası: ' + error.message, true);
+
+    closeEditMustahsilModal();
+    showToast('Müstahsil kartı güncellendi.');
+    await refreshMasterData();
+  }
+
+  async function deleteMustahsil(id, ad) {
+    if (!confirm(`"${ad}" müstahsilini silmek istediğinize emin misiniz?`)) return;
+    const { error } = await sbClient.from('mustahsiller').delete().eq('id', id);
+    if (error) return showToast('Silme hatası (süt kaydı olabilir): ' + error.message, true);
+    showToast('Müstahsil silindi.');
+    await refreshMasterData();
+  }
+
+  async function loadTopluRapor() {
+    const bas = document.getElementById('raporBaslangic').value;
+    const bit = document.getElementById('raporBitis').value;
+    const grupFiltre = (document.getElementById('raporGrupFiltre').value || '').trim().toUpperCase();
+
+    const { data: rows, error } = await sbClient.from('sut_girisleri').select('*').gte('tarih', bas).lte('tarih', bit);
+    if (error) return showToast('Rapor hatası: ' + error.message, true);
+
+    const kgMap = {};
+    const tutarMap = {};
+    (rows || []).forEach(r => {
+      const kg = Number(r.miktar_kg || 0);
+      const fiyat = (r.birim_fiyat !== null && r.birim_fiyat !== undefined)
+        ? Number(r.birim_fiyat)
+        : getEffectiveMustahsilPrice(r.mustahsil_id, r.tarih);
+      kgMap[r.mustahsil_id] = (kgMap[r.mustahsil_id] || 0) + kg;
+      tutarMap[r.mustahsil_id] = (tutarMap[r.mustahsil_id] || 0) + (kg * fiyat);
+    });
+
+    const filteredMst = allMustahsiller.filter(m => !grupFiltre || (m.grup || 'GENEL').toUpperCase() === grupFiltre);
+    let genelKg = 0, genelTutar = 0;
+
+    const rowsHtml = filteredMst.map(m => {
+      const kg = kgMap[m.id] || 0;
+      const tutar = tutarMap[m.id] || 0;
+      const ortFiyat = kg > 0 ? (tutar / kg) : Number(m.birim_fiyat || 0);
+      genelKg += kg;
+      genelTutar += tutar;
+
+      return `<tr>
+        <td>${m.cari_kodu}</td>
+        <td><strong>${m.ad_soyad}</strong></td>
+        <td><span class="badge badge-blue">${(m.grup || 'GENEL').toUpperCase()}</span></td>
+        <td>${kg.toFixed(1)} Kg</td>
+        <td>${ortFiyat.toFixed(2)} ₺</td>
+        <td><strong>${tutar.toFixed(2)} ₺</strong></td>
+      </tr>`;
+    }).join('');
+
+    const totalRow = `<tr style="background:#e2e8f0;font-weight:800;">
+      <td colspan="3">TOPLAM (${filteredMst.length} Müstahsil)</td>
+      <td>${genelKg.toFixed(1)} Kg</td>
+      <td>${genelKg > 0 ? (genelTutar / genelKg).toFixed(2) : '0.00'} ₺</td>
+      <td>${genelTutar.toFixed(2)} ₺</td>
+    </tr>`;
+
+    document.getElementById('topluRaporBody').innerHTML = rowsHtml + totalRow;
+  }
+
+  // ==========================================
+  // DİNAMİK KULLANICI & YETKİ YÖNETİMİ
+  // ==========================================
+  async function loadUsersList() {
+    const { data, error } = await sbClient.from('kullanicilar').select('*').order('created_at', { ascending: true });
+    if (error) return showToast('Kullanıcı listesi hatası: ' + error.message, true);
+    allUsers = data || [];
+
+    const tbody = document.getElementById('usersTableBody');
+    tbody.innerHTML = allUsers.map((u, idx) => {
+      const perms = Array.isArray(u.yetkiler) ? u.yetkiler : [];
+      const permBadges = perms.length
+        ? perms.map(p => `<span class="badge badge-blue">${MODULE_LABELS[p] || p}</span>`).join(' ')
+        : '<span class="badge badge-amber">Yetki Seçilmemiş</span>';
+
+      const plakaInfo = u.atanan_plaka
+        ? `${u.atanan_plaka} <small style="color:#64748b;">(${getTanksForPlaka(u.atanan_plaka).length} Tank)</small>`
+        : '<span style="color:#64748b;">Tüm Plakalar</span>';
+
+      return `<tr>
+        <td><strong>${u.ad_soyad}</strong></td>
+        <td><code>${u.kullanici_adi}</code></td>
+        <td><code>${u.sifre}</code></td>
+        <td>${plakaInfo}</td>
+        <td>${permBadges}</td>
+        <td>${u.aktif ? '<span class="badge badge-green">Aktif</span>' : '<span class="badge badge-red">Pasif</span>'}</td>
+        <td style="white-space:nowrap;">
+          <button type="button" class="btn btn-primary btn-sm btn-edit-user" data-idx="${idx}">Düzenle</button>
+          ${u.kullanici_adi !== 'admin' ? `<button type="button" class="btn btn-danger btn-sm btn-del-user" data-idx="${idx}">Sil</button>` : ''}
+        </td>
+      </tr>`;
+    }).join('');
+
+    tbody.querySelectorAll('.btn-edit-user').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const u = allUsers[Number(btn.dataset.idx)];
+        if (u) openUserModal(u);
+      });
+    });
+
+    tbody.querySelectorAll('.btn-del-user').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const u = allUsers[Number(btn.dataset.idx)];
+        if (u) deleteUser(u.id, u.kullanici_adi);
+      });
+    });
+  }
+
+  async function populateUserPlakaSelect(selectedPlaka = '') {
+    const sel = document.getElementById('uPlaka');
+    const plakaSet = new Set(getDistinctPlakalar());
+
+    if (selectedPlaka && selectedPlaka.trim()) {
+      plakaSet.add(selectedPlaka.trim().toUpperCase());
+    }
+
+    const sortedPlakalar = [...plakaSet].sort((a, b) => a.localeCompare(b, 'tr'));
+    sel.innerHTML =
+      `<option value="">Tüm Plakalar (Kısıt Yok)</option>` +
+      sortedPlakalar.map(p => {
+        const tCount = getTanksForPlaka(p).length;
+        return `<option value="${p}">${p} (${tCount} Tanklı)</option>`;
+      }).join('');
+
+    sel.value = selectedPlaka ? selectedPlaka.trim().toUpperCase() : '';
+  }
+
+  async function openUserModal(u = null) {
+    const modal = document.getElementById('userModal');
+    if (u) {
+      document.getElementById('userModalTitle').textContent = `Kullanıcı Düzenle: ${u.ad_soyad}`;
+      document.getElementById('editUserId').value = u.id;
+      document.getElementById('uAdSoyad').value = u.ad_soyad || '';
+      document.getElementById('uKullaniciAdi').value = u.kullanici_adi || '';
+      document.getElementById('uSifre').value = u.sifre || '';
+      await populateUserPlakaSelect(u.atanan_plaka || '');
+      document.getElementById('uAktif').checked = !!u.aktif;
+
+      const perms = Array.isArray(u.yetkiler) ? u.yetkiler : [];
+      document.querySelectorAll('.u-perm').forEach(cb => {
+        cb.checked = perms.includes(cb.value);
+      });
+    } else {
+      document.getElementById('userModalTitle').textContent = 'Yeni Kullanıcı Ekle';
+      document.getElementById('editUserId').value = '';
+      document.getElementById('uAdSoyad').value = '';
+      document.getElementById('uKullaniciAdi').value = '';
+      document.getElementById('uSifre').value = '';
+      await populateUserPlakaSelect('');
+      document.getElementById('uAktif').checked = true;
+      document.querySelectorAll('.u-perm').forEach(cb => { cb.checked = cb.value === 'toplama'; });
+    }
+    modal.classList.remove('hidden');
+    document.getElementById('uAdSoyad').focus();
+  }
+
+  function closeUserModal() {
+    document.getElementById('userModal').classList.add('hidden');
+  }
+
+  async function saveDynamicUser() {
+    const id = document.getElementById('editUserId').value.trim();
+    const adSoyad = document.getElementById('uAdSoyad').value.trim();
+    const kullaniciAdi = document.getElementById('uKullaniciAdi').value.trim();
+    const sifre = document.getElementById('uSifre').value.trim();
+    const plaka = document.getElementById('uPlaka').value.trim().toUpperCase() || null;
+    let aktif = document.getElementById('uAktif').checked;
+
+    const seciliYetkiler = [];
+    document.querySelectorAll('.u-perm:checked').forEach(cb => seciliYetkiler.push(cb.value));
+
+    if (!adSoyad || !kullaniciAdi || !sifre) {
+      return showToast('Ad Soyad, Kullanıcı Adı ve Şifre zorunludur.', true);
+    }
+    if (!seciliYetkiler.length) {
+      return showToast('Kullanıcı için en az bir bölüm seçmelisiniz.', true);
+    }
+
+    if (kullaniciAdi === 'admin') {
+      aktif = true;
+      if (!seciliYetkiler.includes('kullanicilar')) seciliYetkiler.push('kullanicilar');
+    }
+
+    const payload = {
+      ad_soyad: adSoyad,
+      kullanici_adi: kullaniciAdi,
+      sifre: sifre,
+      rol: seciliYetkiler.includes('kullanicilar') ? 'ADMIN' : 'OZEL',
+      atanan_plaka: plaka,
+      aktif: aktif,
+      yetkiler: seciliYetkiler
+    };
+
+    let res;
+    if (id) {
+      res = await sbClient.from('kullanicilar').update(payload).eq('id', id);
+    } else {
+      res = await sbClient.from('kullanicilar').insert([payload]);
+    }
+
+    if (res.error) return showToast('Kullanıcı kayıt hatası: ' + res.error.message, true);
+
+    showToast(id ? 'Kullanıcı yetkileri güncellendi.' : 'Yeni kullanıcı oluşturuldu.');
+    if (currentUser.id === id) {
+      currentUser = { ...currentUser, ...payload };
+      buildTabs();
+    }
+    closeUserModal();
+    await refreshMasterData();
+    loadUsersList();
+  }
+
+  async function deleteUser(id, username) {
+    if (username === 'admin') return showToast('Ana admin hesabı silinemez.', true);
+    if (!confirm(`"${username}" kullanıcısını silmek istediğinize emin misiniz?`)) return;
+    const { error } = await sbClient.from('kullanicilar').delete().eq('id', id);
+    if (error) return showToast('Silme hatası: ' + error.message, true);
+    showToast('Kullanıcı silindi.');
+    loadUsersList();
+  }
+
+  // ==========================================
+  // KAPI QR AFİŞİ & KAMERA OKUMA
+  // ==========================================
+  function openQrPrintModal(mustahsilId) {
+    const m = allMustahsiller.find(x => x.id === mustahsilId);
+    if (!m) return showToast('Müstahsil bulunamadı.', true);
+
+    const qrVal = (m.qr_kod || ('ALK-' + m.cari_kodu)).trim();
+    document.getElementById('printQrAd').textContent = m.ad_soyad;
+    document.getElementById('printQrMeta').textContent = `Cari Kodu: ${m.cari_kodu} • Grup: ${(m.grup || 'GENEL').toUpperCase()}`;
+    document.getElementById('printQrCodeText').textContent = qrVal;
+
+    const qrImgUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=10&data=${encodeURIComponent(qrVal)}`;
+    document.getElementById('qrCodeCanvasBox').innerHTML =
+      `<img src="${qrImgUrl}" alt="QR ${qrVal}" style="width:280px;height:280px;max-width:100%;display:block;border-radius:8px;" />`;
+
+    document.getElementById('qrPrintModal').classList.remove('hidden');
+  }
+
+  function closeQrPrintModal() {
+    document.getElementById('qrPrintModal').classList.add('hidden');
+  }
+
+  async function openQrScanner() {
+    qrScanLocked = false;
+    document.getElementById('manualQrInput').value = '';
+    document.getElementById('qrReaderBox').innerHTML = '';
+    document.getElementById('qrModal').classList.remove('hidden');
+    document.getElementById('manualQrInput').focus();
+
+    if (typeof Html5Qrcode === 'undefined') {
+      return showToast('QR kamera kütüphanesi yüklenemedi; alttan kod girebilirsiniz.', true);
+    }
+
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      return showToast('Bu tarayıcıda kamera erişimi desteklenmiyor; alttan kod girin.', true);
+    }
+
+    try {
+      const cameras = await Html5Qrcode.getCameras();
+      if (!cameras || !cameras.length) {
+        return showToast('Aktif kamera bulunamadı; alttaki kutudan kod girebilirsiniz.', true);
+      }
+
+      const backCam = cameras.find(c => /back|rear|environment|arka/i.test(c.label));
+      const cameraId = backCam ? backCam.id : cameras[0].id;
+
+      html5QrInstance = new Html5Qrcode('qrReaderBox');
+      await html5QrInstance.start(
+        cameraId,
+        { fps: 10, qrbox: { width: 220, height: 220 } },
+        (decodedText) => {
+          if (qrScanLocked) return;
+          qrScanLocked = true;
+          selectMustahsilByQr(decodedText);
+        },
+        () => {}
+      );
+    } catch (err) {
+      showToast('Kamera başlatılamadı (' + (err?.name || err) + '). Kod kutusunu kullanabilirsiniz.', true);
+    }
+  }
+
+  async function closeQrScanner() {
+    qrScanLocked = false;
+    const modal = document.getElementById('qrModal');
+    if (modal) modal.classList.add('hidden');
+    if (html5QrInstance) {
+      try {
+        if (html5QrInstance.isScanning) {
+          await html5QrInstance.stop();
+        }
+        await html5QrInstance.clear();
+      } catch (e) {}
+      html5QrInstance = null;
+    }
+  }
+
+  function selectMustahsilByQr(rawCode) {
+    const code = (rawCode || '').trim().toUpperCase();
+    if (!code) return showToast('Lütfen bir QR veya cari kodu girin.', true);
+
+    if (!allMustahsiller.length) {
+      qrScanLocked = false;
+      return showToast('Müstahsil listesi henüz yüklenmedi.', true);
+    }
+
+    const found = allMustahsiller.find(m => {
+      const qr = (m.qr_kod || '').trim().toUpperCase();
+      const cari = (m.cari_kodu || '').trim().toUpperCase();
+      return qr === code || cari === code || ('ALK-' + cari) === code;
+    });
+
+    if (!found) {
+      qrScanLocked = false;
+      return showToast(`"${code}" koduna ait müstahsil bulunamadı.`, true);
+    }
+
+    document.getElementById('sutGrupFiltre').value = '';
+    document.getElementById('sutMustahsilAra').value = '';
+    populateMustahsilSelect();
+    document.getElementById('sutMustahsil').value = found.id;
+    checkMustahsilAnomalyPreview();
+
+    closeQrScanner();
+    showToast(`✅ ${found.cari_kodu} - ${found.ad_soyad} seçildi.`);
+    document.getElementById('sutMiktar').focus();
+  }
+</script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Alakuzular Gıda | Süt Toplama, Süzme Yoğurt & Maliyet Sistemi</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    @media print {
+      @page { size: A4 portrait; margin: 10mm; }
+      body * { visibility: hidden; }
+      #qrPrintArea, #qrPrintArea * { visibility: visible; }
+      #qrPrintArea {
+        position: fixed;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        border: 4px solid #0f4c81 !important;
+        border-radius: 16px !important;
+        padding: 24px !important;
+        display: flex !important;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        background: #fff !important;
+      }
+    }
+    :root {
+      --bg: #f1f5f9;
+      --card: #ffffff;
+      --primary: #0f4c81;
+      --primary-dark: #093256;
+      --navy-card: #172a45;
+      --accent: #059669;
+      --gold: #f59e0b;
+      --danger: #dc2626;
+      --warning: #d97706;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #cbd5e1;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+    body { background: var(--bg); color: var(--text); min-height: 100vh; }
+    .hidden { display: none !important; }
+
+    header {
+      background: var(--primary);
+      color: #fff;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+    header h1 { font-size: 1.15rem; font-weight: 700; letter-spacing: 0.3px; }
+    header .sub { font-size: 0.78rem; opacity: 0.85; }
+    .badge-status {
+      background: rgba(255,255,255,0.15);
+      padding: 5px 12px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .dot-live { width: 9px; height: 9px; border-radius: 50%; background: #22c55e; display: inline-block; }
+    .dot-offline { width: 9px; height: 9px; border-radius: 50%; background: #ef4444; display: inline-block; }
+
+    .login-wrap {
+      max-width: 420px;
+      margin: 60px auto;
+      background: var(--card);
+      padding: 28px;
+      border-radius: 14px;
+      box-shadow: 0 10px 25px rgba(15,23,42,0.08);
+      border: 1px solid var(--border);
+    }
+    .login-wrap h2 { color: var(--primary); margin-bottom: 6px; font-size: 1.35rem; }
+    .login-wrap p { color: var(--muted); font-size: 0.88rem; margin-bottom: 20px; }
+
+    .container { max-width: 1280px; margin: 18px auto; padding: 0 14px 40px; }
+    .tabs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+      background: #e2e8f0;
+      padding: 6px;
+      border-radius: 10px;
+    }
+    .tab-btn {
+      border: none;
+      background: transparent;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: #334155;
+      cursor: pointer;
+      transition: 0.15s;
+    }
+    .tab-btn.active { background: var(--primary); color: #fff; box-shadow: 0 2px 6px rgba(15,76,129,0.25); }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 6px rgba(15,23,42,0.04);
+    }
+    .card h3 { font-size: 1.05rem; color: var(--primary); margin-bottom: 12px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; }
+    .card-header-flex {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 10px;
+      margin-bottom: 12px;
+    }
+    .card-header-flex h3 { border-bottom: none; padding-bottom: 0; margin-bottom: 0; }
+
+    /* MODERN TANK & TOPLAMA DASHBOARD KARTI (GÖRSEL TASARIM) */
+    .route-status-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px 16px;
+      margin-bottom: 14px;
+      box-shadow: 0 2px 8px rgba(15,23,42,0.04);
+    }
+    .net-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 0.84rem;
+      font-weight: 700;
+    }
+    .net-online { background: #dcfce7; color: #15803d; }
+    .net-offline { background: #fee2e2; color: #b91c1c; }
+    .sync-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #f1f5f9;
+      color: #334155;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 0.83rem;
+      font-weight: 600;
+    }
+
+    .navy-summary-card {
+      background: linear-gradient(145deg, #172a45 0%, #0f1f36 100%);
+      color: #fff;
+      border-radius: 18px;
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: 0 12px 28px rgba(15, 23, 42, 0.18);
+    }
+    .navy-top-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .navy-title-lbl {
+      font-size: 0.76rem;
+      font-weight: 800;
+      letter-spacing: 0.8px;
+      color: #f59e0b;
+      text-transform: uppercase;
+    }
+    .navy-date-sub {
+      font-size: 0.92rem;
+      color: #cbd5e1;
+      margin-top: 2px;
+    }
+    .tr-plate-badge {
+      display: inline-flex;
+      align-items: stretch;
+      background: #fff;
+      color: #0f172a;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 2px solid #cbd5e1;
+      font-weight: 900;
+      font-size: 1.05rem;
+      letter-spacing: 0.8px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+    }
+    .tr-plate-blue {
+      background: #1d4ed8;
+      color: #fff;
+      font-size: 0.65rem;
+      font-weight: 800;
+      padding: 4px 6px;
+      display: flex;
+      align-items: flex-end;
+    }
+    .tr-plate-text {
+      padding: 6px 14px;
+    }
+    .navy-metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.12);
+      margin-bottom: 16px;
+    }
+    .navy-metric-lbl {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #94a3b8;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+    .navy-metric-val {
+      font-size: 1.75rem;
+      font-weight: 900;
+      margin-top: 2px;
+    }
+    .navy-metric-val.gold { color: #fbbf24; }
+    .navy-metric-val.white { color: #ffffff; }
+
+    .tank-list-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .tank-row-item {
+      background: rgba(255,255,255,0.05);
+      border: 1.5px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 10px 14px;
+      cursor: pointer;
+      transition: 0.15s;
+    }
+    .tank-row-item:hover { background: rgba(255,255,255,0.09); }
+    .tank-row-item.selected-tank {
+      border-color: #f59e0b;
+      background: rgba(245, 158, 11, 0.14);
+    }
+    .tank-row-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin-bottom: 7px;
+    }
+    .tank-bar-bg {
+      width: 100%;
+      height: 9px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .tank-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #f59e0b, #fbbf24);
+      border-radius: 999px;
+      transition: width 0.25s ease;
+    }
+    .tank-bar-fill.full-danger { background: linear-gradient(90deg, #ef4444, #f87171); }
+
+    .tank-selector-pills {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .tank-pill-btn {
+      flex: 1;
+      min-width: 90px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 2px solid var(--border);
+      background: #f8fafc;
+      font-weight: 800;
+      font-size: 0.88rem;
+      color: #334155;
+      cursor: pointer;
+      text-align: center;
+      transition: 0.15s;
+    }
+    .tank-pill-btn.active {
+      background: #172a45;
+      border-color: #172a45;
+      color: #fbbf24;
+    }
+
+    .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
+
+    label { display: block; font-size: 0.82rem; font-weight: 600; color: #334155; margin-bottom: 4px; }
+    input, select, textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.95rem;
+      background: #fff;
+      color: var(--text);
+    }
+    input:focus, select:focus { outline: none; border-color: var(--primary); }
+    input:disabled, select:disabled { background: #f1f5f9; color: #334155; font-weight: 700; cursor: not-allowed; }
+    .input-xl { font-size: 1.35rem; font-weight: 700; padding: 14px; text-align: center; }
+
+    .vardiya-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .vardiya-btn {
+      padding: 10px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      background: #f8fafc;
+      color: #334155;
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: 0.15s;
+    }
+    .vardiya-btn.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+    }
+
+    .perm-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 10px;
+      background: #f8fafc;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #e2e8f0;
+      margin: 8px 0 14px;
+    }
+    .perm-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.86rem;
+      font-weight: 600;
+      color: #1e293b;
+      cursor: pointer;
+    }
+    .perm-item input { width: 17px; height: 17px; cursor: pointer; }
+
+    .btn {
+      border: none;
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: 0.15s;
+    }
+    .btn-sm { padding: 6px 10px; font-size: 0.8rem; }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-success { background: var(--accent); color: #fff; }
+    .btn-danger { background: var(--danger); color: #fff; }
+    .btn-warning { background: var(--warning); color: #fff; }
+    .btn-outline { background: #fff; border: 1.5px solid var(--border); color: var(--text); }
+    .btn-outline:hover { background: #f8fafc; }
+    .btn-lg { width: 100%; padding: 14px; font-size: 1.05rem; }
+
+    .kpi-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 14px;
+    }
+    .kpi-box .lbl { font-size: 0.78rem; color: var(--muted); font-weight: 600; }
+    .kpi-box .val { font-size: 1.35rem; font-weight: 800; color: var(--primary); margin-top: 4px; }
+
+    .alert-danger {
+      background: #fef2f2;
+      border: 2px solid var(--danger);
+      color: #991b1b;
+      padding: 14px;
+      border-radius: 10px;
+      font-weight: 700;
+      margin: 12px 0;
+    }
+    .alert-ok {
+      background: #ecfdf5;
+      border: 1.5px solid #10b981;
+      color: #065f46;
+      padding: 12px;
+      border-radius: 10px;
+      font-weight: 600;
+      margin: 12px 0;
+    }
+    .info-banner {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      color: #1e3a8a;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 0.84rem;
+      margin-bottom: 12px;
+      line-height: 1.45;
+    }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.86rem; margin-top: 10px; }
+    th, td { border: 1px solid #e2e8f0; padding: 8px 10px; text-align: left; vertical-align: middle; }
+    th { background: #f1f5f9; font-weight: 700; color: #1e293b; }
+    tr:nth-child(even) { background: #f8fafc; }
+    tr.anomaly-row { background: #fef2f2 !important; }
+
+    .badge {
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      display: inline-block;
+      margin: 2px 2px 2px 0;
+    }
+    .badge-blue { background: #dbeafe; color: #1e40af; }
+    .badge-red { background: #fee2e2; color: #b91c1c; }
+    .badge-green { background: #dcfce7; color: #15803d; }
+    .badge-amber { background: #fef3c7; color: #b45309; }
+    .badge-navy { background: #e2e8f0; color: #0f172a; }
+
+    .chip-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .chip-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 6px 10px;
+      font-size: 0.84rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
+    .chip-btn {
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      font-size: 0.85rem;
+      padding: 2px 4px;
+      border-radius: 4px;
+    }
+    .chip-btn:hover { background: #e2e8f0; }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.55);
+      backdrop-filter: blur(2px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 9000;
+    }
+    .modal-dialog {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      width: 100%;
+      max-width: 720px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 45px rgba(15, 23, 42, 0.28);
+      animation: modalFadeIn 0.16s ease-out;
+    }
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: translateY(-8px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .modal-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #f8fafc;
+      border-radius: 14px 14px 0 0;
+    }
+    .modal-header h3 { color: var(--primary); font-size: 1.08rem; margin: 0; }
+    .modal-close {
+      background: transparent;
+      border: none;
+      font-size: 1.35rem;
+      line-height: 1;
+      color: var(--muted);
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 6px;
+    }
+    .modal-close:hover { background: #e2e8f0; color: var(--text); }
+    .modal-body { padding: 20px; }
+    .modal-footer {
+      padding: 14px 20px;
+      border-top: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      flex-wrap: wrap;
+      background: #f8fafc;
+      border-radius: 0 0 14px 14px;
+    }
+
+    .mobile-sticky-qr-bar {
+      display: none;
+    }
+    @media (max-width: 768px) {
+      body { padding-bottom: 76px; }
+      .mobile-sticky-qr-bar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: rgba(255, 255, 255, 0.96);
+        backdrop-filter: blur(8px);
+        border-top: 1px solid var(--border);
+        padding: 10px 14px;
+        z-index: 8500;
+        display: flex;
+        gap: 10px;
+        box-shadow: 0 -4px 16px rgba(15, 23, 42, 0.12);
+      }
+      .mobile-sticky-qr-bar.hidden { display: none !important; }
+      #toast { bottom: 82px !important; }
+    }
+
+    #toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #0f172a;
+      color: #fff;
+      padding: 12px 18px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+      z-index: 9999;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>ALAKUZULAR GIDA | SÜT TOPLAMA & SÜZME YOĞURT SİSTEMİ</h1>
+    <div class="sub">Alakuzular Gıda İhtiyaç Mad. Nak. Tarım ve Petrol Ürün. San. Tic. Ltd. Şti.</div>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+    <span id="headerNetBadge" class="badge-status"><span class="dot-live"></span> Çevrimiçi</span>
+    <span id="userBadge" class="badge-status hidden"></span>
+    <button id="logoutBtn" class="btn btn-danger hidden" style="padding:6px 12px;font-size:0.82rem;" onclick="logout()">Çıkış</button>
+  </div>
+</header>
+
+<div id="loginView" class="login-wrap">
+  <h2>Sisteme Giriş</h2>
+  <p>Yetkili kullanıcı adı ve şifrenizle giriş yapın.</p>
+  <div style="margin-bottom:12px;">
+    <label>Kullanıcı Adı</label>
+    <input type="text" id="loginUser" placeholder="Kullanıcı adınız" />
+  </div>
+  <div style="margin-bottom:18px;">
+    <label>Şifre</label>
+    <input type="password" id="loginPass" placeholder="••••" onkeydown="if(event.key==='Enter') login()" />
+  </div>
+  <button class="btn btn-primary btn-lg" onclick="login()">Giriş Yap</button>
+  <div id="loginErrorBox" class="alert-danger hidden" style="font-size:0.84rem;font-weight:600;"></div>
+</div>
+
+<div id="appView" class="container hidden">
+  <div class="tabs" id="navTabs"></div>
+
+  <!-- 1. SAHA SÜT TOPLAMA (MOBİL ÖNCELİKLİ HIZLI GİRİŞ + TANK KARTI) -->
+  <div id="tab-toplama" class="tab-panel hidden">
+
+    <!-- Üst Bağlantı & Senkronizasyon Çubuğu -->
+    <div class="route-status-bar">
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+        <span id="routeNetPill" class="net-pill net-online">📶 Çevrimiçi</span>
+        <span id="routeSyncPill" class="sync-pill">☁️ Tüm veriler gönderildi</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+        <button type="button" id="btnSyncOffline" class="btn btn-warning btn-sm hidden" onclick="syncOfflineQueue()">🔄 Gönder (<span id="offlinePendingCount">0</span>)</button>
+        <button type="button" class="btn btn-outline btn-sm" onclick="loadSutGirisleri()">↻ Yenile</button>
+      </div>
+    </div>
+
+    <!-- 1. EN ÜSTTE: TELEFON İÇİN HIZLI QR OKUTMA, MÜSTAHSİL & SÜT GİRİŞİ -->
+    <div class="card" style="border:2px solid #0f4c81;padding:16px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:12px;">
+        <h3 style="border:none;margin:0;padding:0;font-size:1.05rem;">⚡ Hızlı Süt Girişi</h3>
+        <button type="button" class="btn btn-primary" style="padding:10px 16px;font-size:0.95rem;" onclick="openQrScanner()">📷 QR Okut</button>
+      </div>
+
+      <!-- Müstahsil Arama & Seçim (En Üstte Başparmak Hizasında) -->
+      <div style="margin-bottom:12px;">
+        <div style="display:flex;gap:6px;margin-bottom:6px;">
+          <select id="sutGrupFiltre" onchange="populateMustahsilSelect()" style="max-width:135px;font-size:0.86rem;">
+            <option value="">Tüm Gruplar</option>
+          </select>
+          <input type="text" id="sutMustahsilAra" oninput="populateMustahsilSelect()" placeholder="İsim veya cari kod ara..." style="font-size:0.9rem;" />
+        </div>
+        <select id="sutMustahsil" onchange="checkMustahsilAnomalyPreview()" style="font-size:1rem;font-weight:700;padding:12px;border-color:#0f4c81;"></select>
+      </div>
+
+      <!-- Tank Seçimi -->
+      <div style="margin-bottom:12px;">
+        <label>Boşaltılacak Tank</label>
+        <input type="hidden" id="sutTankNo" value="1" />
+        <div id="tankSelectorPills" class="tank-selector-pills"></div>
+      </div>
+
+      <!-- Miktar & Kaydet -->
+      <div class="grid-2" style="align-items:end;gap:10px;">
+        <div>
+          <label>Süt Miktarı (KG / Litre)</label>
+          <input type="number" step="0.1" inputmode="decimal" id="sutMiktar" class="input-xl" placeholder="0.0" oninput="checkMustahsilAnomalyPreview()" />
+        </div>
+        <div>
           <label style="display:flex;align-items:center;gap:8px;margin-bottom:10px;cursor:pointer;font-size:0.86rem;">
             <input type="checkbox" id="sutAyriGugum" style="width:19px;height:19px;" />
             Ayrı Güğüm / Numune (Karışmasın)
