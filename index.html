@@ -583,22 +583,66 @@
 <div id="appView" class="container hidden">
   <div class="tabs" id="navTabs"></div>
 
-  <!-- 1. SAHA SÜT TOPLAMA (YENİ TANK & ÇEVRİMDIŞI TASARIM) -->
+  <!-- 1. SAHA SÜT TOPLAMA (MOBİL ÖNCELİKLİ HIZLI GİRİŞ + TANK KARTI) -->
   <div id="tab-toplama" class="tab-panel hidden">
 
     <!-- Üst Bağlantı & Senkronizasyon Çubuğu -->
     <div class="route-status-bar">
-      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
         <span id="routeNetPill" class="net-pill net-online">📶 Çevrimiçi</span>
         <span id="routeSyncPill" class="sync-pill">☁️ Tüm veriler gönderildi</span>
       </div>
-      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-        <button type="button" id="btnSyncOffline" class="btn btn-warning btn-sm hidden" onclick="syncOfflineQueue()">🔄 Bekleyenleri Gönder (<span id="offlinePendingCount">0</span>)</button>
-        <button type="button" class="btn btn-outline btn-sm" onclick="loadSutGirisleri()">↻ Listeyi Yenile</button>
+      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+        <button type="button" id="btnSyncOffline" class="btn btn-warning btn-sm hidden" onclick="syncOfflineQueue()">🔄 Gönder (<span id="offlinePendingCount">0</span>)</button>
+        <button type="button" class="btn btn-outline btn-sm" onclick="loadSutGirisleri()">↻ Yenile</button>
       </div>
     </div>
 
-    <!-- Koyu Lacivert Özet & Tank Doluluk Kartı -->
+    <!-- 1. EN ÜSTTE: TELEFON İÇİN HIZLI QR OKUTMA, MÜSTAHSİL & SÜT GİRİŞİ -->
+    <div class="card" style="border:2px solid #0f4c81;padding:16px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:12px;">
+        <h3 style="border:none;margin:0;padding:0;font-size:1.05rem;">⚡ Hızlı Süt Girişi</h3>
+        <button type="button" class="btn btn-primary" style="padding:10px 16px;font-size:0.95rem;" onclick="openQrScanner()">📷 QR Okut</button>
+      </div>
+
+      <!-- Müstahsil Arama & Seçim (En Üstte Başparmak Hizasında) -->
+      <div style="margin-bottom:12px;">
+        <div style="display:flex;gap:6px;margin-bottom:6px;">
+          <select id="sutGrupFiltre" onchange="populateMustahsilSelect()" style="max-width:135px;font-size:0.86rem;">
+            <option value="">Tüm Gruplar</option>
+          </select>
+          <input type="text" id="sutMustahsilAra" oninput="populateMustahsilSelect()" placeholder="İsim veya cari kod ara..." style="font-size:0.9rem;" />
+        </div>
+        <select id="sutMustahsil" onchange="checkMustahsilAnomalyPreview()" style="font-size:1rem;font-weight:700;padding:12px;border-color:#0f4c81;"></select>
+      </div>
+
+      <!-- Tank Seçimi -->
+      <div style="margin-bottom:12px;">
+        <label>Boşaltılacak Tank</label>
+        <input type="hidden" id="sutTankNo" value="1" />
+        <div id="tankSelectorPills" class="tank-selector-pills"></div>
+      </div>
+
+      <!-- Miktar & Kaydet -->
+      <div class="grid-2" style="align-items:end;gap:10px;">
+        <div>
+          <label>Süt Miktarı (KG / Litre)</label>
+          <input type="number" step="0.1" inputmode="decimal" id="sutMiktar" class="input-xl" placeholder="0.0" oninput="checkMustahsilAnomalyPreview()" />
+        </div>
+        <div>
+          <label style="display:flex;align-items:center;gap:8px;margin-bottom:10px;cursor:pointer;font-size:0.86rem;">
+            <input type="checkbox" id="sutAyriGugum" style="width:19px;height:19px;" />
+            Ayrı Güğüm / Numune (Karışmasın)
+          </label>
+          <button class="btn btn-success btn-lg" style="padding:15px;font-size:1.08rem;" onclick="saveSutGirisi()">✅ Süt Kaydını Kaydet</button>
+        </div>
+      </div>
+
+      <!-- Anormal Süt Artışı Canlı Uyarı Alanı -->
+      <div id="anomalyPreviewBox"></div>
+    </div>
+
+    <!-- 2. HEMEN ALTINDA: LACİVERT TANK DOLULUK & VARDİYA ÖZET KARTI -->
     <div class="navy-summary-card">
       <div class="navy-top-row">
         <div>
@@ -625,10 +669,9 @@
       <div id="navyTankList" class="tank-list-wrap"></div>
     </div>
 
-    <!-- Süt Giriş Formu -->
-    <div class="card">
-      <h3>Saha Süt Girişi & Tank Seçimi</h3>
-      <div class="grid-3" style="margin-bottom:14px;">
+    <!-- 3. VARDİYA, TARİH & ARAÇ PLAKASI AYARI -->
+    <div class="card" style="padding:14px;">
+      <div class="grid-3" style="gap:10px;">
         <div>
           <label>Tarih</label>
           <input type="date" id="sutTarih" onchange="loadSutGirisleri()" />
@@ -646,42 +689,6 @@
           <select id="sutPlaka" onchange="onSutPlakaChange()"></select>
         </div>
       </div>
-
-      <div style="margin-bottom:14px;">
-        <label>Sütün Boşaltılacağı Tank Seçimi</label>
-        <input type="hidden" id="sutTankNo" value="1" />
-        <div id="tankSelectorPills" class="tank-selector-pills"></div>
-      </div>
-
-      <div class="grid-3" style="align-items:end;">
-        <div>
-          <label>Grup Filtresi & Müstahsil Seçimi</label>
-          <div style="display:flex;gap:6px;margin-bottom:6px;">
-            <select id="sutGrupFiltre" onchange="populateMustahsilSelect()" style="max-width:155px;">
-              <option value="">Tüm Gruplar</option>
-            </select>
-            <input type="text" id="sutMustahsilAra" oninput="populateMustahsilSelect()" placeholder="İsim veya cari ara..." />
-          </div>
-          <div style="display:flex;gap:8px;">
-            <select id="sutMustahsil" onchange="checkMustahsilAnomalyPreview()"></select>
-            <button type="button" class="btn btn-primary" style="white-space:nowrap;" onclick="openQrScanner()">📷 QR Okut</button>
-          </div>
-        </div>
-        <div>
-          <label>Süt Miktarı (KG / Litre)</label>
-          <input type="number" step="0.1" id="sutMiktar" class="input-xl" placeholder="0.0" oninput="checkMustahsilAnomalyPreview()" />
-        </div>
-        <div>
-          <label style="display:flex;align-items:center;gap:8px;margin-bottom:10px;cursor:pointer;">
-            <input type="checkbox" id="sutAyriGugum" style="width:18px;height:18px;" />
-            Ayrı Güğüm / Numune (Karışmasın)
-          </label>
-          <button class="btn btn-success btn-lg" onclick="saveSutGirisi()">Süt Kaydını Kaydet</button>
-        </div>
-      </div>
-
-      <!-- Anormal Süt Artışı Canlı Uyarı Alanı -->
-      <div id="anomalyPreviewBox"></div>
     </div>
 
     <!-- Toplanan Süt Listesi -->
