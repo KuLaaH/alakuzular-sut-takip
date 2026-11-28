@@ -751,45 +751,47 @@
 
   <!-- 2. MERKEZ KANTAR & SÜZME YOĞURT ÜRETİM -->
   <div id="tab-depo" class="tab-panel hidden">
-    <div class="card">
-      <h3>Merkez Kantar Tartımı & Plaka Fark Kontrolü</h3>
-      <div class="grid-4" style="margin-bottom:12px;">
-        <div>
-          <label>Tarih</label>
-          <input type="date" id="depoTarih" onchange="loadDepoData()" />
-        </div>
-        <div>
-          <label>Vardiya</label>
-          <select id="depoVardiya" onchange="loadDepoData()">
+    <!-- Depo Stok Özet Kartı -->
+    <div class="card" style="border:2px solid #0f4c81;">
+      <div class="card-header-flex">
+        <h3>🏭 Merkez Depo Süt Stok & Hareket Özeti</h3>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+          <input type="date" id="depoTarih" onchange="loadDepoData()" style="width:auto;" />
+          <select id="depoVardiya" onchange="loadDepoData()" style="width:auto;">
             <option value="SABAH">SABAH</option>
             <option value="AKSAM">AKŞAM</option>
           </select>
+          <button type="button" class="btn btn-outline btn-sm" onclick="loadDepoData()">↻ Yenile</button>
         </div>
+      </div>
+      <div id="depoStokKpiGrid" class="grid-4"></div>
+    </div>
+
+    <div class="card">
+      <h3>Merkez Kantar Tartımı (Depoya Süt Girişi) & Plaka Fark Kontrolü</h3>
+      <div class="grid-3" style="margin-bottom:12px;">
         <div>
           <label>Araç Plakası</label>
           <select id="kantarPlaka"></select>
         </div>
         <div>
-          <label>Merkez Kantar Tartımı (Kg)</label>
+          <label>Merkez Kantar Tartımı — Depoya Giren (Kg)</label>
           <input type="number" step="0.1" id="kantarKg" placeholder="0.0" />
         </div>
-      </div>
-      <div class="grid-2" style="align-items:end;">
         <div>
           <label>Açıklama / Fire Notu</label>
           <input type="text" id="kantarNot" placeholder="Varsa fark açıklaması..." />
         </div>
-        <div>
-          <button class="btn btn-primary btn-lg" onclick="saveKantar()">Kantar Tartımını Kaydet</button>
-        </div>
       </div>
+      <button class="btn btn-primary btn-lg" onclick="saveKantar()">Kantar Tartımını Kaydet (Depoya Al)</button>
+
       <div style="overflow-x:auto;margin-top:12px;">
         <table>
           <thead>
             <tr>
               <th>Plaka</th>
               <th>Saha Toplamı (Kg)</th>
-              <th>Merkez Kantar (Kg)</th>
+              <th>Merkez Kantar / Giren (Kg)</th>
               <th>Fark (Kg)</th>
               <th>Not</th>
             </tr>
@@ -800,10 +802,10 @@
     </div>
 
     <div class="card">
-      <h3>Süzme Yoğurt Üretim & Mayalama (3,20 Randıman Kontrolü)</h3>
+      <h3>Süzme Yoğurt Üretim & Mayalama (Depodan Çıkan Süt / 3,20 Randıman)</h3>
       <div class="grid-3" style="margin-bottom:12px;">
         <div>
-          <label>Mayalanan Çiğ Süt (Kg)</label>
+          <label>Mayalanan Çiğ Süt — Depodan Çıkan (Kg)</label>
           <input type="number" step="0.1" id="mayalananSut" oninput="calcRandimanPreview()" placeholder="Örn: 3200" />
         </div>
         <div>
@@ -825,7 +827,7 @@
           <input type="number" id="adet900Gr" oninput="calcRandimanPreview()" value="0" />
         </div>
         <div style="display:flex;align-items:end;">
-          <button class="btn btn-success btn-lg" onclick="saveYogurtUretim()">Vardiya Üretimini Kaydet</button>
+          <button class="btn btn-success btn-lg" onclick="saveYogurtUretim()">Vardiya Üretimini Kaydet (Stoktan Düş)</button>
         </div>
       </div>
 
@@ -836,7 +838,7 @@
           <thead>
             <tr>
               <th>Vardiya</th>
-              <th>Mayalanan Süt</th>
+              <th>Mayalanan / Çıkan Süt</th>
               <th>10Kg Normal</th>
               <th>10Kg Sert</th>
               <th>2Kg Kase</th>
@@ -846,6 +848,25 @@
             </tr>
           </thead>
           <tbody id="uretimListBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Depo Giren / Çıkan Süt Hareketleri -->
+    <div class="card">
+      <h3>📋 Depo Giren / Çıkan Süt Hareketleri</h3>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Tarih</th>
+              <th>Vardiya</th>
+              <th>Hareket Yönü</th>
+              <th>Kaynak / Açıklama</th>
+              <th>Miktar (Kg)</th>
+            </tr>
+          </thead>
+          <tbody id="depoHareketBody"></tbody>
         </table>
       </div>
     </div>
@@ -2498,44 +2519,120 @@
     const tarih = document.getElementById('depoTarih').value;
     const vardiya = document.getElementById('depoVardiya').value;
 
-    const [{ data: sutRows }, { data: kantarRows }, { data: uretimRows }] = await Promise.all([
+    const [
+      { data: sutRows },
+      { data: vardiyaKantarRows },
+      { data: vardiyaUretimRows },
+      { data: allKantarRows },
+      { data: allUretimRows }
+    ] = await Promise.all([
       sbClient.from('sut_girisleri').select('*').eq('tarih', tarih).eq('vardiya', vardiya),
       sbClient.from('merkez_kantar').select('*').eq('tarih', tarih).eq('vardiya', vardiya),
-      sbClient.from('yogurt_uretim').select('*').eq('tarih', tarih).order('vardiya', { ascending: true })
+      sbClient.from('yogurt_uretim').select('*').eq('tarih', tarih).order('vardiya', { ascending: true }),
+      sbClient.from('merkez_kantar').select('*').order('tarih', { ascending: false }).limit(200),
+      sbClient.from('yogurt_uretim').select('*').order('tarih', { ascending: false }).limit(200)
     ]);
+
+    const toplamGirenKg = (allKantarRows || []).reduce((acc, r) => acc + Number(r.kantar_kg || 0), 0);
+    const toplamCikanKg = (allUretimRows || []).reduce((acc, r) => acc + Number(r.mayalanan_sut_kg || 0), 0);
+    const mevcutDepoStokKg = toplamGirenKg - toplamCikanKg;
+
+    const vardiyaGirenKg = (vardiyaKantarRows || []).reduce((acc, r) => acc + Number(r.kantar_kg || 0), 0);
+    const vardiyaCikanKg = (vardiyaUretimRows || [])
+      .filter(u => u.vardiya === vardiya)
+      .reduce((acc, r) => acc + Number(r.mayalanan_sut_kg || 0), 0);
+
+    document.getElementById('depoStokKpiGrid').innerHTML = `
+      <div class="kpi-box">
+        <div class="lbl">Depoda Biriken Toplam Süt (Giren)</div>
+        <div class="val" style="color:#0f4c81;">${toplamGirenKg.toFixed(1)} Kg</div>
+      </div>
+      <div class="kpi-box">
+        <div class="lbl">Mayalanan / Depodan Çıkan Süt</div>
+        <div class="val" style="color:#d97706;">${toplamCikanKg.toFixed(1)} Kg</div>
+      </div>
+      <div class="kpi-box" style="border:2px solid ${mevcutDepoStokKg < 0 ? '#dc2626' : '#059669'};">
+        <div class="lbl">Depodaki Güncel Kalan Süt</div>
+        <div class="val" style="color:${mevcutDepoStokKg < 0 ? '#dc2626' : '#059669'};">${mevcutDepoStokKg.toFixed(1)} Kg</div>
+      </div>
+      <div class="kpi-box">
+        <div class="lbl">Seçili Vardiya (${vardiya}) Giren / Çıkan</div>
+        <div class="val" style="font-size:1.05rem;">+${vardiyaGirenKg.toFixed(1)} / -${vardiyaCikanKg.toFixed(1)} Kg</div>
+      </div>
+    `;
 
     const sahaByPlaka = {};
     (sutRows || []).forEach(r => { sahaByPlaka[r.plaka] = (sahaByPlaka[r.plaka] || 0) + Number(r.miktar_kg); });
 
-    const allPlakalar = [...new Set([...Object.keys(sahaByPlaka), ...(kantarRows || []).map(k => k.plaka)])];
-    document.getElementById('kantarListBody').innerHTML = allPlakalar.map(p => {
-      const saha = sahaByPlaka[p] || 0;
-      const kRec = (kantarRows || []).find(k => k.plaka === p);
-      const kantar = kRec ? Number(kRec.kantar_kg) : 0;
-      const fark = kRec ? (kantar - saha) : 0;
-      return `<tr>
-        <td><strong>${p}</strong></td>
-        <td>${saha.toFixed(1)} Kg</td>
-        <td>${kRec ? kantar.toFixed(1) + ' Kg' : '-'}</td>
-        <td>${kRec ? `<span class="badge ${fark < -5 ? 'badge-red' : 'badge-green'}">${fark.toFixed(1)} Kg</span>` : '-'}</td>
-        <td>${kRec?.aciklama_notu || ''}</td>
-      </tr>`;
-    }).join('');
+    const allPlakalar = [...new Set([...Object.keys(sahaByPlaka), ...(vardiyaKantarRows || []).map(k => k.plaka)])];
+    document.getElementById('kantarListBody').innerHTML = allPlakalar.length
+      ? allPlakalar.map(p => {
+          const saha = sahaByPlaka[p] || 0;
+          const kRec = (vardiyaKantarRows || []).find(k => k.plaka === p);
+          const kantar = kRec ? Number(kRec.kantar_kg) : 0;
+          const fark = kRec ? (kantar - saha) : 0;
+          return `<tr>
+            <td><strong>${p}</strong></td>
+            <td>${saha.toFixed(1)} Kg</td>
+            <td>${kRec ? kantar.toFixed(1) + ' Kg' : '-'}</td>
+            <td>${kRec ? `<span class="badge ${fark < -5 ? 'badge-red' : 'badge-green'}">${fark.toFixed(1)} Kg</span>` : '-'}</td>
+            <td>${kRec?.aciklama_notu || ''}</td>
+          </tr>`;
+        }).join('')
+      : '<tr><td colspan="5" style="text-align:center;color:#64748b;">Bu tarih ve vardiya için henüz kantar kaydı yok.</td></tr>';
 
-    document.getElementById('uretimListBody').innerHTML = (uretimRows || []).map(u => {
-      const topKg = (u.normal_10kg_adet * 10) + (u.sert_10kg_adet * 10) + (u.kase_2kg_adet * 2) + (u.kase_900g_adet * 0.9);
-      const oran = topKg > 0 ? (Number(u.mayalanan_sut_kg) / topKg) : 0;
-      return `<tr>
-        <td><strong>${u.vardiya}</strong></td>
-        <td>${Number(u.mayalanan_sut_kg).toFixed(1)} Kg</td>
-        <td>${u.normal_10kg_adet}</td>
-        <td>${u.sert_10kg_adet}</td>
-        <td>${u.kase_2kg_adet}</td>
-        <td>${u.kase_900g_adet}</td>
-        <td><strong>${topKg.toFixed(1)} Kg</strong></td>
-        <td><span class="badge ${oran > 3.20 ? 'badge-red' : 'badge-green'}">${oran.toFixed(2)} ${oran > 3.20 ? '⚠️ YÜKSEK' : ''}</span></td>
-      </tr>`;
-    }).join('');
+    document.getElementById('uretimListBody').innerHTML = (vardiyaUretimRows || []).length
+      ? (vardiyaUretimRows || []).map(u => {
+          const topKg = (u.normal_10kg_adet * 10) + (u.sert_10kg_adet * 10) + (u.kase_2kg_adet * 2) + (u.kase_900g_adet * 0.9);
+          const oran = topKg > 0 ? (Number(u.mayalanan_sut_kg) / topKg) : 0;
+          return `<tr>
+            <td><strong>${u.vardiya}</strong></td>
+            <td><strong>${Number(u.mayalanan_sut_kg).toFixed(1)} Kg</strong></td>
+            <td>${u.normal_10kg_adet}</td>
+            <td>${u.sert_10kg_adet}</td>
+            <td>${u.kase_2kg_adet}</td>
+            <td>${u.kase_900g_adet}</td>
+            <td><strong>${topKg.toFixed(1)} Kg</strong></td>
+            <td><span class="badge ${oran > 3.20 ? 'badge-red' : 'badge-green'}">${oran.toFixed(2)} ${oran > 3.20 ? '⚠️ YÜKSEK' : ''}</span></td>
+          </tr>`;
+        }).join('')
+      : '<tr><td colspan="8" style="text-align:center;color:#64748b;">Bu tarih için henüz mayalama / üretim kaydı yok.</td></tr>';
+
+    const hareketler = [];
+    (allKantarRows || []).forEach(k => {
+      if (Number(k.kantar_kg || 0) > 0) {
+        hareketler.push({
+          tarih: k.tarih || '',
+          vardiya: k.vardiya || '',
+          yon: 'GİREN',
+          aciklama: `${k.plaka || 'Araç'}${k.aciklama_notu ? ' — ' + k.aciklama_notu : ''}`,
+          miktar: Number(k.kantar_kg || 0)
+        });
+      }
+    });
+    (allUretimRows || []).forEach(u => {
+      if (Number(u.mayalanan_sut_kg || 0) > 0) {
+        hareketler.push({
+          tarih: u.tarih || '',
+          vardiya: u.vardiya || '',
+          yon: 'ÇIKAN',
+          aciklama: 'Süzme Yoğurt Mayalama',
+          miktar: Number(u.mayalanan_sut_kg || 0)
+        });
+      }
+    });
+
+    hareketler.sort((a, b) => (b.tarih || '').localeCompare(a.tarih || '') || (b.vardiya || '').localeCompare(a.vardiya || ''));
+
+    document.getElementById('depoHareketBody').innerHTML = hareketler.length
+      ? hareketler.map(h => `<tr>
+          <td><strong>${h.tarih}</strong></td>
+          <td>${h.vardiya}</td>
+          <td>${h.yon === 'GİREN' ? '<span class="badge badge-green">⬇️ GİREN (+Süt)</span>' : '<span class="badge badge-amber">⬆️ ÇIKAN (-Mayalanan)</span>'}</td>
+          <td>${h.aciklama}</td>
+          <td><strong style="color:${h.yon === 'GİREN' ? '#15803d' : '#b45309'};">${h.yon === 'GİREN' ? '+' : '-'}${h.miktar.toFixed(1)} Kg</strong></td>
+        </tr>`).join('')
+      : '<tr><td colspan="5" style="text-align:center;color:#64748b;">Henüz giren veya çıkan süt hareketi bulunmuyor.</td></tr>';
   }
 
   // ==========================================
