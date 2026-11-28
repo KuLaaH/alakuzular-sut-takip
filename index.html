@@ -628,14 +628,19 @@
         <button type="button" class="btn btn-primary" style="padding:10px 16px;font-size:0.95rem;" onclick="openQrScanner()">📷 QR Okut</button>
       </div>
 
-      <!-- Müstahsil Arama & Seçim (En Üstte Başparmak Hizasında) -->
-      <div style="margin-bottom:12px;">
-        <div style="display:flex;gap:6px;margin-bottom:6px;">
+      <!-- Müstahsil Hızlı Arama & Seçim (QR okutmadığında veya manuel seçimde) -->
+      <div style="margin-bottom:12px;background:#f8fafc;border:1.5px solid #cbd5e1;border-radius:10px;padding:10px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;gap:6px;flex-wrap:wrap;">
+          <label style="margin:0;color:#0f4c81;">🔎 Müşteri / Müstahsil Hızlı Ara & Seç</label>
+          <button type="button" class="btn btn-outline btn-sm" style="padding:3px 8px;font-size:0.75rem;" onclick="clearMustahsilSearch()">Temizle</button>
+        </div>
+        <div style="display:flex;gap:6px;margin-bottom:8px;">
           <select id="sutGrupFiltre" onchange="populateMustahsilSelect()" style="max-width:135px;font-size:0.86rem;">
             <option value="">Tüm Gruplar</option>
           </select>
-          <input type="text" id="sutMustahsilAra" oninput="populateMustahsilSelect()" placeholder="İsim veya cari kod ara..." style="font-size:0.9rem;" />
+          <input type="text" id="sutMustahsilAra" oninput="populateMustahsilSelect()" placeholder="Ad soyad, cari kod veya telefon yazın..." style="font-size:0.92rem;font-weight:600;" />
         </div>
+        <div id="sutAramaSonucSayisi" style="font-size:0.76rem;color:#64748b;margin-bottom:4px;"></div>
         <select id="sutMustahsil" onchange="checkMustahsilAnomalyPreview()" style="font-size:1rem;font-weight:700;padding:12px;border-color:#0f4c81;"></select>
       </div>
 
@@ -688,20 +693,20 @@
       <div id="navyTankList" class="tank-list-wrap"></div>
     </div>
 
-    <!-- 3. VARDİYA, TARİH & ARAÇ PLAKASI AYARI -->
+    <!-- 3. TARİH, OTOMATİK VARDİYA BİLGİSİ & ARAÇ PLAKASI AYARI -->
+    <input type="hidden" id="sutVardiya" value="SABAH" />
     <div class="card" style="padding:14px;">
-      <div class="grid-3" style="gap:10px;">
+      <div class="grid-3" style="gap:10px;align-items:center;">
         <div>
           <label>Tarih</label>
           <input type="date" id="sutTarih" onchange="loadSutGirisleri()" />
         </div>
         <div>
-          <label>Vardiya</label>
-          <input type="hidden" id="sutVardiya" value="SABAH" />
-          <div class="vardiya-group">
-            <button type="button" id="btnVardiyaSABAH" class="vardiya-btn active" onclick="setSutVardiya('SABAH')">☀️ Sabah</button>
-            <button type="button" id="btnVardiyaAKSAM" class="vardiya-btn" onclick="setSutVardiya('AKSAM')">🌙 Akşam</button>
+          <label>Aktif Vardiya (Saat Kuralı)</label>
+          <div id="autoVardiyaBadgeBox" style="padding:10px 12px;border-radius:8px;background:#f1f5f9;border:1.5px solid #cbd5e1;font-weight:800;font-size:0.9rem;color:#0f172a;">
+            ☀️ SABAH (00:00 - 15:59)
           </div>
+          <div style="font-size:0.74rem;color:#64748b;margin-top:3px;">16:00 - 23:59 arası otomatik AKŞAM</div>
         </div>
         <div>
           <label>Toplayıcı Araç Plakası</label>
@@ -1217,7 +1222,7 @@
     <div class="modal-body">
       <input type="hidden" id="editSutId" />
       <div class="grid-2" style="margin-bottom:12px;">
-        <div><label>Tarih *</label><input type="date" id="editSutTarih" /></div>
+        <div id="editSutTarihWrap"><label>Tarih *</label><input type="date" id="editSutTarih" /></div>
         <div>
           <label>Vardiya *</label>
           <select id="editSutVardiya">
@@ -1232,7 +1237,7 @@
       </div>
       <div class="grid-3" style="margin-bottom:12px;">
         <div><label>Süt Miktarı (Kg) *</label><input type="number" step="0.1" id="editSutMiktar" /></div>
-        <div><label>Birim Fiyat (₺/Kg)</label><input type="number" step="0.01" id="editSutFiyat" /></div>
+        <div id="editSutFiyatWrap"><label>Birim Fiyat (₺/Kg)</label><input type="number" step="0.01" id="editSutFiyat" /></div>
         <div><label>Toplayıcı Plaka</label><select id="editSutPlaka"></select></div>
       </div>
       <div style="margin-bottom:12px;">
@@ -1519,12 +1524,42 @@
     box.classList.remove('hidden');
   }
 
-  function setSutVardiya(vardiya) {
-    document.getElementById('sutVardiya').value = vardiya;
-    document.getElementById('btnVardiyaSABAH').classList.toggle('active', vardiya === 'SABAH');
-    document.getElementById('btnVardiyaAKSAM').classList.toggle('active', vardiya === 'AKSAM');
-    loadSutGirisleri();
+  function computeAutoVardiyaByClock() {
+    const now = new Date();
+    const hour = now.getHours();
+    return (hour >= 16 && hour <= 23) ? 'AKSAM' : 'SABAH';
   }
+
+  function applyAutoVardiya(shouldReload = false) {
+    const vardiya = computeAutoVardiyaByClock();
+    const hiddenInput = document.getElementById('sutVardiya');
+    const prev = hiddenInput ? hiddenInput.value : vardiya;
+    if (hiddenInput) hiddenInput.value = vardiya;
+
+    const badgeBox = document.getElementById('autoVardiyaBadgeBox');
+    if (badgeBox) {
+      if (vardiya === 'AKSAM') {
+        badgeBox.innerHTML = '🌙 AKŞAM (16:00 - 23:59 Otomatik)';
+        badgeBox.style.background = '#fef3c7';
+        badgeBox.style.borderColor = '#f59e0b';
+        badgeBox.style.color = '#92400e';
+      } else {
+        badgeBox.innerHTML = '☀️ SABAH (00:00 - 15:59 Otomatik)';
+        badgeBox.style.background = '#e0f2fe';
+        badgeBox.style.borderColor = '#0284c7';
+        badgeBox.style.color = '#075985';
+      }
+    }
+
+    if (shouldReload && prev !== vardiya && currentUser) {
+      loadSutGirisleri();
+    }
+    return vardiya;
+  }
+
+  setInterval(() => {
+    if (currentUser) applyAutoVardiya(true);
+  }, 60000);
 
   async function login() {
     document.getElementById('loginErrorBox').classList.add('hidden');
@@ -1581,16 +1616,22 @@
       if (el) el.value = today;
     });
     document.getElementById('raporBaslangic').value = today.slice(0, 8) + '01';
-    setSutVardiya('SABAH');
+    applyAutoVardiya(false);
 
-    const canSeeHistoryAndPrice = hasPerm('gecmis_tarih') || hasPerm('maliyet');
-    if (!canSeeHistoryAndPrice) {
+    const canSeePriceAndProfit = hasPerm('maliyet') || hasPerm('kullanicilar') || (currentUser && currentUser.rol === 'ADMIN');
+    const canSeeHistory = hasPerm('gecmis_tarih') || canSeePriceAndProfit;
+
+    if (!canSeeHistory) {
       document.getElementById('sutTarih').setAttribute('readonly', true);
       document.getElementById('depoTarih').setAttribute('readonly', true);
-      document.querySelectorAll('.finans-yetki').forEach(el => el.classList.add('hidden'));
     } else {
       document.getElementById('sutTarih').removeAttribute('readonly');
       document.getElementById('depoTarih').removeAttribute('readonly');
+    }
+
+    if (!canSeePriceAndProfit) {
+      document.querySelectorAll('.finans-yetki').forEach(el => el.classList.add('hidden'));
+    } else {
       document.querySelectorAll('.finans-yetki').forEach(el => el.classList.remove('hidden'));
     }
 
@@ -2064,8 +2105,16 @@
   // ==========================================
   // SAHA SÜT TOPLAMA (SAAT, TANK, ANOMALİ & OFFLINE)
   // ==========================================
+  function clearMustahsilSearch() {
+    document.getElementById('sutGrupFiltre').value = '';
+    document.getElementById('sutMustahsilAra').value = '';
+    populateMustahsilSelect();
+    document.getElementById('sutMustahsilAra').focus();
+  }
+
   function populateMustahsilSelect() {
     const sel = document.getElementById('sutMustahsil');
+    const countEl = document.getElementById('sutAramaSonucSayisi');
     const grupFiltre = (document.getElementById('sutGrupFiltre')?.value || '').trim().toUpperCase();
     const arama = (document.getElementById('sutMustahsilAra')?.value || '').trim().toLocaleLowerCase('tr');
 
@@ -2073,20 +2122,28 @@
       const gOk = !grupFiltre || (m.grup || 'GENEL').toUpperCase() === grupFiltre;
       const aOk = !arama ||
         (m.ad_soyad || '').toLocaleLowerCase('tr').includes(arama) ||
-        (m.cari_kodu || '').toLocaleLowerCase('tr').includes(arama);
+        (m.cari_kodu || '').toLocaleLowerCase('tr').includes(arama) ||
+        (m.telefon || '').toLocaleLowerCase('tr').includes(arama);
       return gOk && aOk;
     });
+
+    if (countEl) {
+      countEl.textContent = arama || grupFiltre
+        ? `${filtered.length} müstahsil bulundu`
+        : `Toplam ${filtered.length} müstahsil listeleniyor`;
+    }
 
     sel.innerHTML = filtered.length
       ? filtered.map(m => `<option value="${m.id}">${m.cari_kodu} - ${m.ad_soyad} [${m.grup || 'GENEL'}]</option>`).join('')
       : '<option value="">Eşleşen müstahsil bulunamadı</option>';
+    checkMustahsilAnomalyPreview();
   }
 
   async function saveSutGirisi() {
     const mustahsilId = document.getElementById('sutMustahsil').value;
     const miktar = parseFloat(document.getElementById('sutMiktar').value);
     const tarih = document.getElementById('sutTarih').value;
-    const vardiya = document.getElementById('sutVardiya').value;
+    const vardiya = applyAutoVardiya(false);
     const tankNo = parseInt(document.getElementById('sutTankNo').value) || 1;
 
     if (!mustahsilId || isNaN(miktar) || miktar <= 0) {
@@ -2222,7 +2279,7 @@
       }).join('');
     }
 
-    const showFinans = hasPerm('gecmis_tarih') || hasPerm('maliyet');
+    const showFinans = hasPerm('maliyet') || hasPerm('kullanicilar') || (currentUser && currentUser.rol === 'ADMIN');
     let topKg = 0, topTutar = 0;
     const tbody = document.getElementById('sutListBody');
 
@@ -2234,7 +2291,7 @@
         : getEffectiveMustahsilPrice(r.mustahsil_id, r.tarih);
       const tutar = kg * fiyat;
       topKg += kg;
-      topTutar += tutar;
+      if (showFinans) topTutar += tutar;
 
       const saatText = r.toplama_saati || (r.created_at ? new Date(r.created_at).toTimeString().slice(0, 5) : '-');
       const tankLabel = `Tank ${r.tank_no || 1}`;
@@ -2287,15 +2344,26 @@
     loadSutGirisleri();
   }
 
+  function isAdminUser() {
+    return !!(currentUser && (currentUser.rol === 'ADMIN' || currentUser.kullanici_adi === 'admin' || hasPerm('kullanicilar')));
+  }
+
   async function openEditSutModal(sutId) {
     const { data, error } = await sbClient.from('sut_girisleri').select('*').eq('id', sutId).single();
     if (error || !data) return showToast('Kayıt bilgisi alınamadı.', true);
 
+    const isAdmin = isAdminUser();
+    const canSeePrice = isAdmin || hasPerm('maliyet');
+
     document.getElementById('editSutId').value = data.id;
     document.getElementById('editSutTarih').value = data.tarih;
+    document.getElementById('editSutTarihWrap').classList.toggle('hidden', !isAdmin);
+
+    document.getElementById('editSutFiyatWrap').classList.toggle('hidden', !canSeePrice);
+    document.getElementById('editSutFiyat').value = Number(data.birim_fiyat || 0).toFixed(2);
+
     document.getElementById('editSutVardiya').value = data.vardiya;
     document.getElementById('editSutMiktar').value = Number(data.miktar_kg);
-    document.getElementById('editSutFiyat').value = Number(data.birim_fiyat || 0).toFixed(2);
     document.getElementById('editSutTank').value = String(data.tank_no || 1);
 
     const mstSel = document.getElementById('editSutMustahsil');
@@ -2319,6 +2387,9 @@
 
   async function updateSutGirisi() {
     const id = document.getElementById('editSutId').value;
+    const isAdmin = isAdminUser();
+    const canSeePrice = isAdmin || hasPerm('maliyet');
+
     const tarih = document.getElementById('editSutTarih').value;
     const vardiya = document.getElementById('editSutVardiya').value;
     const mustahsilId = document.getElementById('editSutMustahsil').value;
@@ -2331,15 +2402,17 @@
       return showToast('Geçerli müstahsil ve süt miktarı girin.', true);
     }
 
-    const { error } = await sbClient.from('sut_girisleri').update({
-      tarih,
+    const updatePayload = {
       vardiya,
       mustahsil_id: mustahsilId,
       miktar_kg: miktar,
-      birim_fiyat: isNaN(fiyat) ? 0 : fiyat,
       plaka,
       tank_no: tankNo
-    }).eq('id', id);
+    };
+    if (isAdmin && tarih) updatePayload.tarih = tarih;
+    if (canSeePrice && !isNaN(fiyat)) updatePayload.birim_fiyat = fiyat;
+
+    const { error } = await sbClient.from('sut_girisleri').update(updatePayload).eq('id', id);
 
     if (error) return showToast('Süt kaydı güncelleme hatası: ' + error.message, true);
 
